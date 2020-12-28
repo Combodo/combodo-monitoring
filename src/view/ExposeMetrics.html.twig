@@ -1,0 +1,7 @@
+{% for oMetric in  metrics  %}
+    #{{oMetric.getDescription()}}
+    <br>
+    {{oMetric.getName()}}={{oMetric.getValue()}}
+    <br>
+    <br>
+{% endfor %}
