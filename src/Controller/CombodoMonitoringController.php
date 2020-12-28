@@ -18,7 +18,7 @@ define('CONF', 'conf');
 define('METRIC_DESCRIPTION', 'description');
 define('METRICS', 'metrics');
 
-class MonitoringController extends Controller {
+class CombodoMonitoringController extends Controller {
     public function OperationExposeMetrics() {
         $aParams = array();
 
@@ -48,6 +48,7 @@ class MonitoringController extends Controller {
             return $aIniParams;
         }
 
+
         $aIniParams = parse_ini_file($sConfigFile, true);
         if (is_array($aIniParams) && array_key_exists(METRICS, $aIniParams)) {
             foreach ($aIniParams[METRICS] as $sKey => $oValue) {
@@ -55,11 +56,11 @@ class MonitoringController extends Controller {
                     if (strstr($oValue[CONF], '.')){
                         $sMetricConfig = explode(".", $oValue[CONF]);
                         $aIniParams[METRICS][$sKey][CONF] = $sMetricConfig;
-                        print_r($aIniParams[METRICS][$sKey][CONF]);
                     }
                 }
             }
         }
+
         return $aIniParams;
     }
 
@@ -131,17 +132,25 @@ class MonitoringController extends Controller {
     public function computeConfMetric($sMetricName, $aMetric) {
         if (is_array($aMetric) && array_key_exists(CONF, $aMetric)) {
             $aConfParamPath = $aMetric[CONF];
-            $sValue = null;
             if (!empty($aConfParamPath)) {
-                $sType = key($aConfParamPath);
-                $aPath = $aConfParamPath[$sType];
-                if ($sType==='MySettings'){
-                    $sValue = utils::GetConfig()->Get($aPath[0]);
-                } else if ($sType==='MyModuleSettings'){
-                    $sModule = key($aPath);
-                    $sProperty = $aPath[$sModule];
-                    $sValue = utils::GetConfig()->GetModuleSetting($sModule, $sProperty, null);
-                } /*else if ($sType==='MyModules'){
+                $sType = null;
+                $sModule = null;
+                foreach ($aConfParamPath as $sConfParam){
+                    if (is_null($sType)){
+                        $sType = $sConfParam;
+                        continue;
+                    }
+                    if ($sType==='MySettings'){
+                        $sValue = utils::GetConfig()->Get($sConfParam);
+                        break;
+                    } else if ($sType==='MyModuleSettings'){
+                        if (is_null($sModule)){
+                            $sModule = $sConfParam;
+                            continue;
+                        }
+                        $sValue = utils::GetConfig()->GetModuleSetting($sModule, $sConfParam, null);
+                        break;
+                    } /*else if ($sType==='MyModules'){
                     $sKey = key($aPath);
                     $sKey2 = $aPath[$sKey];
                     $aAddons = utils::GetConfig()->GetAddons();
@@ -149,6 +158,7 @@ class MonitoringController extends Controller {
                         $sValue = $aAddons[$sKey][$sKey2];
                     }
                 }*/
+                }
             }
 
             if (is_null($sValue)) {

@@ -9,6 +9,8 @@ class CombodoMonitoringMetric {
     private $sDescription;
     /** @var string $sValue */
     private $sValue;
+    /** @var string[] $aLabels */
+    private $aLabels;
 
     /**
      * CombodoMonitoringMetric constructor.
@@ -20,27 +22,35 @@ class CombodoMonitoringMetric {
         $this->sName = $sName;
         $this->sDescription = $sDescription;
         $this->sValue = $sValue;
+        $this->sValue = $sValue;
     }
 
     /**
      * @return string
      */
-    public function getName(): string {
+    public function getName() {
         return $this->sName;
     }
 
     /**
      * @return string
      */
-    public function getDescription(): string {
+    public function getDescription() {
         return $this->sDescription;
     }
 
     /**
      * @return string
      */
-    public function getValue(): string {
+    public function getValue() {
         return $this->sValue;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getLabels() {
+        return $this->aLabels;
     }
 
 

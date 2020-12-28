@@ -6,9 +6,9 @@
 
 require_once(APPROOT.'application/startup.inc.php');
 
-use Combodo\iTop\Integrity\Monitoring\Controller\MonitoringController;
+use Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringController;
 
-$oAjaxTabController = new MonitoringController(MODULESROOT.'combodo-monitoring/src/view', 'combodo-monitoring');
+$oAjaxTabController = new CombodoMonitoringController(MODULESROOT.'combodo-monitoring/src/view', 'combodo-monitoring');
 $oAjaxTabController->AllowOnlyAdmin();
 $oAjaxTabController->SetDefaultOperation('ExposeMetrics');
 $oAjaxTabController->HandleOperation();

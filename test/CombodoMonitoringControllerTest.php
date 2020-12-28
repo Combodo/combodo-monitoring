@@ -2,10 +2,10 @@
 
 use \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
-use \Combodo\iTop\Integrity\Monitoring\Controller\MonitoringController;
+use \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringController;
 
-class MonitoringControllerTest extends ItopDataTestCase {
-    /** @var MonitoringController $monitoringController */
+class CombodoMonitoringControllerTest extends ItopDataTestCase {
+    /** @var CombodoMonitoringController $monitoringController */
     private $monitoringController;
 
     public function setUp()
@@ -14,7 +14,7 @@ class MonitoringControllerTest extends ItopDataTestCase {
         parent::setUp();
 
         require_once(APPROOT . 'core/config.class.inc.php');
-        require_once(APPROOT . 'env-production/combodo-monitoring/src/Controller/MonitoringController.php');
+        require_once(APPROOT . 'env-production/combodo-monitoring/src/Controller/CombodoMonitoringController.php');
         require_once(APPROOT . 'env-production/combodo-monitoring/src/Controller/CombodoMonitoringMetric.php');
 
         if (!defined('MODULESROOT'))
@@ -22,7 +22,7 @@ class MonitoringControllerTest extends ItopDataTestCase {
             define('MODULESROOT', APPROOT.'env-production/');
         }
 
-        $this->monitoringController = new MonitoringController(MODULESROOT.'combodo-monitoring/src/view');
+        $this->monitoringController = new CombodoMonitoringController(MODULESROOT.'combodo-monitoring/src/view');
     }
 
     public function testConfigReading(){
@@ -86,7 +86,7 @@ class MonitoringControllerTest extends ItopDataTestCase {
                     ['access_mode' =>
                         [
                             'description' => 'access mode',
-                            'conf' => [ 'MySettings' => ['access_mode']]
+                            'conf' => [ 'MySettings', 'access_mode']
                         ]
                     ]
                 ],
@@ -97,7 +97,7 @@ class MonitoringControllerTest extends ItopDataTestCase {
                     ['access_message' =>
                         [
                             'description' => 'access message',
-                            'conf' => [ 'MySettings' => ['access_message2']]
+                            'conf' => [ 'MySettings', 'access_message2']
                         ]
                     ]
                 ],
@@ -108,7 +108,7 @@ class MonitoringControllerTest extends ItopDataTestCase {
                     ['retention_count' =>
                         [
                             'description' => 'retention count',
-                            'conf' => [ 'MyModuleSettings' => ['itop-backup' => 'retention_count']]
+                            'conf' => [ 'MyModuleSettings', 'itop-backup', 'retention_count']
                         ]
                     ]
                 ],
@@ -119,7 +119,7 @@ class MonitoringControllerTest extends ItopDataTestCase {
                     ['access_message' =>
                         [
                             'description' => 'retention count',
-                            'conf' => [ 'MyModuleSettings' => ['itop-backup2' => 'retention_count']]
+                            'conf' => [ 'MyModuleSettings', 'itop-backup2', 'retention_count']
                         ]
                     ]
                 ],
@@ -130,7 +130,7 @@ class MonitoringControllerTest extends ItopDataTestCase {
                     ['access_message' =>
                         [
                             'description' => 'retention count',
-                            'conf' => [ 'MyModuleSettings' => ['itop-backup' => 'retention_count2']]
+                            'conf' => [ 'MyModuleSettings', 'itop-backup', 'retention_count2']
                         ]
                     ]
                 ],
@@ -141,7 +141,7 @@ class MonitoringControllerTest extends ItopDataTestCase {
                     ['user_rights' =>
                         [
                             'description' => 'user rights',
-                            'conf' => [ 'MyModules' => ['addons' => 'user rights']]
+                            'conf' => [ 'MyModules', 'addons', 'user rights']
                         ]
                     ]
                 ],
@@ -152,7 +152,7 @@ class MonitoringControllerTest extends ItopDataTestCase {
                     ['user_rights' =>
                         [
                             'description' => 'user rights',
-                            'conf' => [ 'MyModules' => ['addons2' => 'user rights']]
+                            'conf' => [ 'MyModules', 'addons2', 'user rights']
                         ]
                     ]
                 ],
@@ -163,7 +163,7 @@ class MonitoringControllerTest extends ItopDataTestCase {
                     ['user_rights' =>
                         [
                             'description' => 'user rights',
-                            'conf' => [ 'MyModules' => ['addons' => 'user rights2']]
+                            'conf' => [ 'MyModules', 'addons', 'user rights2']
                         ]
                     ]
                 ],
@@ -174,7 +174,7 @@ class MonitoringControllerTest extends ItopDataTestCase {
                     ['itop_backup_weekdays_count' =>
                         [
                             'description' => 'User authorized quota',
-                            'conf' => [ 'MyModuleSettings' => ['itop-backup' => 'week_days']]
+                            'conf' => [ 'MyModuleSettings', 'itop-backup', 'week_days']
                         ]
                     ]
                 ],

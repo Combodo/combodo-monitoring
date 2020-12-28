@@ -41,7 +41,7 @@ SetupWebPage::AddModule(
 		//
 		'datamodel' => array(
             //'model.combodo-monitoring.php',
-			'src/Controller/MonitoringController.php',
+			'src/Controller/CombodoMonitoringController.php',
             'src/Controller/CombodoMonitoringMetric.php',
 		),
 		'webservice' => array(),
