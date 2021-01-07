@@ -14,8 +14,10 @@ use Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric;
 
 define('MONITORING_CONFIG_FILE', 'monitoring-itop.ini');
 define('OQL_COUNT', 'oql_count');
+define('OQL_GROUPBY', 'oql_groupby');
 define('CONF', 'conf');
 define('METRIC_DESCRIPTION', 'description');
+define('METRIC_LABEL', 'label');
 define('METRICS', 'metrics');
 
 class CombodoMonitoringController extends Controller {
@@ -34,7 +36,7 @@ class CombodoMonitoringController extends Controller {
         }
 
         $aParams[METRICS] = $aTwigMetrics;
-        $this->DisplayPage($aParams);
+        $this->DisplayPage($aParams, null, self::PAGE_TYPE_BASIC_HTML);
     }
 
     /**
@@ -47,7 +49,6 @@ class CombodoMonitoringController extends Controller {
             \IssueLog::Error("Cannot read monitoring config file : $sConfigFile");
             return $aIniParams;
         }
-
 
         $aIniParams = parse_ini_file($sConfigFile, true);
         if (is_array($aIniParams) && array_key_exists(METRICS, $aIniParams)) {
@@ -78,14 +79,22 @@ class CombodoMonitoringController extends Controller {
 
         try {
             foreach ($aIniParams[METRICS] as $sMetricName => $aMetric) {
-                $combodoMonitoringMetric = $this->computeOqlMetric($sMetricName, $aMetric);
-                if (is_null($combodoMonitoringMetric)){
-                    $combodoMonitoringMetric = $this->computeConfMetric($sMetricName, $aMetric);
+                /** @var array[CombodoMonitoringMetric] $aCombodoMonitoringMetrics */
+                $aCombodoMonitoringMetrics = $this->computeOqlMetrics($sMetricName, $aMetric);
+                if (is_null($aCombodoMonitoringMetrics)){
+                    $aCombodoMonitoringMetrics = $this->computeConfMetrics($sMetricName, $aMetric);
                 }
 
-                if (!is_null($combodoMonitoringMetric)){
-                    $aMetrics[] = $combodoMonitoringMetric;
+                if (is_null($aCombodoMonitoringMetrics)) {
+                    continue;
                 }
+
+                foreach ($aCombodoMonitoringMetrics as $oCombodoMonitoringMetrics){
+                    $this->fillDescription($aMetric, $sMetricName, $oCombodoMonitoringMetrics);
+                    $this->fillLabels($aMetric, $oCombodoMonitoringMetrics);
+                }
+
+                $aMetrics = array_merge($aMetrics, $aCombodoMonitoringMetrics);
             }
         }catch (\Exception $e){
             //fail and return nothing on purpose
@@ -102,34 +111,74 @@ class CombodoMonitoringController extends Controller {
      * @return \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric|null
      * @throws \Exception
      */
-    public function computeOqlMetric($sMetricName, $aMetric) {
+    public function computeOqlMetrics($sMetricName, $aMetric) {
         if (is_array($aMetric) && array_key_exists(OQL_COUNT, $aMetric)) {
             $oSearch = \DBSearch::FromOQL($aMetric[OQL_COUNT]);
-            $oSet = new \DBObjectSet($oSearch);
+            if (array_key_exists(OQL_GROUPBY, $aMetric)) {
+                $aDynamicLabelFields = explode(",", $aMetric[OQL_GROUPBY]);
+                if (count($aDynamicLabelFields)==0){
+                    throw new \Exception("Strange configuration on $sMetricName:" . $aMetric[OQL_GROUPBY]);
+                } else if (count($aDynamicLabelFields)==1){
+                    throw new \Exception("Missing OQL field inside $sMetricName configuration:" . $aMetric[OQL_GROUPBY]);
+                }
 
-            $sValue = "" . $oSet->Count();
-            $sDescription = "";
-            if (key_exists(METRIC_DESCRIPTION, $aMetric)) {
-                $sDescription = $aMetric[METRIC_DESCRIPTION];
+                $sLabelName = trim($aDynamicLabelFields[0]);
+                $sOqlField = trim($aDynamicLabelFields[1]);
+                $oExpr = \Expression::FromOQL($sOqlField);
+                $aGroupByExpr=[ $sLabelName => $oExpr ];
+                return $this->FetchGroupByMetrics($sMetricName, $oSearch, $aGroupByExpr);
+            } else{
+                $oSet = new \DBObjectSet($oSearch);
+                return [ new CombodoMonitoringMetric($sMetricName, "",  "" . $oSet->Count()) ] ;
             }
-
-            if (empty($sDescription)) {
-                throw new Exception("Metric $sMetricName has no sDescription. Please provide it.");
-            }
-
-            return new CombodoMonitoringMetric($sMetricName, $sDescription, $sValue);
         }
 
         return null;
     }
 
     /**
+     * @param string $sMetricName
+     * @param \DBSearch $oSearch
+     * @param $aGroupByExpr
+     * @return array|null
+     * @throws \CoreException
+     * @throws \MySQLException
+     * @throws \MySQLHasGoneAwayException
+     */
+    private function FetchGroupByMetrics($sMetricName, $oSearch, $aGroupByExpr)
+    {
+        $sSQL = $oSearch->MakeGroupByQuery([], $aGroupByExpr);
+        $resQuery = \CMDBSource::Query($sSQL);
+        if (!$resQuery)
+        {
+            return null;
+        }
+        else
+        {
+            $aCombodoMonitoringMetrics = [];
+            while ($aRes = \CMDBSource::FetchArray($resQuery)) {
+                $sValue = $aRes['_itop_count_'];
+                $oCombodoMonitoringMetrics = new CombodoMonitoringMetric($sMetricName, "", $sValue);
+                foreach (array_keys($aGroupByExpr) as $sLabelName) {
+                    $sLabelName = $sLabelName;
+                    $oCombodoMonitoringMetrics->addLabel($sLabelName, $aRes[$sLabelName]);
+                }
+                $aCombodoMonitoringMetrics[] = $oCombodoMonitoringMetrics;
+                unset($aRes);
+            }
+            \CMDBSource::FreeResult($resQuery);
+            return $aCombodoMonitoringMetrics;
+        }
+    }
+
+
+    /**
      * @param $sMetricName
      * @param $aMetric
-     * @return \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric|null
+     * @return array[\Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric]|null
      * @throws \Exception
      */
-    public function computeConfMetric($sMetricName, $aMetric) {
+    public function computeConfMetrics($sMetricName, $aMetric) {
         if (is_array($aMetric) && array_key_exists(CONF, $aMetric)) {
             $aConfParamPath = $aMetric[CONF];
             if (!empty($aConfParamPath)) {
@@ -165,18 +214,38 @@ class CombodoMonitoringController extends Controller {
                 throw new Exception("Metric $sMetricName was not found in configuration found.");
             }
 
-            $sDescription = "";
-            if (key_exists(METRIC_DESCRIPTION, $aMetric)) {
-                $sDescription = $aMetric[METRIC_DESCRIPTION];
-            }
-
-            if (empty($sDescription)) {
-                throw new Exception("Metric $sMetricName has no sDescription. Please provide it.");
-            }
-
-            return new CombodoMonitoringMetric($sMetricName, $sDescription, "" . $sValue);
+            return [ new CombodoMonitoringMetric($sMetricName, "", "" . $sValue) ] ;
         }
 
         return null;
+    }
+
+    /**
+     * @param $aMetric
+     * @param string $sMetricName
+     * @param \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric $combodoMonitoringMetric
+     */
+    public function fillDescription($aMetric, $sMetricName, $combodoMonitoringMetric): void {
+        $sDescription = "";
+        if (array_key_exists(METRIC_DESCRIPTION, $aMetric)) {
+            $sDescription = $aMetric[METRIC_DESCRIPTION];
+        }
+
+        if (empty($sDescription)) {
+            throw new Exception("Metric $sMetricName has no sDescription. Please provide it.");
+        }
+
+        $combodoMonitoringMetric->setDescription($sDescription);
+    }
+
+    /**
+     * @param $aMetric
+     * @param \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric $combodoMonitoringMetric
+     */
+    public function fillLabels($aMetric, $combodoMonitoringMetric): void {
+        if (array_key_exists(METRIC_LABEL, $aMetric)) {
+            $aLabelKeyValue = explode(",", $aMetric[METRIC_LABEL]);
+            $combodoMonitoringMetric->addLabel(trim($aLabelKeyValue[0]), trim($aLabelKeyValue[1]));
+        }
     }
 }
