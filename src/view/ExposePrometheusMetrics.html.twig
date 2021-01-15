@@ -1,0 +1,17 @@
+{% for oMetric in  metrics  %}
+    {% set labels = "{" %}
+    {% for labelName, labelValue in  oMetric.getLabels()  %}
+        {% if not loop.first %}
+        {% set labels = labels ~ "," %}
+        {% endif %}
+
+        {% set labels = labels ~ labelName ~ "=\"" ~ labelValue ~ "\"" %}
+    {% endfor %}
+    {% set labels = labels~ "}" %}
+
+    #{{oMetric.getDescription()}}
+    <br>
+    {{oMetric.getName()}}{{labels}} {{oMetric.getValue()}}
+    <br>
+    <br>
+{% endfor %}
