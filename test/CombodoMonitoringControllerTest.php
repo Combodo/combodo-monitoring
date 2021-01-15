@@ -27,7 +27,7 @@ class CombodoMonitoringControllerTest extends ItopDataTestCase {
 
 
     public function testConfigReading(){
-        $aParams = $this->monitoringController->readConf(__DIR__ . '/' . MONITORING_CONFIG_FILE);
+        $aParams = $this->monitoringController->ReadConf(__DIR__ . '/' . MONITORING_CONFIG_FILE);
 
         $aExpected = ['metrics' =>
             [   'itop_user_count' =>
@@ -82,7 +82,7 @@ class CombodoMonitoringControllerTest extends ItopDataTestCase {
             $aLabel = count($aPerMetricValues)==4 ? $aPerMetricValues[3] : [];
             $aExpectedMetrics[] = new CombodoMonitoringMetric($aPerMetricValues[0], $aPerMetricValues[1], $aPerMetricValues[2], $aLabel);
         }
-        $aMetrics = $this->monitoringController->readMetrics($sInitConf);
+        $aMetrics = $this->monitoringController->ReadMetrics($sInitConf);
         $this->assertEquals(
             $aExpectedMetrics,
             $aMetrics);

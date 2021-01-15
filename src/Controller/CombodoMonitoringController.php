@@ -21,11 +21,11 @@ define('METRIC_LABEL', 'label');
 define('METRICS', 'metrics');
 
 class CombodoMonitoringController extends Controller {
-    public function OperationExposeMetrics() {
+    public function OperationExposePrometheusMetrics() {
         $aParams = array();
 
-        $aIniParams = $this->readConf();
-        $aMetrics = $this->readMetrics($aIniParams);
+        $aIniParams = $this->ReadConf();
+        $aMetrics = $this->ReadMetrics($aIniParams);
 
         $aTwigMetrics = [];
         if (is_array($aMetrics) && count($aMetrics) != 0){
@@ -36,13 +36,13 @@ class CombodoMonitoringController extends Controller {
         }
 
         $aParams[METRICS] = $aTwigMetrics;
-        $this->DisplayPage($aParams, null, self::PAGE_TYPE_BASIC_HTML);
+        $this->DisplayPage($aParams, null, self::ENUM_PAGE_TYPE_BASIC_HTML);
     }
 
     /**
      * @param null $sConfigFile
      */
-    public function readConf($sConfigFile=null){
+    public function ReadConf($sConfigFile=null){
         $aIniParams = [];
         $sConfigFile = is_null($sConfigFile) ? APPCONF.'production/'.MONITORING_CONFIG_FILE : $sConfigFile;
         if (!is_file($sConfigFile) || !is_readable($sConfigFile)){
@@ -69,7 +69,7 @@ class CombodoMonitoringController extends Controller {
      * @param $aIniParams
      * @return array
      */
-    public function readMetrics($aIniParams){
+    public function ReadMetrics($aIniParams){
         /** @var array[CombodoMonitoringMetric] $aMetrics */
         $aMetrics = [];
         if (!is_array($aIniParams) || !array_key_exists(METRICS, $aIniParams)){
@@ -80,9 +80,9 @@ class CombodoMonitoringController extends Controller {
         try {
             foreach ($aIniParams[METRICS] as $sMetricName => $aMetric) {
                 /** @var array[CombodoMonitoringMetric] $aCombodoMonitoringMetrics */
-                $aCombodoMonitoringMetrics = $this->computeOqlMetrics($sMetricName, $aMetric);
+                $aCombodoMonitoringMetrics = $this->ComputeOqlMetrics($sMetricName, $aMetric);
                 if (is_null($aCombodoMonitoringMetrics)){
-                    $aCombodoMonitoringMetrics = $this->computeConfMetrics($sMetricName, $aMetric);
+                    $aCombodoMonitoringMetrics = $this->ComputeConfMetrics($sMetricName, $aMetric);
                 }
 
                 if (is_null($aCombodoMonitoringMetrics)) {
@@ -90,8 +90,8 @@ class CombodoMonitoringController extends Controller {
                 }
 
                 foreach ($aCombodoMonitoringMetrics as $oCombodoMonitoringMetrics){
-                    $this->fillDescription($aMetric, $sMetricName, $oCombodoMonitoringMetrics);
-                    $this->fillLabels($aMetric, $oCombodoMonitoringMetrics);
+                    $this->FillDescription($aMetric, $sMetricName, $oCombodoMonitoringMetrics);
+                    $this->FillLabels($aMetric, $oCombodoMonitoringMetrics);
                 }
 
                 $aMetrics = array_merge($aMetrics, $aCombodoMonitoringMetrics);
@@ -111,7 +111,7 @@ class CombodoMonitoringController extends Controller {
      * @return \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric|null
      * @throws \Exception
      */
-    public function computeOqlMetrics($sMetricName, $aMetric) {
+    public function ComputeOqlMetrics($sMetricName, $aMetric) {
         if (is_array($aMetric) && array_key_exists(OQL_COUNT, $aMetric)) {
             $oSearch = \DBSearch::FromOQL($aMetric[OQL_COUNT]);
             if (array_key_exists(OQL_GROUPBY, $aMetric)) {
@@ -178,7 +178,7 @@ class CombodoMonitoringController extends Controller {
      * @return array[\Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric]|null
      * @throws \Exception
      */
-    public function computeConfMetrics($sMetricName, $aMetric) {
+    public function ComputeConfMetrics($sMetricName, $aMetric) {
         if (is_array($aMetric) && array_key_exists(CONF, $aMetric)) {
             $aConfParamPath = $aMetric[CONF];
             if (!empty($aConfParamPath)) {
@@ -225,7 +225,7 @@ class CombodoMonitoringController extends Controller {
      * @param string $sMetricName
      * @param \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric $combodoMonitoringMetric
      */
-    public function fillDescription($aMetric, $sMetricName, $combodoMonitoringMetric): void {
+    public function FillDescription($aMetric, $sMetricName, $combodoMonitoringMetric): void {
         $sDescription = "";
         if (array_key_exists(METRIC_DESCRIPTION, $aMetric)) {
             $sDescription = $aMetric[METRIC_DESCRIPTION];
@@ -242,7 +242,7 @@ class CombodoMonitoringController extends Controller {
      * @param $aMetric
      * @param \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric $combodoMonitoringMetric
      */
-    public function fillLabels($aMetric, $combodoMonitoringMetric): void {
+    public function FillLabels($aMetric, $combodoMonitoringMetric): void {
         if (array_key_exists(METRIC_LABEL, $aMetric)) {
             $aLabelKeyValue = explode(",", $aMetric[METRIC_LABEL]);
             $combodoMonitoringMetric->addLabel(trim($aLabelKeyValue[0]), trim($aLabelKeyValue[1]));

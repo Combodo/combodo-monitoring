@@ -8,7 +8,9 @@ require_once(APPROOT.'application/startup.inc.php');
 
 use Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringController;
 
-$oAjaxTabController = new CombodoMonitoringController(MODULESROOT.'combodo-monitoring/src/view', 'combodo-monitoring');
-$oAjaxTabController->AllowOnlyAdmin();
-$oAjaxTabController->SetDefaultOperation('ExposeMetrics');
-$oAjaxTabController->HandleOperation();
+$oCombodoMonitoringController = new CombodoMonitoringController(MODULESROOT.'combodo-monitoring/src/view', 'combodo-monitoring');
+$oCombodoMonitoringController->AllowOnlyAdmin();
+$oCombodoMonitoringController->SetDefaultOperation('ExposePrometheusMetrics');
+$oCombodoMonitoringController->setAccessTokenConfigParamId('access_token');
+$oCombodoMonitoringController->setAccessAuthorizedNetworkConfigParamId('authorized_network');
+$oCombodoMonitoringController->HandleOperation();
