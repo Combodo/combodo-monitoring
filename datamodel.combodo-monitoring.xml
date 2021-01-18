@@ -1,3 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <itop_design version="3.0">
+    <module_parameters>
+        <parameters id="combodo-monitoring" _delta="define">
+            <access_token></access_token>
+            <authorized_network></authorized_network>
+        </parameters>
+    </module_parameters>
 </itop_design>

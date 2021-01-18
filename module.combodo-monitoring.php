@@ -55,6 +55,8 @@ SetupWebPage::AddModule(
 
 		// Default settings
 		//
-		'settings' => array(),
+		'settings' => array(
+            // see the './datamodel.combodo-monitoring.xml' for the default settings!
+        ),
 	)
 );

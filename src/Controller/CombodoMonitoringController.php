@@ -8,11 +8,9 @@ namespace Combodo\iTop\Integrity\Monitoring\Controller;
 
 use Combodo\iTop\Application\TwigBase\Controller\Controller;
 use PHPUnit\Runner\Exception;
-use SetupUtils;
 use utils;
-use Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric;
 
-define('MONITORING_CONFIG_FILE', 'monitoring-itop.ini');
+define('EXEC_MODULE', 'combodo-monitoring');
 define('OQL_COUNT', 'oql_count');
 define('OQL_GROUPBY', 'oql_groupby');
 define('CONF', 'conf');
@@ -24,8 +22,8 @@ class CombodoMonitoringController extends Controller {
     public function OperationExposePrometheusMetrics() {
         $aParams = array();
 
-        $aIniParams = $this->ReadConf();
-        $aMetrics = $this->ReadMetrics($aIniParams);
+        $aMetricParams = $this->ReadMetricConf();
+        $aMetrics = $this->ReadMetrics($aMetricParams);
 
         $aTwigMetrics = [];
         if (is_array($aMetrics) && count($aMetrics) != 0){
@@ -42,43 +40,33 @@ class CombodoMonitoringController extends Controller {
     /**
      * @param null $sConfigFile
      */
-    public function ReadConf($sConfigFile=null){
-        $aIniParams = [];
-        $sConfigFile = is_null($sConfigFile) ? APPCONF.'production/'.MONITORING_CONFIG_FILE : $sConfigFile;
-        if (!is_file($sConfigFile) || !is_readable($sConfigFile)){
-            \IssueLog::Error("Cannot read monitoring config file : $sConfigFile");
-            return $aIniParams;
-        }
-
-        $aIniParams = parse_ini_file($sConfigFile, true);
-        if (is_array($aIniParams) && array_key_exists(METRICS, $aIniParams)) {
-            foreach ($aIniParams[METRICS] as $sKey => $oValue) {
-                if (is_array($oValue) && array_key_exists(CONF, $oValue)) {
-                    if (strstr($oValue[CONF], '.')){
-                        $sMetricConfig = explode(".", $oValue[CONF]);
-                        $aIniParams[METRICS][$sKey][CONF] = $sMetricConfig;
-                    }
+    public function ReadMetricConf($sConfigFile=null){
+        $aMetricParams = \utils::GetConfig()->GetModuleSetting(EXEC_MODULE, METRICS);
+        foreach ($aMetricParams as $sKey => $oValue) {
+            if (is_array($oValue) && array_key_exists(CONF, $oValue)) {
+                if (strstr($oValue[CONF], '.')){
+                    $sMetricConfig = explode(".", $oValue[CONF]);
+                    $aMetricParams[$sKey][CONF] = $sMetricConfig;
                 }
             }
         }
-
-        return $aIniParams;
+        return $aMetricParams;
     }
 
     /**
-     * @param $aIniParams
+     * @param $aMetricParams
      * @return array
      */
-    public function ReadMetrics($aIniParams){
+    public function ReadMetrics($aMetricParams){
         /** @var array[CombodoMonitoringMetric] $aMetrics */
         $aMetrics = [];
-        if (!is_array($aIniParams) || !array_key_exists(METRICS, $aIniParams)){
+        if (!is_array($aMetricParams) || empty($aMetricParams)){
             \IssueLog::Info("No metrics configured");
             return $aMetrics;
         }
 
         try {
-            foreach ($aIniParams[METRICS] as $sMetricName => $aMetric) {
+            foreach ($aMetricParams as $sMetricName => $aMetric) {
                 /** @var array[CombodoMonitoringMetric] $aCombodoMonitoringMetrics */
                 $aCombodoMonitoringMetrics = $this->ComputeOqlMetrics($sMetricName, $aMetric);
                 if (is_null($aCombodoMonitoringMetrics)){
