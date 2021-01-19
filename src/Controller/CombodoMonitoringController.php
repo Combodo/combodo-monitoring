@@ -34,7 +34,24 @@ class CombodoMonitoringController extends Controller {
         }
 
         $aParams[METRICS] = $aTwigMetrics;
-        $this->DisplayPage($aParams, null, self::ENUM_PAGE_TYPE_BASIC_HTML);
+        //$this->DisplayPage($aParams, null, self::ENUM_PAGE_TYPE_TXT);
+
+
+        header('Content-Type: text/plain; charset=UTF-8');
+        $sOutput = "";
+        foreach ($aMetrics as $oMetric){
+            /** @var CombodoMonitoringMetric $oMetric*/
+            $sOutput .=  "# " . $oMetric->GetDescription() . "\n";
+            $sLabels = "";
+            foreach ($oMetric->GetLabels() as $sKey => $sValue) {
+                $sLabels .= empty($sLabels) ? "" : ",";
+                $sLabels .= "$sKey=\"$sValue\"" ;
+            }
+            $sOutput .= $oMetric->GetName() . "{" . $sLabels . "} " . $oMetric->GetValue() . "\n";
+            $sOutput .=  "\n";
+        }
+
+        echo $sOutput;
     }
 
     /**
@@ -149,7 +166,7 @@ class CombodoMonitoringController extends Controller {
                 $oCombodoMonitoringMetrics = new CombodoMonitoringMetric($sMetricName, "", $sValue);
                 foreach (array_keys($aGroupByExpr) as $sLabelName) {
                     $sLabelName = $sLabelName;
-                    $oCombodoMonitoringMetrics->addLabel($sLabelName, $aRes[$sLabelName]);
+                    $oCombodoMonitoringMetrics->AddLabel($sLabelName, $aRes[$sLabelName]);
                 }
                 $aCombodoMonitoringMetrics[] = $oCombodoMonitoringMetrics;
                 unset($aRes);
@@ -223,7 +240,7 @@ class CombodoMonitoringController extends Controller {
             throw new Exception("Metric $sMetricName has no sDescription. Please provide it.");
         }
 
-        $combodoMonitoringMetric->setDescription($sDescription);
+        $combodoMonitoringMetric->SetDescription($sDescription);
     }
 
     /**
@@ -233,7 +250,7 @@ class CombodoMonitoringController extends Controller {
     public function FillLabels($aMetric, $combodoMonitoringMetric): void {
         if (array_key_exists(METRIC_LABEL, $aMetric)) {
             $aLabelKeyValue = explode(",", $aMetric[METRIC_LABEL]);
-            $combodoMonitoringMetric->addLabel(trim($aLabelKeyValue[0]), trim($aLabelKeyValue[1]));
+            $combodoMonitoringMetric->AddLabel(trim($aLabelKeyValue[0]), trim($aLabelKeyValue[1]));
         }
     }
 }

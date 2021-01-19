@@ -29,39 +29,40 @@ class CombodoMonitoringMetric {
     /**
      * @return string
      */
-    public function getName() {
+    public function GetName() {
         return $this->sName;
     }
 
     /**
      * @return string
      */
-    public function getDescription() {
+    public function GetDescription() {
         return $this->sDescription;
     }
 
     /**
      * @param string $sDescription
      */
-    public function setDescription(string $sDescription): void {
+    public function SetDescription(string $sDescription): void {
         $this->sDescription = $sDescription;
     }
 
     /**
      * @return string
      */
-    public function getValue() {
+    public function GetValue() {
         return $this->sValue;
     }
 
     /**
      * @return string[]
      */
-    public function getLabels() {
+    public function GetLabels() {
         return $this->aLabels;
     }
 
-    public function addLabel($sKey, $sValue){
+    public function AddLabel($sKey, $sValue){
         $this->aLabels[$sKey] = $sValue;
     }
+
 }
