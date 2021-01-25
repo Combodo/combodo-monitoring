@@ -13,7 +13,12 @@ use utils;
 class CombodoMonitoringController extends Controller {
     const EXEC_MODULE = 'combodo-monitoring';
     const OQL_COUNT = 'oql_count';
+    const OQL_SELECT = 'oql_select';
+    const OQL_COLUMNS = 'oql_columns';
     const OQL_GROUPBY = 'oql_groupby';
+    const OQL_ORDERBY = 'oql_orderby';
+    const OQL_LIMIT_COUNT = 'oql_limit_count';
+    const OQL_LIMIT_START = 'oql_limit_start';
     const CONF = 'conf';
     const METRIC_DESCRIPTION = 'description';
     const METRIC_LABEL = 'label';
@@ -116,29 +121,69 @@ class CombodoMonitoringController extends Controller {
      * @return \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric|null
      * @throws \Exception
      */
-    public function ComputeOqlMetrics($sMetricName, $aMetric) {
-        if (is_array($aMetric) && array_key_exists(self::OQL_COUNT, $aMetric)) {
-            $oSearch = \DBSearch::FromOQL($aMetric[self::OQL_COUNT]);
-            if (array_key_exists(self::OQL_GROUPBY, $aMetric)) {
-                $aDynamicLabelFields = explode(",", $aMetric[self::OQL_GROUPBY]);
-                if (count($aDynamicLabelFields)==0){
-                    throw new \Exception("Strange configuration on $sMetricName:" . $aMetric[self::OQL_GROUPBY]);
-                } else if (count($aDynamicLabelFields)==1){
-                    throw new \Exception("Missing OQL field inside $sMetricName configuration:" . $aMetric[self::OQL_GROUPBY]);
-                }
-
-                $sLabelName = trim($aDynamicLabelFields[0]);
-                $sOqlField = trim($aDynamicLabelFields[1]);
-                $oExpr = \Expression::FromOQL($sOqlField);
-                $aGroupByExpr=[ $sLabelName => $oExpr ];
-                return $this->FetchGroupByMetrics($sMetricName, $oSearch, $aGroupByExpr);
-            } else{
-                $oSet = new \DBObjectSet($oSearch);
-                return [ new CombodoMonitoringMetric($sMetricName, "",  "" . $oSet->Count()) ] ;
-            }
+    public function ComputeOqlMetrics($sMetricName, $aMetric, $returnSQL = false)
+    {
+        if (!is_array($aMetric) || !array_key_exists(self::OQL_COUNT, $aMetric)) {
+            return null;
         }
 
-        return null;
+
+        $oSearch = \DBSearch::FromOQL($aMetric[self::OQL_COUNT]);
+
+        if (array_key_exists(self::OQL_ORDERBY, $aMetric)) {
+            $aOrderBy = $aMetric[self::OQL_ORDERBY];
+        } else {
+            $aOrderBy = [];
+        }
+        if (array_key_exists(self::OQL_LIMIT_COUNT, $aMetric)) {
+            $iLimitCount = $aMetric[self::OQL_LIMIT_COUNT];
+        } else {
+            $iLimitCount = 0;
+        }
+        if (array_key_exists(self::OQL_LIMIT_START, $aMetric)) {
+            $iLimitStart = $aMetric[self::OQL_LIMIT_START];
+        } else {
+            $iLimitStart = 0;
+        }
+        if (array_key_exists(self::OQL_COLUMNS, $aMetric)) {
+            $aOptimizeColumnsLoad = $aMetric[self::OQL_COLUMNS];
+        } else {
+            $aOptimizeColumnsLoad = null;
+        }
+
+
+        if (array_key_exists(self::OQL_GROUPBY, $aMetric)) {
+            $aDynamicLabelFields = explode(",", $aMetric[self::OQL_GROUPBY]);
+            if (count($aDynamicLabelFields)==0){
+                throw new \Exception("Strange configuration on $sMetricName:" . $aMetric[self::OQL_GROUPBY]);
+            } else if (count($aDynamicLabelFields)==1){
+                throw new \Exception("Missing OQL field inside $sMetricName configuration:" . $aMetric[self::OQL_GROUPBY]);
+            }
+
+            $sLabelName = trim($aDynamicLabelFields[0]);
+            $sOqlField = trim($aDynamicLabelFields[1]);
+            $oExpr = \Expression::FromOQL($sOqlField);
+            $aGroupByExpr=[ $sLabelName => $oExpr ];
+            $sSQL = $oSearch->MakeGroupByQuery([], $aGroupByExpr, false, [], $aOrderBy, $iLimitCount, $iLimitStart);
+
+            if ($returnSQL) {
+                return $sSQL;
+            }
+
+            return $this->FetchGroupByMetrics($sMetricName, $aGroupByExpr, $sSQL);
+        } else{
+            $oSet = new \DBObjectSet($oSearch);
+            $oSet->SetOrderBy($aOrderBy);
+            $oSet->SetLimit($iLimitCount, $iLimitStart);
+            if (!is_null($aOptimizeColumnsLoad)) {
+                $oSet->OptimizeColumnLoad($aOptimizeColumnsLoad);
+            }
+            if ($returnSQL) {
+                return $oSet;
+            }
+
+            return [ new CombodoMonitoringMetric($sMetricName, "",  "" . $oSet->Count()) ] ;
+        }
     }
 
     /**
@@ -150,9 +195,8 @@ class CombodoMonitoringController extends Controller {
      * @throws \MySQLException
      * @throws \MySQLHasGoneAwayException
      */
-    private function FetchGroupByMetrics($sMetricName, $oSearch, $aGroupByExpr)
+    private function FetchGroupByMetrics($sMetricName, $aGroupByExpr, $sSQL)
     {
-        $sSQL = $oSearch->MakeGroupByQuery([], $aGroupByExpr);
         $resQuery = \CMDBSource::Query($sSQL);
         if (!$resQuery)
         {
