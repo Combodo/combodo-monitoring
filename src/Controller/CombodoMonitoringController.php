@@ -10,15 +10,15 @@ use Combodo\iTop\Application\TwigBase\Controller\Controller;
 use PHPUnit\Runner\Exception;
 use utils;
 
-define('EXEC_MODULE', 'combodo-monitoring');
-define('OQL_COUNT', 'oql_count');
-define('OQL_GROUPBY', 'oql_groupby');
-define('CONF', 'conf');
-define('METRIC_DESCRIPTION', 'description');
-define('METRIC_LABEL', 'label');
-define('METRICS', 'metrics');
-
 class CombodoMonitoringController extends Controller {
+    const EXEC_MODULE = 'combodo-monitoring';
+    const OQL_COUNT = 'oql_count';
+    const OQL_GROUPBY = 'oql_groupby';
+    const CONF = 'conf';
+    const METRIC_DESCRIPTION = 'description';
+    const METRIC_LABEL = 'label';
+    const METRICS = 'metrics';
+
     public function OperationExposePrometheusMetrics() {
         $aParams = array();
 
@@ -33,7 +33,7 @@ class CombodoMonitoringController extends Controller {
             }
         }
 
-        $aParams[METRICS] = $aTwigMetrics;
+        $aParams[self::METRICS] = $aTwigMetrics;
         //$this->DisplayPage($aParams, null, self::ENUM_PAGE_TYPE_TXT);
 
 
@@ -58,12 +58,12 @@ class CombodoMonitoringController extends Controller {
      * @param null $sConfigFile
      */
     public function ReadMetricConf($sConfigFile=null){
-        $aMetricParams = \utils::GetConfig()->GetModuleSetting(EXEC_MODULE, METRICS);
+        $aMetricParams = \utils::GetConfig()->GetModuleSetting(self::EXEC_MODULE, self::METRICS);
         foreach ($aMetricParams as $sKey => $oValue) {
-            if (is_array($oValue) && array_key_exists(CONF, $oValue)) {
-                if (strstr($oValue[CONF], '.')){
-                    $sMetricConfig = explode(".", $oValue[CONF]);
-                    $aMetricParams[$sKey][CONF] = $sMetricConfig;
+            if (is_array($oValue) && array_key_exists(self::CONF, $oValue)) {
+                if (strstr($oValue[self::CONF], '.')){
+                    $sMetricConfig = explode(".", $oValue[self::CONF]);
+                    $aMetricParams[$sKey][self::CONF] = $sMetricConfig;
                 }
             }
         }
@@ -117,14 +117,14 @@ class CombodoMonitoringController extends Controller {
      * @throws \Exception
      */
     public function ComputeOqlMetrics($sMetricName, $aMetric) {
-        if (is_array($aMetric) && array_key_exists(OQL_COUNT, $aMetric)) {
-            $oSearch = \DBSearch::FromOQL($aMetric[OQL_COUNT]);
-            if (array_key_exists(OQL_GROUPBY, $aMetric)) {
-                $aDynamicLabelFields = explode(",", $aMetric[OQL_GROUPBY]);
+        if (is_array($aMetric) && array_key_exists(self::OQL_COUNT, $aMetric)) {
+            $oSearch = \DBSearch::FromOQL($aMetric[self::OQL_COUNT]);
+            if (array_key_exists(self::OQL_GROUPBY, $aMetric)) {
+                $aDynamicLabelFields = explode(",", $aMetric[self::OQL_GROUPBY]);
                 if (count($aDynamicLabelFields)==0){
-                    throw new \Exception("Strange configuration on $sMetricName:" . $aMetric[OQL_GROUPBY]);
+                    throw new \Exception("Strange configuration on $sMetricName:" . $aMetric[self::OQL_GROUPBY]);
                 } else if (count($aDynamicLabelFields)==1){
-                    throw new \Exception("Missing OQL field inside $sMetricName configuration:" . $aMetric[OQL_GROUPBY]);
+                    throw new \Exception("Missing OQL field inside $sMetricName configuration:" . $aMetric[self::OQL_GROUPBY]);
                 }
 
                 $sLabelName = trim($aDynamicLabelFields[0]);
@@ -184,8 +184,8 @@ class CombodoMonitoringController extends Controller {
      * @throws \Exception
      */
     public function ComputeConfMetrics($sMetricName, $aMetric) {
-        if (is_array($aMetric) && array_key_exists(CONF, $aMetric)) {
-            $aConfParamPath = $aMetric[CONF];
+        if (is_array($aMetric) && array_key_exists(self::CONF, $aMetric)) {
+            $aConfParamPath = $aMetric[self::CONF];
             if (!empty($aConfParamPath)) {
                 $sType = null;
                 $sModule = null;
@@ -232,8 +232,8 @@ class CombodoMonitoringController extends Controller {
      */
     public function FillDescription($aMetric, $sMetricName, $combodoMonitoringMetric): void {
         $sDescription = "";
-        if (array_key_exists(METRIC_DESCRIPTION, $aMetric)) {
-            $sDescription = $aMetric[METRIC_DESCRIPTION];
+        if (array_key_exists(self::METRIC_DESCRIPTION, $aMetric)) {
+            $sDescription = $aMetric[self::METRIC_DESCRIPTION];
         }
 
         if (empty($sDescription)) {
@@ -248,8 +248,8 @@ class CombodoMonitoringController extends Controller {
      * @param \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric $combodoMonitoringMetric
      */
     public function FillLabels($aMetric, $combodoMonitoringMetric): void {
-        if (array_key_exists(METRIC_LABEL, $aMetric)) {
-            $aLabelKeyValue = explode(",", $aMetric[METRIC_LABEL]);
+        if (array_key_exists(self::METRIC_LABEL, $aMetric)) {
+            $aLabelKeyValue = explode(",", $aMetric[self::METRIC_LABEL]);
             $combodoMonitoringMetric->AddLabel(trim($aLabelKeyValue[0]), trim($aLabelKeyValue[1]));
         }
     }

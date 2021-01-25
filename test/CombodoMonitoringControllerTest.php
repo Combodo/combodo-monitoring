@@ -25,46 +25,6 @@ class CombodoMonitoringControllerTest extends ItopDataTestCase {
         $this->monitoringController = new CombodoMonitoringController(MODULESROOT.'combodo-monitoring/src/view');
     }
 
-    /*public function testConfigReading(){
-        $aParams = $this->monitoringController->ReadMetricConf(__DIR__ . '/' . MONITORING_CONFIG_FILE);
-
-        $aMetrics = [
-            'access_token' => '',
-            'authorized_network'  => '',
-            'metrics' => [
-                'itop_user_count' => [
-                    'description' => 'Nb of users',
-                    'oql_count' => 'SELECT User',
-                    'label' => 'labelname1,labelvalue1'
-                ],
-                'itop_user_quota_count' => [
-                        'description' => 'User authorized quota',
-                        'conf' => 'eeii'
-                ],
-                'itop_backup_retention_count' => [
-                        'description' => 'description test',
-                        'conf' => ['MyModuleSettings', 'itop-backup', 'retention_count'],
-                        'label' => 'labelname3,labelvalue3'
-                ]
-            ]
-        ];
-
-        MetaModel::GetConfig()->SetModuleSetting('combodo-monitoring', 'metrics', $aMetrics);
-
-        $this->assertArrayHasKey('metrics', $aParams);
-
-        $aMetrics = $aParams['metrics'];
-
-        $this->assertArrayHasKey('itop_user_count', $aMetrics);
-        $this->assertArrayHasKey('itop_user_groupby_count', $aMetrics);
-        $this->assertArrayHasKey('itop_user_quota_count', $aMetrics);
-        $this->assertArrayHasKey('itop_backup_retention_count', $aMetrics);
-
-        $sExpected = json_encode($aExpected);
-        $sArray = json_encode($aParams);
-        $this->assertEquals($sExpected, $sArray);
-    }*/
-
     /**
      * @dataProvider GetMonitoringConf
      * @param array $aMetricConf

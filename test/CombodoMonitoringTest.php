@@ -1,9 +1,12 @@
 <?php
 
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
+use \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringController;
 
 class CombodoMonitoringTest extends ItopDataTestCase {
     private $sUrl;
+    private $sConfigFile;
+    private $sConfBackupPath;
 
     public function setUp()
     {
@@ -18,38 +21,117 @@ class CombodoMonitoringTest extends ItopDataTestCase {
             define('MODULESROOT', APPROOT.'env-production/');
         }
 
-        $sConfigFile = \utils::GetConfig()->GetLoadedFile();
-        @chmod($sConfigFile, 0770);
+        $this->sConfigFile = \utils::GetConfig()->GetLoadedFile();
+        @chmod($this->sConfigFile, 0770);
         $this->sUrl = \MetaModel::GetConfig()->Get('app_root_url') . "/pages/exec.php?exec_module=combodo-monitoring&exec_page=index.php&exec_env=production";
-        @chmod($sConfigFile, 0444); // Read-only
+        @chmod($this->sConfigFile, 0444); // Read-only
+
+        $this->sConfBackupPath = tempnam(sys_get_temp_dir(), 'conf.php');
+        copy($this->sConfigFile, $this->sConfBackupPath);
     }
 
+    public function tearDown()
+    {
+        @chmod($this->sConfigFile, 0770);
+        copy($this->sConfBackupPath, $this->sConfigFile);
+        @chmod($this->sConfigFile, 0444); // Read-only
+    }
 
     private function CallRestApi($sUrl){
         $ch = curl_init();
 
-        curl_setopt($ch, CURLOPT_URL, $sUrl);
+        curl_setopt($ch, CURLOPT_URL, "$sUrl");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $sContent = curl_exec($ch);
-        $iCode = curl_errno($ch);
+        $iCode = curl_getinfo($ch,  CURLINFO_HTTP_CODE);
         curl_close ($ch);
 
         return [ $sContent, $iCode];
     }
 
     /**
-     * @dataProvider TokenAccessProvider
+     * @dataProvider MonitoringProvider
      */
-    public function testTokenAccess($responseContent, $httpCode){
+    public function testMonitoringPage($aMetricConf, $sExpectedContentPath, $iExpectedHttpCode){
+        @chmod($this->sConfigFile, 0770);
+        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'access_token', 'toto123');
+        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'authorized_network', '');
+        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, CombodoMonitoringController::METRICS, $aMetricConf);
+        \utils::GetConfig()->WriteToFile();
+        @chmod($this->sConfigFile, 0444); // Read-only
+
         $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123");
 
-        $this->assertEquals($responseContent, $aResp[0]);
-        $this->assertEquals($httpCode, $aResp[1]);
+        $this->assertEquals($iExpectedHttpCode, $aResp[1], $aResp[0]);
+        $this->assertEquals(file_get_contents($sExpectedContentPath), $aResp[0]);
     }
 
-    public function TokenAccessProvider(){
+    public function MonitoringProvider(){
+        $sRessourcesDir = __DIR__ . "/ressources";
+
         return [
-            [   "", 200 ],
+            [
+                'aMetricConf' => [
+                    'itop_user_count' => array(
+                        'description' => 'Nb of users',
+                        'oql_count' => 'SELECT URP_UserProfile',
+                        'label' => 'toto,titi'
+                    ),
+                    'itop_user_groupby_count' => array(
+                        'description' => 'Nb of users',
+                        'oql_count' => 'SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid =URP_Profiles_profileid.id',
+                        'oql_groupby' => 'profile, URP_Profiles_profileid.friendlyname',
+                    ),
+                    'itop_backup_retention_count' => array(
+                        'description' => 'Retention count',
+                        'conf' => 'MyModuleSettings.itop-backup.retention_count',
+                        'label' => 'shadok,gabuzomeu'
+                    )
+                ],
+                'sExpectedContentPath' => "$sRessourcesDir/prometheus_content.txt",
+                'iExpectedHttpCode' => 200
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider TokenConfProvider
+     */
+    public function testTokenConf($aMetricConf, $sExpectedContentPath, $iExpectedHttpCode){
+        @chmod($this->sConfigFile, 0770);
+        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'access_token', 'toto123');
+        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'authorized_network', '');
+        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, CombodoMonitoringController::METRICS, $aMetricConf);
+        \utils::GetConfig()->WriteToFile();
+        @chmod($this->sConfigFile, 0444); // Read-only
+
+        $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123");
+
+        $this->assertEquals($iExpectedHttpCode, $aResp[1], $aResp[0]);
+        $this->assertEquals(file_get_contents($sExpectedContentPath), $aResp[0]);
+    }
+
+    public function TokenConfProvider(){
+        $sRessourcesDir = __DIR__ . "/ressources";
+
+        return [
+            [
+                'aMetricConf' => [
+                    'itop_user_count' => array(
+                        'description' => 'Nb of users',
+                        'oql_count' => 'SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid =URP_Profiles_profileid.id',
+                        'oql_groupby' => 'profile, URP_Profiles_profileid.friendlyname',
+                        'label' => 'toto,titi'
+                    ),
+                    'itop_backup_retention_count' => array(
+                        'description' => 'Retention count',
+                        'conf' => 'MyModuleSettings.itop-backup.retention_count',
+                        'label' => 'shadok,gabuzomeu'
+                    )
+                ],
+                'sExpectedContentPath' => "$sRessourcesDir/prometheus_content.txt",
+                'iExpectedHttpCode' => 200
+            ],
         ];
     }
 }
