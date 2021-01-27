@@ -55,7 +55,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
     public function testMonitoringPage($aMetricConf, $sExpectedContentPath, $iExpectedHttpCode){
         @chmod($this->sConfigFile, 0770);
         \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'access_token', 'toto123');
-        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'authorized_network', '');
+        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'authorized_network', []);
         \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, CombodoMonitoringController::METRICS, $aMetricConf);
         \utils::GetConfig()->WriteToFile();
         @chmod($this->sConfigFile, 0444); // Read-only
@@ -97,7 +97,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
     public function testTokenConf(){
         @chmod($this->sConfigFile, 0770);
         \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'access_token', 'toto123');
-        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'authorized_network', '');
+        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'authorized_network', []);
         \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, CombodoMonitoringController::METRICS, []);
         \utils::GetConfig()->WriteToFile();
         @chmod($this->sConfigFile, 0444); // Read-only
@@ -114,10 +114,10 @@ class CombodoMonitoringTest extends ItopDataTestCase {
      * @throws ConfigException
      * @throws CoreException
      */
-    public function testAuthorizedNetwork($sNetworkRegexp, $iHttpCode){
+    public function testAuthorizedNetwork($aNetworkRegexps, $iHttpCode){
         @chmod($this->sConfigFile, 0770);
         \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'access_token', 'toto123');
-        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'authorized_network', $sNetworkRegexp);
+        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'authorized_network', $aNetworkRegexps);
         \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, CombodoMonitoringController::METRICS, []);
         \utils::GetConfig()->WriteToFile();
         @chmod($this->sConfigFile, 0444); // Read-only
@@ -132,8 +132,13 @@ class CombodoMonitoringTest extends ItopDataTestCase {
 
     public function NetworkProvider(){
         return [
-            'network ok' => [ 'sNetworkRegexp' => '127\\.0\\.0\\.\\d{1,3}', 'iHttpCode' => 200 ],
-            'wrong network' => [ 'sNetworkRegexp' => '20\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}', 'iHttpCode' => 500 ],
+            'wrong conf' => [ 'aNetworkRegexps' => '', 'iHttpCode' => 200 ],
+            'empty' => [ 'aNetworkRegexps' => [], 'iHttpCode' => 200 ],
+            'ok 127.0.0.1' => [ 'aNetworkRegexps' => ['127.0.0.1'], 'iHttpCode' => 200 ],
+            'ok 127.X.X.X' => [ 'aNetworkRegexps' => ['127.0.0.1/24'], 'iHttpCode' => 200 ],
+            'ok with further authorized networks' => [ 'aNetworkRegexps' => ['20.0.0.0/24', '127.0.0.1'], 'iHttpCode' => 200 ],
+            'wrong network' => [ 'aNetworkRegexps' => ['20.0.0.0/24'], 'iHttpCode' => 500 ],
+            'wrong IP' => [ 'aNetworkRegexps' => ['20.0.0.0'], 'iHttpCode' => 500 ],
         ];
     }
 }
