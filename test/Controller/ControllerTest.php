@@ -1,11 +1,27 @@
 <?php
+/*
+ * Copyright (C) 2013-2021 Combodo SARL
+ * This file is part of iTop.
+ * iTop is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * iTop is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * You should have received a copy of the GNU Affero General Public License
+ */
 
-use \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringMetric;
+
+namespace Combodo\iTop\Monitoring\Test\Controller;
+
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
-use \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringController;
+use \Combodo\iTop\Monitoring\Controller\Controller;
+use \Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
-class CombodoMonitoringControllerTest extends ItopDataTestCase {
-    /** @var CombodoMonitoringController $monitoringController */
+class ControllerTest extends ItopDataTestCase {
+    /** @var Controller $monitoringController */
     private $monitoringController;
 
     public function setUp()
@@ -14,15 +30,15 @@ class CombodoMonitoringControllerTest extends ItopDataTestCase {
         parent::setUp();
 
         require_once(APPROOT . 'core/config.class.inc.php');
-        require_once(APPROOT . 'env-production/combodo-monitoring/src/Controller/CombodoMonitoringController.php');
-        require_once(APPROOT . 'env-production/combodo-monitoring/src/Controller/CombodoMonitoringMetric.php');
+        require_once(APPROOT . 'env-production/combodo-monitoring/src/Controller/Controller.php');
+        require_once(APPROOT . 'env-production/combodo-monitoring/src/Model/MonitoringMetric.php');
 
         if (!defined('MODULESROOT'))
         {
             define('MODULESROOT', APPROOT.'env-production/');
         }
 
-        $this->monitoringController = new CombodoMonitoringController(MODULESROOT.'combodo-monitoring/src/view');
+        $this->monitoringController = new Controller(MODULESROOT.'combodo-monitoring/src/view');
     }
 
     /**
@@ -34,7 +50,7 @@ class CombodoMonitoringControllerTest extends ItopDataTestCase {
         $aExpectedMetrics=[];
         foreach ($aExpectedMetricFields as $aPerMetricValues){
             $aLabel = count($aPerMetricValues)==4 ? $aPerMetricValues[3] : [];
-            $aExpectedMetrics[] = new CombodoMonitoringMetric($aPerMetricValues[0], $aPerMetricValues[1], $aPerMetricValues[2], $aLabel);
+            $aExpectedMetrics[] = new MonitoringMetric($aPerMetricValues[0], $aPerMetricValues[1], $aPerMetricValues[2], $aLabel);
         }
         $aMetrics = $this->monitoringController->ReadMetrics($aMetricConf);
         $this->assertEquals(
@@ -130,7 +146,7 @@ class CombodoMonitoringControllerTest extends ItopDataTestCase {
                 ['itop_user_count' =>
                     [
                         'description' => 'Nb of users',
-                        'oql_count' => 'SELECT User',
+                        'oql_count' => 'SELECT User WHERE id=1',
                         'label' => ' labelname2 , labelvalue2 '
                     ]
                 ],
@@ -140,7 +156,7 @@ class CombodoMonitoringControllerTest extends ItopDataTestCase {
                 ['itop_user_count' =>
                     [
                         'description' => 'Nb of URP_UserProfile par type',
-                        'oql_count' => 'SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid = URP_Profiles_profileid.id',
+                        'oql_count' => 'SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid = URP_Profiles_profileid.id WHERE URP_UserProfile.userid=1',
                         'oql_groupby' => 'profile, URP_Profiles_profileid.friendlyname'
                     ]
                 ],
