@@ -1,0 +1,9 @@
+# Nb of users
+itop_user_count{toto="titi"} 1
+
+# Nb of users
+itop_user_groupby_count{profile="Administrator"} 1
+
+# Retention count
+itop_backup_retention_count{shadok="gabuzomeu"} 5
+

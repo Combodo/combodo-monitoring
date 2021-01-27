@@ -371,4 +371,42 @@ class CombodoMonitoringControllerTest extends ItopDataTestCase {
             ],
         ];
     }
+
+    /**
+     * @dataProvider ReadMetricConfProvider
+     */
+    public function  testReadMetricConf(string $sCollection, array $aConf, $aExpectedResult, ?string $sExpectedException)
+    {
+        if (null !== $sExpectedException) {
+            $this->expectExceptionMessageRegExp($sExpectedException);
+        }
+
+        $oConfigMock = $this->createMock(Config::class);
+        $oConfigMock->expects($this->any())
+            ->method('GetModuleSetting')
+            ->willReturn( $aConf);
+
+        $result = $this->monitoringController->ReadMetricConf($sCollection, $oConfigMock);
+
+        $this->assertEquals($aExpectedResult, $result);
+    }
+
+    public function ReadMetricConfProvider()
+    {
+        return [
+            'nominal' => [
+                'sCollection' => 'foo',
+                'aConf' => ['foo' => ['whatever']],
+                'aExpectedResult' => ['whatever'],
+                'sExpectedException' => null
+            ],
+            'missing collection' => [
+                'sCollection' => 'foo',
+                'aConf' => ['bar' => []],
+                'aExpectedResult' => null,
+                'sExpectedException' => '/Collection "foo" not found/'
+            ],
+
+        ];
+    }
 }

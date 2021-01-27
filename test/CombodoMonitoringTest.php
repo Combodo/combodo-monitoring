@@ -94,44 +94,46 @@ class CombodoMonitoringTest extends ItopDataTestCase {
         ];
     }
 
-    /**
-     * @dataProvider TokenConfProvider
-     */
-    public function testTokenConf($aMetricConf, $sExpectedContentPath, $iExpectedHttpCode){
+    public function testTokenConf(){
         @chmod($this->sConfigFile, 0770);
         \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'access_token', 'toto123');
         \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'authorized_network', '');
-        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, CombodoMonitoringController::METRICS, $aMetricConf);
+        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, CombodoMonitoringController::METRICS, []);
         \utils::GetConfig()->WriteToFile();
         @chmod($this->sConfigFile, 0444); // Read-only
 
         $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123");
-
-        $this->assertEquals($iExpectedHttpCode, $aResp[1], $aResp[0]);
-        $this->assertEquals(file_get_contents($sExpectedContentPath), $aResp[0]);
+        $this->assertEquals(200, $aResp[1], "wrong http error code. $aResp[1] instead of 200");
+        $aResp = $this->CallRestApi("$this->sUrl&access_token=toto124");
+        $this->assertEquals(500, $aResp[1], "wrong http error code. $aResp[1] instead of 500");
+        $this->assertContains('Exception : Invalid token', $aResp[0]);
     }
 
-    public function TokenConfProvider(){
-        $sRessourcesDir = __DIR__ . "/ressources";
+    /**
+     * @dataProvider NetworkProvider
+     * @throws ConfigException
+     * @throws CoreException
+     */
+    public function testAuthorizedNetwork($sNetworkRegexp, $iHttpCode){
+        @chmod($this->sConfigFile, 0770);
+        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'access_token', 'toto123');
+        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'authorized_network', $sNetworkRegexp);
+        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, CombodoMonitoringController::METRICS, []);
+        \utils::GetConfig()->WriteToFile();
+        @chmod($this->sConfigFile, 0444); // Read-only
 
+        $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123");
+        $sErrorCode = $aResp[1];
+        $this->assertEquals($iHttpCode, $sErrorCode, "wrong http error code. $sErrorCode instead of $iHttpCode. " . $aResp[0]);
+        if (500 == $sErrorCode){
+            $this->assertContains('Exception : Unauthorized network', $aResp[0]);
+        }
+    }
+
+    public function NetworkProvider(){
         return [
-            [
-                'aMetricConf' => [
-                    'itop_user_count' => array(
-                        'description' => 'Nb of users',
-                        'oql_count' => 'SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid =URP_Profiles_profileid.id',
-                        'oql_groupby' => 'profile, URP_Profiles_profileid.friendlyname',
-                        'label' => 'toto,titi'
-                    ),
-                    'itop_backup_retention_count' => array(
-                        'description' => 'Retention count',
-                        'conf' => 'MyModuleSettings.itop-backup.retention_count',
-                        'label' => 'shadok,gabuzomeu'
-                    )
-                ],
-                'sExpectedContentPath' => "$sRessourcesDir/prometheus_content.txt",
-                'iExpectedHttpCode' => 200
-            ],
+            'network ok' => [ 'sNetworkRegexp' => '127\\.0\\.0\\.\\d{1,3}', 'iHttpCode' => 200 ],
+            'wrong network' => [ 'sNetworkRegexp' => '20\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}', 'iHttpCode' => 500 ],
         ];
     }
 }

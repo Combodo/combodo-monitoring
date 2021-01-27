@@ -25,9 +25,16 @@ class CombodoMonitoringController extends Controller {
     const METRICS = 'metrics';
 
     public function OperationExposePrometheusMetrics() {
+        $sCollection = utils::ReadParam('collection', null);
+
+        if (is_null($sCollection)) {
+            throw new \Exception('Missing mandatory GET parameter collection');
+        }
+
+        $aMetricParams = $this->ReadMetricConf($sCollection);
+
         $aParams = array();
 
-        $aMetricParams = $this->ReadMetricConf();
         $aMetrics = $this->ReadMetrics($aMetricParams);
 
         $aTwigMetrics = [];
@@ -61,18 +68,28 @@ class CombodoMonitoringController extends Controller {
 
     /**
      * @param null $sConfigFile
+     *
+     * @throws \Exception
      */
-    public function ReadMetricConf($sConfigFile=null){
-        $aMetricParams = \utils::GetConfig()->GetModuleSetting(self::EXEC_MODULE, self::METRICS);
-        foreach ($aMetricParams as $sKey => $oValue) {
+    public function ReadMetricConf($sCollection, ?\Config $config = null){
+        $config = $config ?: \utils::GetConfig();
+        $aModuleSetting = $config->GetModuleSetting(self::EXEC_MODULE, self::METRICS);
+
+        if (!array_key_exists($sCollection, $aModuleSetting)) {
+            throw new \Exception(sprintf('Collection "%s" not found (should be an index of $MyModuleSettings["%s"]["%s"])', $sCollection, self::EXEC_MODULE, self::METRICS));
+        }
+
+        $aCollectionSetting = $aModuleSetting[$sCollection];
+
+        foreach ($aCollectionSetting as $sKey => $oValue) {
             if (is_array($oValue) && array_key_exists(self::CONF, $oValue)) {
                 if (strstr($oValue[self::CONF], '.')){
                     $sMetricConfig = explode(".", $oValue[self::CONF]);
-                    $aMetricParams[$sKey][self::CONF] = $sMetricConfig;
+                    $aCollectionSetting[$sKey][self::CONF] = $sMetricConfig;
                 }
             }
         }
-        return $aMetricParams;
+        return $aCollectionSetting;
     }
 
     /**
