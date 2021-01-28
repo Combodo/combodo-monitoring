@@ -28,6 +28,12 @@ class MetricReaderFactory
         }
 
         switch (true) {
+            case array_key_exists(Constants::CUSTOM, $aMetric):
+                $oReader = new CustomReader($sMetricName, $aMetric);
+                break;
+            case array_key_exists(Constants::OQL_GROUPBY, $aMetric):
+                $oReader = new OqlGroupByReader($sMetricName, $aMetric);
+                break;
             case array_key_exists(Constants::OQL_COUNT, $aMetric):
                 $oReader = new OqlCountReader($sMetricName, $aMetric);
                 break;

@@ -35,94 +35,39 @@ class OqlCountReader implements MetricReaderInterface
      */
     public function GetMetrics(): ?array
     {
-        $oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_COUNT]);
+        $oSet = $this->GetObjectSet();
 
-        if (array_key_exists(Constants::OQL_ORDERBY, $this->aMetric)) {
-            $aOrderBy = $this->aMetric[Constants::OQL_ORDERBY];
-        } else {
-            $aOrderBy = [];
-        }
-        if (array_key_exists(Constants::OQL_LIMIT_COUNT, $this->aMetric)) {
-            $iLimitCount = $this->aMetric[Constants::OQL_LIMIT_COUNT];
-        } else {
-            $iLimitCount = 0;
-        }
-        if (array_key_exists(Constants::OQL_LIMIT_START, $this->aMetric)) {
-            $iLimitStart = $this->aMetric[Constants::OQL_LIMIT_START];
-        } else {
-            $iLimitStart = 0;
-        }
-        if (array_key_exists(Constants::OQL_COLUMNS, $this->aMetric)) {
-            $aOptimizeColumnsLoad = $this->aMetric[Constants::OQL_COLUMNS];
-        } else {
-            $aOptimizeColumnsLoad = null;
-        }
+        $sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
+        $aLabels = $this->aMetric[Constants::METRIC_LABEL] ?? [];
 
+        return [ new MonitoringMetric($this->sMetricName, $sDescription,  $oSet->Count(), $aLabels)] ;
 
-        if (array_key_exists(Constants::OQL_GROUPBY, $this->aMetric)) {
-            $aDynamicLabelFields = explode(",", $this->aMetric[Constants::OQL_GROUPBY]);
-            if (count($aDynamicLabelFields)==0){
-                throw new \Exception("Strange configuration on $this->sMetricName:" . $this->aMetric[Constants::OQL_GROUPBY]);
-            } else if (count($aDynamicLabelFields)==1){
-                throw new \Exception("Missing OQL field inside $this->sMetricName configuration:" . $this->aMetric[Constants::OQL_GROUPBY]);
-            }
-
-            $sLabelName = trim($aDynamicLabelFields[0]);
-            $sOqlField = trim($aDynamicLabelFields[1]);
-            $oExpr = \Expression::FromOQL($sOqlField);
-            $aGroupByExpr=[ $sLabelName => $oExpr ];
-            $sSQL = $oSearch->MakeGroupByQuery([], $aGroupByExpr, false, [], $aOrderBy, $iLimitCount, $iLimitStart);
-
-//            if ($returnSQL) {
-//                return $sSQL;
-//            }
-
-            return $this->FetchGroupByMetrics($this->sMetricName, $aGroupByExpr, $sSQL);
-        } else{
-            $oSet = new \DBObjectSet($oSearch);
-            $oSet->SetOrderBy($aOrderBy);
-            $oSet->SetLimit($iLimitCount, $iLimitStart);
-            if (!is_null($aOptimizeColumnsLoad)) {
-                $oSet->OptimizeColumnLoad($aOptimizeColumnsLoad);
-            }
-//            if ($returnSQL) {
-//                return $oSet;
-//            }
-
-            return [ new MonitoringMetric($this->sMetricName, "",  "" . $oSet->Count()) ] ;
-        }
     }
+
     /**
-     * @param string $sMetricName
-     * @param \DBSearch $oSearch
-     * @param $aGroupByExpr
-     * @return array|null
+     * @return \DBObjectSet
      * @throws \CoreException
      * @throws \MySQLException
-     * @throws \MySQLHasGoneAwayException
+     * @throws \OQLException
      */
-    private function FetchGroupByMetrics($sMetricName, $aGroupByExpr, $sSQL)
+    private function GetObjectSet(): \DBObjectSet
     {
-        $resQuery = \CMDBSource::Query($sSQL);
-        if (!$resQuery)
+        $oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_COUNT]);
+
+        $aOrderBy = $this->aMetric[Constants::OQL_ORDERBY] ?? [];
+        $iLimitCount = $this->aMetric[Constants::OQL_LIMIT_COUNT] ?? 0;
+        $iLimitStart = $this->aMetric[Constants::OQL_LIMIT_START] ?? 0;
+        $aOptimizeColumnsLoad = $this->aMetric[Constants::OQL_COLUMNS] ?? null;
+
+        $oSet = new \DBObjectSet($oSearch);
+        $oSet->SetOrderBy($aOrderBy);
+        $oSet->SetLimit($iLimitCount, $iLimitStart);
+
+        if (!is_null($aOptimizeColumnsLoad))
         {
-            return null;
+            $oSet->OptimizeColumnLoad($aOptimizeColumnsLoad);
         }
-        else
-        {
-            $aMonitoringMetrics = [];
-            while ($aRes = \CMDBSource::FetchArray($resQuery)) {
-                $sValue = $aRes['_itop_count_'];
-                $oMonitoringMetrics = new MonitoringMetric($sMetricName, "", $sValue);
-                foreach (array_keys($aGroupByExpr) as $sLabelName) {
-                    $sLabelName = $sLabelName;
-                    $oMonitoringMetrics->AddLabel($sLabelName, $aRes[$sLabelName]);
-                }
-                $aMonitoringMetrics[] = $oMonitoringMetrics;
-                unset($aRes);
-            }
-            \CMDBSource::FreeResult($resQuery);
-            return $aMonitoringMetrics;
-        }
+
+        return $oSet;
     }
 }

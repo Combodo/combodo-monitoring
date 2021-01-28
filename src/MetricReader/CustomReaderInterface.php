@@ -13,21 +13,17 @@
  * You should have received a copy of the GNU Affero General Public License
  */
 
-namespace Combodo\iTop\Monitoring\Model;
+namespace Combodo\iTop\Monitoring\MetricReader;
 
 
-class Constants
+use Combodo\iTop\Monitoring\Model\MonitoringMetric;
+
+interface CustomReaderInterface
 {
-    const CUSTOM = 'custom';
-    const EXEC_MODULE = 'combodo-monitoring';
-    const OQL_COUNT = 'oql_count';
-    const OQL_SELECT = 'oql_select';
-    const OQL_COLUMNS = 'oql_columns';
-    const OQL_GROUPBY = 'oql_groupby';
-    const OQL_ORDERBY = 'oql_orderby';
-    const OQL_LIMIT_COUNT = 'oql_limit_count';
-    const OQL_LIMIT_START = 'oql_limit_start';
-    const METRIC_DESCRIPTION = 'description';
-    const METRIC_LABEL = 'label';
-    const METRICS = 'metrics';
+    public function __construct($aMetricConf);
+
+    /**
+     * @return MonitoringMetric[]
+     */
+    public function GetMetrics(): ?array;
 }

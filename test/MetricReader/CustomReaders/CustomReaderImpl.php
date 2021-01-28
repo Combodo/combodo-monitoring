@@ -13,21 +13,26 @@
  * You should have received a copy of the GNU Affero General Public License
  */
 
-namespace Combodo\iTop\Monitoring\Model;
+namespace Combodo\iTop\Monitoring\Test\MetricReader\CustomReaders;
 
+use Combodo\iTop\Monitoring\Model\Constants;
+use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
-class Constants
+class CustomReaderImpl implements \Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface
 {
-    const CUSTOM = 'custom';
-    const EXEC_MODULE = 'combodo-monitoring';
-    const OQL_COUNT = 'oql_count';
-    const OQL_SELECT = 'oql_select';
-    const OQL_COLUMNS = 'oql_columns';
-    const OQL_GROUPBY = 'oql_groupby';
-    const OQL_ORDERBY = 'oql_orderby';
-    const OQL_LIMIT_COUNT = 'oql_limit_count';
-    const OQL_LIMIT_START = 'oql_limit_start';
-    const METRIC_DESCRIPTION = 'description';
-    const METRIC_LABEL = 'label';
-    const METRICS = 'metrics';
+
+    private $aMetricConf;
+
+    public function __construct($aMetricConf)
+    {
+        $this->aMetricConf = $aMetricConf;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function GetMetrics(): ?array
+    {
+        return [ new MonitoringMetric('foo', $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '', 42, ['baz' => 'iste'])];
+    }
 }

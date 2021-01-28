@@ -71,17 +71,7 @@ class Controller extends BaseController {
             throw new \Exception(sprintf('Collection "%s" not found (should be an index of $MyModuleSettings["%s"]["%s"])', $sCollection, Constants::EXEC_MODULE, Constants::METRICS));
         }
 
-        $aCollectionSetting = $aModuleSetting[$sCollection];
-
-        foreach ($aCollectionSetting as $sKey => $oValue) {
-            if (is_array($oValue) && array_key_exists(Constants::CONF, $oValue)) {
-                if (strstr($oValue[Constants::CONF], '.')){
-                    $sMetricConfig = explode(".", $oValue[Constants::CONF]);
-                    $aCollectionSetting[$sKey][Constants::CONF] = $sMetricConfig;
-                }
-            }
-        }
-        return $aCollectionSetting;
+        return $aModuleSetting[$sCollection];
     }
 
     /**
@@ -101,6 +91,9 @@ class Controller extends BaseController {
         try {
             foreach ($aMetricParams as $sMetricName => $aMetric) {
 
+                if (!isset($aMetric[Constants::METRIC_DESCRIPTION])) {
+                    throw new Exception("Metric $sMetricName has no sDescription. Please provide it.");
+                }
 
                 $oReader = $oMetricReaderFactory->GetReader($sMetricName, $aMetric);
                 if (is_null($oReader)) {
@@ -111,11 +104,6 @@ class Controller extends BaseController {
 
                 if (is_null($aMonitoringMetrics)) {
                     continue;
-                }
-
-                foreach ($aMonitoringMetrics as $oMonitoringMetrics){
-                    $this->FillDescription($aMetric, $sMetricName, $oMonitoringMetrics);
-                    $this->FillLabels($aMetric, $oMonitoringMetrics);
                 }
 
                 $aMetrics = array_merge($aMetrics, $aMonitoringMetrics);
@@ -129,32 +117,5 @@ class Controller extends BaseController {
         return $aMetrics;
     }
 
-    /**
-     * @param $aMetric
-     * @param string $sMetricName
-     * @param \Combodo\iTop\Monitoring\Controller\MonitoringMetric $MonitoringMetric
-     */
-    public function FillDescription($aMetric, $sMetricName, $MonitoringMetric): void {
-        $sDescription = "";
-        if (array_key_exists(Constants::METRIC_DESCRIPTION, $aMetric)) {
-            $sDescription = $aMetric[Constants::METRIC_DESCRIPTION];
-        }
 
-        if (empty($sDescription)) {
-            throw new Exception("Metric $sMetricName has no sDescription. Please provide it.");
-        }
-
-        $MonitoringMetric->SetDescription($sDescription);
-    }
-
-    /**
-     * @param $aMetric
-     * @param \Combodo\iTop\Monitoring\Controller\MonitoringMetric $MonitoringMetric
-     */
-    public function FillLabels($aMetric, $MonitoringMetric): void {
-        if (array_key_exists(Constants::METRIC_LABEL, $aMetric)) {
-            $aLabelKeyValue = explode(",", $aMetric[Constants::METRIC_LABEL]);
-            $MonitoringMetric->AddLabel(trim($aLabelKeyValue[0]), trim($aLabelKeyValue[1]));
-        }
-    }
 }

@@ -1,9 +1,12 @@
-# Nb of users
+# Nb of users (oql_count)
 itop_user_count{toto="titi"} 1
 
-# Nb of users
+# Nb of users (oql_groupby)
 itop_user_groupby_count{profile="Administrator"} 1
 
-# Retention count
+# Retention count (conf)
 itop_backup_retention_count{shadok="gabuzomeu"} 5
+
+# custom class (custom)
+foo{baz="iste"} 42
 

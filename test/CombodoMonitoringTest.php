@@ -2,7 +2,6 @@
 
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 use Combodo\iTop\Monitoring\Model\Constants;
-use \Combodo\iTop\Monitoring\Controller\Controller;
 
 class CombodoMonitoringTest extends ItopDataTestCase {
     private $sUrl;
@@ -71,23 +70,27 @@ class CombodoMonitoringTest extends ItopDataTestCase {
         $sRessourcesDir = __DIR__ . "/ressources";
 
         return [
-            [
+            'all' => [
                 'aMetricConf' => [
                     'collection1' => [
                         'itop_user_count' => array(
-                            'description' => 'Nb of users',
+                            'description' => 'Nb of users (oql_count)',
                             'oql_count' => 'SELECT URP_UserProfile  WHERE URP_UserProfile.userid=1',
-                            'label' => 'toto,titi'
+                            'label' => ['toto' => 'titi']
                         ),
                         'itop_user_groupby_count' => array(
-                            'description' => 'Nb of users',
+                            'description' => 'Nb of users (oql_groupby)',
                             'oql_count' => 'SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid =URP_Profiles_profileid.id WHERE URP_UserProfile.userid=1',
-                            'oql_groupby' => 'profile, URP_Profiles_profileid.friendlyname',
+                            'oql_groupby' => ['profile' => 'URP_Profiles_profileid.friendlyname'],
                         ),
                         'itop_backup_retention_count' => array(
-                            'description' => 'Retention count',
-                            'conf' => 'MyModuleSettings.itop-backup.retention_count',
-                            'label' => 'shadok,gabuzomeu'
+                            'description' => 'Retention count (conf)',
+                            'conf' => ['MyModuleSettings', 'itop-backup', 'retention_count'],
+                            'label' => ['shadok' => 'gabuzomeu']
+                        ),
+                        'itop_custom' => array(
+                            'description' => 'custom class (custom)',
+                            'custom' => ['class' => '\Combodo\iTop\Monitoring\Test\MetricReader\CustomReaders\CustomReaderImpl']
                         ),
                     ],
                 ],

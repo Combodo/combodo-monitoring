@@ -55,8 +55,10 @@ class ControllerTest extends ItopDataTestCase {
         $aMetrics = $this->monitoringController->ReadMetrics($aMetricConf);
         $this->assertEquals(
             $aExpectedMetrics,
-            $aMetrics);
-    }
+            $aMetrics
+        );
+
+        }
 
     public function GetMonitoringConf() {
         return [
@@ -65,7 +67,7 @@ class ControllerTest extends ItopDataTestCase {
                     [
                         'description' => 'access mode',
                         'conf' => [ 'MySettings', 'access_mode'],
-                        'label' => 'labelname1,labelvalue1'
+                        'label' => ['labelname1' => 'labelvalue1']
                     ]
                 ],
                 [["access_mode", 'access mode', "3", ["labelname1" => "labelvalue1"]]]
@@ -142,22 +144,32 @@ class ControllerTest extends ItopDataTestCase {
                 ],
                 [["itop_backup_weekdays_count", 'User authorized quota', "monday, tuesday, wednesday, thursday, friday"]]
             ],
+
+            'conf itop-standard-email-synchro sub array' => [
+                ['itop_standard_email_synchro' =>
+                    [
+                        'description' => 'ticket logs',
+                        'conf' => [ 'MyModuleSettings', 'itop-standard-email-synchro', 'ticket_log', 'Incident']
+                    ]
+                ],
+                [["itop_standard_email_synchro", 'ticket logs', "public_log"]]
+            ],
             'oql_count' => [
                 ['itop_user_count' =>
                     [
                         'description' => 'Nb of users',
                         'oql_count' => 'SELECT User WHERE id=1',
-                        'label' => ' labelname2 , labelvalue2 '
+                        'label' => ['labelname2' => 'labelvalue2', 'name with space at the end     ' =>'foo']
                     ]
                 ],
-                [["itop_user_count", 'Nb of users', "1", ["labelname2" => "labelvalue2"]]]
+                [["itop_user_count", 'Nb of users', "1", ["labelname2" => "labelvalue2", 'name with space at the end     ' =>'foo']]]
             ],
-            'oql_label' => [
+            'oql_groupby with labels' => [
                 ['itop_user_count' =>
                     [
                         'description' => 'Nb of URP_UserProfile par type',
                         'oql_count' => 'SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid = URP_Profiles_profileid.id WHERE URP_UserProfile.userid=1',
-                        'oql_groupby' => 'profile, URP_Profiles_profileid.friendlyname'
+                        'oql_groupby' => ['profile' => 'URP_Profiles_profileid.friendlyname']
                     ]
                 ],
                 [["itop_user_count", 'Nb of URP_UserProfile par type', "1", ["profile" => "Administrator"]]]

@@ -23,6 +23,7 @@ use utils;
 
 class OqlConfReader implements MetricReaderInterface
 {
+    const CONF = 'conf';
 
     private $sMetricName;
     private $aMetric;
@@ -38,37 +39,45 @@ class OqlConfReader implements MetricReaderInterface
      */
     public function GetMetrics(): ?array
     {
-        if (is_array($this->aMetric) && array_key_exists(Constants::CONF, $this->aMetric)) {
-            $aConfParamPath = $this->aMetric[Constants::CONF];
-            if (!empty($aConfParamPath)) {
-                $sType = null;
-                $sModule = null;
-                foreach ($aConfParamPath as $sConfParam){
-                    if (is_null($sType)){
-                        $sType = $sConfParam;
-                        continue;
-                    }
-                    if ($sType==='MySettings'){
-                        $sValue = utils::GetConfig()->Get($sConfParam);
-                        break;
-                    } else if ($sType==='MyModuleSettings'){
-                        if (is_null($sModule)){
-                            $sModule = $sConfParam;
-                            continue;
-                        }
-                        $sValue = utils::GetConfig()->GetModuleSetting($sModule, $sConfParam, null);
-                        break;
-                    }
-                }
-            }
-
-            if (is_null($sValue)) {
-                throw new Exception("Metric $this->sMetricName was not found in configuration found.");
-            }
-
-            return [ new MonitoringMetric($this->sMetricName, "", "" . $sValue) ] ;
+        if (! is_array($this->aMetric) || !array_key_exists(self::CONF, $this->aMetric))
+        {
+            return null;
         }
 
-        return null;
+        $sValue = $this->GetValue();
+
+        $sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
+        $aLabels = $this->aMetric[Constants::METRIC_LABEL] ?? [];
+        return [ new MonitoringMetric($this->sMetricName, $sDescription, $sValue, $aLabels) ] ;
     }
+
+    private function GetValue(?\Config $config = null)
+    {
+        $config = $config ?: \utils::GetConfig();
+
+        $aMetricConf = $this->aMetric[self::CONF] ?: [];
+
+        if (!is_array($aMetricConf)) {
+            throw new Exception(sprintf('Metric %s is not configured with a proper array ("%s" given).', $this->sMetricName, $aMetricConf));
+        }
+
+        if ($aMetricConf[0] == 'MySettings') {
+            $sValue = $config->Get($aMetricConf[1]);
+            $aParamPath = array_slice($aMetricConf, 2);
+            
+        } else {
+            $sValue = $config->GetModuleSetting($aMetricConf[1], $aMetricConf[2], null);
+            $aParamPath = array_slice($aMetricConf, 3);
+        }
+
+        foreach ($aParamPath as $key) {
+            $sValue = $sValue[$key] ?? null;
+        }
+
+        if (is_null($sValue)) {
+            throw new Exception("Metric $this->sMetricName was not found in configuration found.");
+        }
+
+        return $sValue;
+}
 }
