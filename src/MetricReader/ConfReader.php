@@ -18,10 +18,8 @@ namespace Combodo\iTop\Monitoring\MetricReader;
 
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
-use PHPUnit\Runner\Exception;
-use utils;
 
-class OqlConfReader implements MetricReaderInterface
+class ConfReader implements MetricReaderInterface
 {
     const CONF = 'conf';
 
@@ -58,7 +56,7 @@ class OqlConfReader implements MetricReaderInterface
         $aMetricConf = $this->aMetric[self::CONF] ?: [];
 
         if (!is_array($aMetricConf)) {
-            throw new Exception(sprintf('Metric %s is not configured with a proper array ("%s" given).', $this->sMetricName, $aMetricConf));
+            throw new \Exception(sprintf('Metric %s is not configured with a proper array ("%s" given).', $this->sMetricName, $aMetricConf));
         }
 
         if ($aMetricConf[0] == 'MySettings') {
@@ -75,7 +73,7 @@ class OqlConfReader implements MetricReaderInterface
         }
 
         if (is_null($sValue)) {
-            throw new Exception("Metric $this->sMetricName was not found in configuration found.");
+            throw new \Exception("Metric $this->sMetricName was not found in configuration found.");
         }
 
         return $sValue;

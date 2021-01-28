@@ -19,7 +19,7 @@ namespace Combodo\iTop\Monitoring\MetricReader;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
-class OqlCountReader implements MetricReaderInterface
+class OqlSelectReader implements MetricReaderInterface
 {
     private $sMetricName;
     private $aMetric;
@@ -35,13 +35,28 @@ class OqlCountReader implements MetricReaderInterface
      */
     public function GetMetrics(): ?array
     {
-        $oSet = $this->GetObjectSet();
-
         $sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
         $aLabels = $this->aMetric[Constants::METRIC_LABEL] ?? [];
+        $aColumns = $this->aMetric[Constants::OQL_SELECT][Constants::COLUMNS] ?? [];
 
-        return [ new MonitoringMetric($this->sMetricName, $sDescription,  $oSet->Count(), $aLabels)] ;
+        if (empty($aColumns)) {
+            throw new \Exception("Metric $this->sMetricName Must provide at least one column to be read.");
+        }
 
+        $oSet = $this->GetObjectSet();
+        $aMetrics = [];
+        while ($oObject = $oSet->Fetch()) {
+            foreach ($aColumns as $sColumn) {
+                $aMetrics[] = new MonitoringMetric(
+                    $this->sMetricName,
+                    $sDescription,
+                    $oObject->Get($sColumn),
+                    array_merge($aLabels, ['column' => $sColumn])
+                );
+            }
+        }
+
+        return $aMetrics;
     }
 
     /**
@@ -52,15 +67,26 @@ class OqlCountReader implements MetricReaderInterface
      */
     private function GetObjectSet(): \DBObjectSet
     {
-        $oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_COUNT][Constants::SELECT]);
+        $oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_SELECT][Constants::SELECT]);
 
-        $aOrderBy = $this->aMetric[Constants::OQL_COUNT][Constants::ORDERBY] ?? [];
-        $iLimitCount = $this->aMetric[Constants::OQL_COUNT][Constants::LIMIT_COUNT] ?? 0;
-        $iLimitStart = $this->aMetric[Constants::OQL_COUNT][Constants::LIMIT_START] ?? 0;
+        $aOrderBy = $this->aMetric[Constants::OQL_SELECT][Constants::ORDERBY] ?? [];
+        $iLimitCount = $this->aMetric[Constants::OQL_SELECT][Constants::LIMIT_COUNT] ?? 0;
+        $iLimitStart = $this->aMetric[Constants::OQL_SELECT][Constants::LIMIT_START] ?? 0;
+        $aColumns = $this->aMetric[Constants::OQL_SELECT][Constants::COLUMNS] ?? [];
 
         $oSet = new \DBObjectSet($oSearch);
         $oSet->SetOrderBy($aOrderBy);
         $oSet->SetLimit($iLimitCount, $iLimitStart);
+
+        $sAlias = $oSearch->GetClassAlias();
+        $aOptimizeColumnsLoad = [];
+        foreach ($aColumns as $sAttribute) {
+            $aOptimizeColumnsLoad[$sAlias][] = $sAttribute;
+        }
+
+        if (!empty($aOptimizeColumnsLoad)) {
+            $oSet->OptimizeColumnLoad($aOptimizeColumnsLoad);
+        }
 
         return $oSet;
     }

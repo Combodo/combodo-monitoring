@@ -35,9 +35,8 @@ class OqlGroupByReader implements MetricReaderInterface
      */
     public function GetMetrics(): ?array
     {
-
         $sSQL = $this->MakeSql();
-        return $this->FetchGroupByMetrics($this->sMetricName, $sSQL);
+        return $this->FetchGroupByMetrics($sSQL);
 
     }
     /**
@@ -46,15 +45,18 @@ class OqlGroupByReader implements MetricReaderInterface
      */
     private function MakeSql(): string
     {
-        $oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_COUNT]);
-        $aGroupBy = $this->aMetric[Constants::OQL_GROUPBY];
+        $oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_GROUPBY][Constants::SELECT]);
+        $aGroupBy = $this->aMetric[Constants::OQL_GROUPBY][Constants::GROUPBY];
+        $aOrderBy = $this->aMetric[Constants::OQL_GROUPBY][Constants::ORDERBY] ?? [];
+        $iLimitCount = $this->aMetric[Constants::OQL_GROUPBY][Constants::LIMIT_COUNT] ?? 0;
+        $iLimitStart = $this->aMetric[Constants::OQL_GROUPBY][Constants::LIMIT_START] ?? 0;
 
         $aGroupByExp = [];
         foreach ($aGroupBy as $sAlias => $sOQLField) {
             $aGroupByExp[$sAlias] = \Expression::FromOQL($sOQLField);
         }
 
-        $sSQL = $oSearch->MakeGroupByQuery([], $aGroupByExp);
+        $sSQL = $oSearch->MakeGroupByQuery([], $aGroupByExp, false, [], $aOrderBy, $iLimitCount, $iLimitStart);
 
         return $sSQL;
     }
@@ -65,9 +67,9 @@ class OqlGroupByReader implements MetricReaderInterface
      * @throws \MySQLException
      * @throws \MySQLHasGoneAwayException
      */
-    private function FetchGroupByMetrics($sMetricName, $sSQL)
+    private function FetchGroupByMetrics($sSQL)
     {
-        $aGroupBy = $this->aMetric[Constants::OQL_GROUPBY];
+        $aGroupBy = $this->aMetric[Constants::OQL_GROUPBY][Constants::GROUPBY];
 
         $resQuery = \CMDBSource::Query($sSQL);
         if (!$resQuery)  {
@@ -75,7 +77,7 @@ class OqlGroupByReader implements MetricReaderInterface
         }
 
         $sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
-        $aStaticLabels = $this->aMetric[Constants::METRIC_LABEL] ?? [];
+        $aStaticLabels = $this->aMetric[Constants::OQL_GROUPBY][Constants::METRIC_LABEL] ?? [];
 
         $aMonitoringMetrics = [];
         while ($aRes = \CMDBSource::FetchArray($resQuery)) {
@@ -86,7 +88,7 @@ class OqlGroupByReader implements MetricReaderInterface
                 $aLabels[$sLabelName] = $aRes[$sLabelName];
             }
 
-            $aMonitoringMetrics[] = new MonitoringMetric($sMetricName, $sDescription, $sValue, $aLabels);
+            $aMonitoringMetrics[] = new MonitoringMetric($this->sMetricName, $sDescription, $sValue, $aLabels);
 
             unset($aRes);
         }

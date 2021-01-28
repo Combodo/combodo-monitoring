@@ -10,7 +10,7 @@ use Combodo\iTop\Monitoring\MetricReader\MetricReaderFactory;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Application\TwigBase\Controller\Controller as BaseController;
-use PHPUnit\Runner\Exception;
+use Exception;
 use utils;
 
 class Controller extends BaseController {
@@ -92,7 +92,7 @@ class Controller extends BaseController {
             foreach ($aMetricParams as $sMetricName => $aMetric) {
 
                 if (!isset($aMetric[Constants::METRIC_DESCRIPTION])) {
-                    throw new Exception("Metric $sMetricName has no sDescription. Please provide it.");
+                    throw new \Exception("Metric $sMetricName has no description. Please provide it.");
                 }
 
                 $oReader = $oMetricReaderFactory->GetReader($sMetricName, $aMetric);

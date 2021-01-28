@@ -18,12 +18,13 @@ namespace Combodo\iTop\Monitoring\Test\MetricReader;
 use Combodo\iTop\Monitoring\MetricReader\CustomReader;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 use Combodo\iTop\Monitoring\Test\MetricReader\CustomReaders\CustomReaderImpl;
+use Combodo\iTop\Test\UnitTest\ItopTestCase;
 
-class CustomReaderTest extends \PHPUnit\Framework\TestCase
+class CustomReaderTest extends ItopTestCase
 {
     public function setUp()
     {
-        require_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
+        @include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         parent::setUp();
 
         require_once(APPROOT . 'env-production/combodo-monitoring/vendor/autoload.php');

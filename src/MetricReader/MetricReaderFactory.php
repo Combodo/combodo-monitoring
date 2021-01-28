@@ -28,6 +28,9 @@ class MetricReaderFactory
         }
 
         switch (true) {
+            case array_key_exists(Constants::OQL_SELECT, $aMetric):
+                $oReader = new OqlSelectReader($sMetricName, $aMetric);
+                break;
             case array_key_exists(Constants::CUSTOM, $aMetric):
                 $oReader = new CustomReader($sMetricName, $aMetric);
                 break;
@@ -37,9 +40,11 @@ class MetricReaderFactory
             case array_key_exists(Constants::OQL_COUNT, $aMetric):
                 $oReader = new OqlCountReader($sMetricName, $aMetric);
                 break;
-            default:
-                $oReader = new OqlConfReader($sMetricName, $aMetric);
+            case array_key_exists(Constants::CONF, $aMetric):
+                $oReader = new ConfReader($sMetricName, $aMetric);
                 break;
+            default:
+                throw new \Exception(sprintf('reader not found for metric %s', $sMetricName));
 
         }
 

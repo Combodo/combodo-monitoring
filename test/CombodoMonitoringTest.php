@@ -73,15 +73,26 @@ class CombodoMonitoringTest extends ItopDataTestCase {
             'all' => [
                 'aMetricConf' => [
                     'collection1' => [
+                        'itop_user_select' => array(
+                            'description' => 'Name of profile (oql_select)',
+                            'oql_select' => [
+                                'select' => 'SELECT URP_UserProfile',
+                                'columns' => ['profile']
+                            ],
+                        ),
                         'itop_user_count' => array(
                             'description' => 'Nb of users (oql_count)',
-                            'oql_count' => 'SELECT URP_UserProfile  WHERE URP_UserProfile.userid=1',
+                            'oql_count' => [
+                                'select' => 'SELECT URP_UserProfile  WHERE URP_UserProfile.userid=1',
+                            ],
                             'label' => ['toto' => 'titi']
                         ),
                         'itop_user_groupby_count' => array(
                             'description' => 'Nb of users (oql_groupby)',
-                            'oql_count' => 'SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid =URP_Profiles_profileid.id WHERE URP_UserProfile.userid=1',
-                            'oql_groupby' => ['profile' => 'URP_Profiles_profileid.friendlyname'],
+                            'oql_groupby' => [
+                                'select' => 'SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid =URP_Profiles_profileid.id WHERE URP_UserProfile.userid=1',
+                                'groupby' => ['profile' => 'URP_Profiles_profileid.friendlyname'],
+                            ],
                         ),
                         'itop_backup_retention_count' => array(
                             'description' => 'Retention count (conf)',
