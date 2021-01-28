@@ -1,0 +1,8 @@
+<phpunit bootstrap="../unittestautoload.php" backupGlobals="false" verbose="true">
+  <testsuites>
+    <testsuite name="testsU">
+      <file>./CombodoMonitoringControllerTest.php</file>
+      <file>./CombodoMonitoringTest.php.php</file>
+    </testsuite>
+  </testsuites>
+</phpunit>
