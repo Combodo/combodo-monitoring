@@ -60,29 +60,7 @@ class OqlGroupByReaderTest extends ItopDataTestCase
                 ],
                 'sExpectedSql' => "SELECT `first_nameAlias` AS `first_name`, COUNT(DISTINCT COALESCE(`User`.`id`, 0)) AS _itop_count_ FROM `priv_user` AS `User` WHERE 1 GROUP BY `first_nameAlias`  ",
             ],
-            'oql_order group by' => [
-                'aConf' => [
-                    'description' => 'ordered users',
-                    'oql_groupby' => [
-                        'select' => 'SELECT User',
-                        'groupby' => ['first_name' => 'first_nameAlias'],
-                        'orderby' => ['first_name' => true, '_itop_count_' => false],
-                    ],
-                ],
-                'sExpectedSql' => "SELECT `first_nameAlias` AS `first_name`, COUNT(DISTINCT COALESCE(`User`.`id`, 0)) AS _itop_count_ FROM `priv_user` AS `User` WHERE 1 GROUP BY `first_nameAlias` ORDER BY first_name ASC, _itop_count_ DESC ",
-            ],
-            'oql_limit group by' => [
-                'aConf' => [
-                    'description' => 'ordered users',
-                    'oql_groupby' => [
-                        'select' => 'SELECT User',
-                        'groupby' => ['profile' => 'URP_Profiles_profileid.friendlyname'],
-                        'limit_count' => '42',
-                        'limit_start' => '24',
-                    ],
-                ],
-                'sExpectedSql' => "SELECT `URP_Profiles_profileid`.`friendlyname` AS `profile`, COUNT(DISTINCT COALESCE(`User`.`id`, 0)) AS _itop_count_ FROM `priv_user` AS `User` WHERE 1 GROUP BY `URP_Profiles_profileid`.`friendlyname`  LIMIT 24, 42",
-            ],
+
         ];
     }
 }

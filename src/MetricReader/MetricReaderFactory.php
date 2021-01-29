@@ -27,26 +27,28 @@ class MetricReaderFactory
             return null;
         }
 
-        switch (true) {
-            case array_key_exists(Constants::OQL_SELECT, $aMetric):
-                $oReader = new OqlSelectReader($sMetricName, $aMetric);
-                break;
-            case array_key_exists(Constants::CUSTOM, $aMetric):
-                $oReader = new CustomReader($sMetricName, $aMetric);
-                break;
-            case array_key_exists(Constants::OQL_GROUPBY, $aMetric):
-                $oReader = new OqlGroupByReader($sMetricName, $aMetric);
-                break;
-            case array_key_exists(Constants::OQL_COUNT, $aMetric):
-                $oReader = new OqlCountReader($sMetricName, $aMetric);
-                break;
-            case array_key_exists(Constants::CONF, $aMetric):
-                $oReader = new ConfReader($sMetricName, $aMetric);
-                break;
-            default:
-                throw new \Exception(sprintf('reader not found for metric %s', $sMetricName));
+        $aKeyToClass = [
+            Constants::OQL_SELECT => OqlSelectReader::class,
+            Constants::CUSTOM => CustomReader::class,
+            Constants::OQL_GROUPBY => OqlGroupByReader::class,
+            Constants::OQL_COUNT => OqlCountReader::class,
+            Constants::CONF => ConfReader::class,
+        ];
 
+        $intersec = array_intersect_key($aKeyToClass, $aMetric);
+        $count = count($intersec);
+
+        if ($count == 0) {
+            throw new \Exception(sprintf('reader not found for metric %s', $sMetricName));
         }
+
+        if ($count == 2) {
+            $aKeys = implode(', ', array_keys($intersec));
+            throw new \Exception(sprintf('only one metric at a time is authorized (found: %s) for metric %s', $aKeys, $sMetricName));
+        }
+
+        $className = reset($intersec);
+        $oReader = new $className($sMetricName, $aMetric);
 
         return $oReader;
     }
