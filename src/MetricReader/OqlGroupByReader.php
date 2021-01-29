@@ -47,16 +47,13 @@ class OqlGroupByReader implements MetricReaderInterface
     {
         $oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_GROUPBY][Constants::SELECT]);
         $aGroupBy = $this->aMetric[Constants::OQL_GROUPBY][Constants::GROUPBY];
-        $aOrderBy = $this->aMetric[Constants::OQL_GROUPBY][Constants::ORDERBY] ?? [];
-        $iLimitCount = $this->aMetric[Constants::OQL_GROUPBY][Constants::LIMIT_COUNT] ?? 0;
-        $iLimitStart = $this->aMetric[Constants::OQL_GROUPBY][Constants::LIMIT_START] ?? 0;
 
         $aGroupByExp = [];
         foreach ($aGroupBy as $sAlias => $sOQLField) {
             $aGroupByExp[$sAlias] = \Expression::FromOQL($sOQLField);
         }
 
-        $sSQL = $oSearch->MakeGroupByQuery([], $aGroupByExp, false, [], $aOrderBy, $iLimitCount, $iLimitStart);
+        $sSQL = $oSearch->MakeGroupByQuery([], $aGroupByExp);
 
         return $sSQL;
     }

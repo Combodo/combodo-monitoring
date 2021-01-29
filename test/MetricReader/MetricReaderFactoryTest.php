@@ -36,10 +36,10 @@ class MetricReaderFactoryTest extends ItopTestCase
     /**
      * @dataProvider GetReaderProvider
      */
-    public function testGetReader($aMetric, $sExpectedClass)
+    public function testGetReader($aMetric, $sExpectedClass, $sExpectedException)
     {
-        if (is_null($sExpectedClass)) {
-            $this->expectExceptionMessageRegExp('/reader not found for metric/');
+        if (! is_null($sExpectedException)) {
+            $this->expectExceptionMessageRegExp($sExpectedException);
         }
         $oMetricReaderFactory = new MetricReaderFactory();
         $result = $oMetricReaderFactory->GetReader('foo', $aMetric);
@@ -54,35 +54,49 @@ class MetricReaderFactoryTest extends ItopTestCase
                     'oql_count' => [ ],
                 ],
                 'sExpectedClass' => OqlCountReader::class,
+                'sExpectedException' => null,
             ],
             'select' => [
                 'aMetric' => [
                     'oql_select' => [ ],
                 ],
                 'sExpectedClass' => OqlSelectReader::class,
+                'sExpectedException' => null,
             ],
             'group by' => [
                 'aMetric' => [
                     'oql_groupby' => [ ],
                 ],
                 'sExpectedClass' => OqlGroupByReader::class,
+                'sExpectedException' => null,
             ],
             'custom' => [
                 'aMetric' => [
                     'custom' => [ ],
                 ],
                 'sExpectedClass' => CustomReader::class,
+                'sExpectedException' => null,
             ],
             'conf' => [
                 'aMetric' => [
                     'conf' => [ ],
                 ],
                 'sExpectedClass' => ConfReader::class,
+                'sExpectedException' => null,
             ],
             'wrong parameter' => [
                 'aMetric' => [
                 ],
                 'sExpectedClass' => null,
+                'sExpectedException' => '/reader not found for metric/',
+            ],
+            'refuse two metrics' => [
+                'aMetric' => [
+                    'conf' => [ ],
+                    'oql_select' => [ ],
+                ],
+                'sExpectedClass' => null,
+                'sExpectedException' => '/only one metric at a time is authorized/',
             ],
         ];
     }

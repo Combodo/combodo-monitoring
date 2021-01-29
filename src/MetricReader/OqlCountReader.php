@@ -54,13 +54,7 @@ class OqlCountReader implements MetricReaderInterface
     {
         $oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_COUNT][Constants::SELECT]);
 
-        $aOrderBy = $this->aMetric[Constants::OQL_COUNT][Constants::ORDERBY] ?? [];
-        $iLimitCount = $this->aMetric[Constants::OQL_COUNT][Constants::LIMIT_COUNT] ?? 0;
-        $iLimitStart = $this->aMetric[Constants::OQL_COUNT][Constants::LIMIT_START] ?? 0;
-
         $oSet = new \DBObjectSet($oSearch);
-        $oSet->SetOrderBy($aOrderBy);
-        $oSet->SetLimit($iLimitCount, $iLimitStart);
 
         return $oSet;
     }
