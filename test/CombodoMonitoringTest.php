@@ -131,7 +131,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
     }
 
     public function NetworkProvider(){
-        $sLocalIp = $_SERVER['REMOTE_ADDR'];
+        $sLocalIp = getHostByName(getHostName());
         return [
             'wrong conf' => [ 'aNetworkRegexps' => '', 'iHttpCode' => 200 ],
             'empty' => [ 'aNetworkRegexps' => [], 'iHttpCode' => 200 ],
