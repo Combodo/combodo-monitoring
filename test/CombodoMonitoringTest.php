@@ -1,7 +1,9 @@
 <?php
 
+use Combodo\iTop\Monitoring\Controller\Controller;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
-use \Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringController;
+use Combodo\iTop\Monitoring\Model\Constants;
+use Symfony\Component\HttpFoundation\IpUtils;
 
 class CombodoMonitoringTest extends ItopDataTestCase {
     private $sUrl;
@@ -10,7 +12,9 @@ class CombodoMonitoringTest extends ItopDataTestCase {
 
     public function setUp()
     {
+        @include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         @include_once '/home/combodo/workspace/iTop/approot.inc.php';
+
         parent::setUp();
 
         require_once(APPROOT . 'core/config.class.inc.php');
@@ -54,13 +58,13 @@ class CombodoMonitoringTest extends ItopDataTestCase {
      */
     public function testMonitoringPage($aMetricConf, $sExpectedContentPath, $iExpectedHttpCode){
         @chmod($this->sConfigFile, 0770);
-        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'access_token', 'toto123');
-        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'authorized_network', []);
-        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, CombodoMonitoringController::METRICS, $aMetricConf);
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, $aMetricConf);
         \utils::GetConfig()->WriteToFile();
         @chmod($this->sConfigFile, 0444); // Read-only
 
-        $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123");
+        $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123&collection=collection1");
 
         $this->assertEquals($iExpectedHttpCode, $aResp[1], $aResp[0]);
         $this->assertEquals(file_get_contents($sExpectedContentPath), $aResp[0]);
@@ -70,23 +74,40 @@ class CombodoMonitoringTest extends ItopDataTestCase {
         $sRessourcesDir = __DIR__ . "/ressources";
 
         return [
-            [
+            'all' => [
                 'aMetricConf' => [
-                    'itop_user_count' => array(
-                        'description' => 'Nb of users',
-                        'oql_count' => 'SELECT URP_UserProfile',
-                        'label' => 'toto,titi'
-                    ),
-                    'itop_user_groupby_count' => array(
-                        'description' => 'Nb of users',
-                        'oql_count' => 'SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid =URP_Profiles_profileid.id',
-                        'oql_groupby' => 'profile, URP_Profiles_profileid.friendlyname',
-                    ),
-                    'itop_backup_retention_count' => array(
-                        'description' => 'Retention count',
-                        'conf' => 'MyModuleSettings.itop-backup.retention_count',
-                        'label' => 'shadok,gabuzomeu'
-                    )
+                    'collection1' => [
+                        'itop_user_select' => array(
+                            'description' => 'Name of profile (oql_select)',
+                            'oql_select' => [
+                                'select' => 'SELECT URP_UserProfile',
+                                'columns' => ['profile']
+                            ],
+                        ),
+                        'itop_user_count' => array(
+                            'description' => 'Nb of users (oql_count)',
+                            'oql_count' => [
+                                'select' => 'SELECT URP_UserProfile  WHERE URP_UserProfile.userid=1',
+                            ],
+                            'label' => ['toto' => 'titi']
+                        ),
+                        'itop_user_groupby_count' => array(
+                            'description' => 'Nb of users (oql_groupby)',
+                            'oql_groupby' => [
+                                'select' => 'SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid =URP_Profiles_profileid.id WHERE URP_UserProfile.userid=1',
+                                'groupby' => ['profile' => 'URP_Profiles_profileid.friendlyname'],
+                            ],
+                        ),
+                        'itop_backup_retention_count' => array(
+                            'description' => 'Retention count (conf)',
+                            'conf' => ['MyModuleSettings', 'itop-backup', 'retention_count'],
+                            'label' => ['shadok' => 'gabuzomeu']
+                        ),
+                        'itop_custom' => array(
+                            'description' => 'custom class (custom)',
+                            'custom' => ['class' => '\Combodo\iTop\Monitoring\Test\MetricReader\CustomReaders\CustomReaderImpl']
+                        ),
+                    ],
                 ],
                 'sExpectedContentPath' => "$sRessourcesDir/prometheus_content.txt",
                 'iExpectedHttpCode' => 200
@@ -96,15 +117,15 @@ class CombodoMonitoringTest extends ItopDataTestCase {
 
     public function testTokenConf(){
         @chmod($this->sConfigFile, 0770);
-        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'access_token', 'toto123');
-        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'authorized_network', []);
-        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, CombodoMonitoringController::METRICS, []);
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, ['collection1' => []]);
         \utils::GetConfig()->WriteToFile();
         @chmod($this->sConfigFile, 0444); // Read-only
 
-        $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123");
+        $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123&collection=collection1");
         $this->assertEquals(200, $aResp[1], "wrong http error code. $aResp[1] instead of 200");
-        $aResp = $this->CallRestApi("$this->sUrl&access_token=toto124");
+        $aResp = $this->CallRestApi("$this->sUrl&access_token=toto124&collection=collection1");
         $this->assertEquals(500, $aResp[1], "wrong http error code. $aResp[1] instead of 500");
         $this->assertContains('Exception : Invalid token', $aResp[0]);
     }
@@ -116,13 +137,13 @@ class CombodoMonitoringTest extends ItopDataTestCase {
      */
     public function testAuthorizedNetwork($aNetworkRegexps, $iHttpCode){
         @chmod($this->sConfigFile, 0770);
-        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'access_token', 'toto123');
-        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, 'authorized_network', $aNetworkRegexps);
-        \utils::GetConfig()->SetModuleSetting(CombodoMonitoringController::EXEC_MODULE, CombodoMonitoringController::METRICS, []);
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', $aNetworkRegexps);
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, ['collection1' => []]);
         \utils::GetConfig()->WriteToFile();
         @chmod($this->sConfigFile, 0444); // Read-only
 
-        $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123");
+        $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123&collection=collection1");
         $sErrorCode = $aResp[1];
         $this->assertEquals($iHttpCode, $sErrorCode, "wrong http error code. $sErrorCode instead of $iHttpCode. " . $aResp[0]);
         if (500 == $sErrorCode){
@@ -130,16 +151,41 @@ class CombodoMonitoringTest extends ItopDataTestCase {
         }
     }
 
+   /* public function testToto(){
+        $this->assertTrue(IpUtils::checkIp("127.0.0.1", ["127.0.0.1/24"]));
+        $this->assertTrue(IpUtils::checkIp("127.0.1.1", ["127.0.1.2/8"]));
+        $this->assertTrue(IpUtils::checkIp("127.0.1.1", ["127.0.1.2/32"]));
+    }*/
+
     public function NetworkProvider(){
         $sLocalIp = getHostByName(getHostName());
+        $aExploded = explode(".",  $sLocalIp);
+        $sSubnet = sprintf("%s.%s.0.1", $aExploded[0], $aExploded[1]);
+
+        //$sLocalIp = gethostbyname(parse_url($this->sUrl, PHP_URL_HOST));
         return [
             'wrong conf' => [ 'aNetworkRegexps' => '', 'iHttpCode' => 200 ],
             'empty' => [ 'aNetworkRegexps' => [], 'iHttpCode' => 200 ],
-            "ok for IP $sLocalIp" => [ 'aNetworkRegexps' => [$sLocalIp], 'iHttpCode' => 200 ],
-            "ok for $sLocalIp/24" => [ 'aNetworkRegexps' => [$sLocalIp . '/24'], 'iHttpCode' => 200 ],
-            "ok with further authorized networks + $sLocalIp" => [ 'aNetworkRegexps' => ['20.0.0.0/24', $sLocalIp], 'iHttpCode' => 200 ],
+            //"ok for IP $sLocalIp" => [ 'aNetworkRegexps' => [$sLocalIp], 'iHttpCode' => 200 ],
+            "ok for $sSubnet/24" => [ 'aNetworkRegexps' => [$sSubnet . '/24'], 'iHttpCode' => 200 ],
+            "ok with further authorized networks + $sSubnet/24" => [ 'aNetworkRegexps' => ['20.0.0.0/24', "$sSubnet/24"], 'iHttpCode' => 200 ],
             'wrong network' => [ 'aNetworkRegexps' => ['20.0.0.0/24'], 'iHttpCode' => 500 ],
             'wrong IP' => [ 'aNetworkRegexps' => ['20.0.0.0'], 'iHttpCode' => 500 ],
         ];
+    }
+
+    public function testCollection(){
+        @chmod($this->sConfigFile, 0770);
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, ['collection1' => []]);
+        \utils::GetConfig()->WriteToFile();
+        @chmod($this->sConfigFile, 0444); // Read-only
+
+        $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123&collection=collection1");
+        $this->assertEquals(200, $aResp[1], "wrong http error code. $aResp[1] instead of 200");
+        $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123");
+        $this->assertEquals(500, $aResp[1], "Missing collection in GET params. $aResp[1] instead of 500");
+        $this->assertContains('Exception : Missing mandatory GET parameter collection', $aResp[0]);
     }
 }

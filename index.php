@@ -6,9 +6,9 @@
 
 require_once(APPROOT.'application/startup.inc.php');
 
-use Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringController;
+use Combodo\iTop\Monitoring\Controller\Controller;
 
-$oCombodoMonitoringController = new CombodoMonitoringController(MODULESROOT.'combodo-monitoring/src/view', 'combodo-monitoring');
+$oCombodoMonitoringController = new Controller(MODULESROOT.'combodo-monitoring/src/view', 'combodo-monitoring');
 $oCombodoMonitoringController->AllowOnlyAdmin();
 $oCombodoMonitoringController->SetDefaultOperation('ExposePrometheusMetrics');
 $oCombodoMonitoringController->SetAccessTokenConfigParamId('access_token');
