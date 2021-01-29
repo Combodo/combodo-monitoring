@@ -55,7 +55,7 @@ class CombodoMonitoringControllerTest extends ItopDataTestCase {
                 [["access_mode", 'access mode', "3", ["labelname1" => "labelvalue1"]]]
             ],
             'conf MySettings not found' => [
-                ['access_message' =>
+                ['access_message1' =>
                     [
                         'description' => 'access message',
                         'conf' => [ 'MySettings', 'access_message2']
@@ -73,7 +73,7 @@ class CombodoMonitoringControllerTest extends ItopDataTestCase {
                 [["retention_count", 'retention count', "5"]]
             ],
             'conf MyModuleSettings not found' => [
-                ['access_message' =>
+                ['access_message2' =>
                     [
                         'description' => 'retention count',
                         'conf' => [ 'MyModuleSettings', 'itop-backup2', 'retention_count']
@@ -82,7 +82,7 @@ class CombodoMonitoringControllerTest extends ItopDataTestCase {
                 []
             ],
             'conf MyModuleSettings not found2' => [
-                ['access_message' =>
+                ['access_message3' =>
                     [
                         'description' => 'retention count',
                         'conf' => [ 'MyModuleSettings', 'itop-backup', 'retention_count2']
@@ -147,7 +147,7 @@ class CombodoMonitoringControllerTest extends ItopDataTestCase {
                 [["itop_user_count", 'Nb of URP_UserProfile par type', "1", ["profile" => "Administrator"]]]
             ],
             'no_description_in_oql_metric' => [
-                ['itop_user_count' =>
+                ['itop_user_nodescription_count' =>
                     [
                         'oql_count' => 'SELECT User'
                     ]
