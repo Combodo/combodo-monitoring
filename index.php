@@ -11,6 +11,6 @@ use Combodo\iTop\Integrity\Monitoring\Controller\CombodoMonitoringController;
 $oCombodoMonitoringController = new CombodoMonitoringController(MODULESROOT.'combodo-monitoring/src/view', 'combodo-monitoring');
 $oCombodoMonitoringController->AllowOnlyAdmin();
 $oCombodoMonitoringController->SetDefaultOperation('ExposePrometheusMetrics');
-$oCombodoMonitoringController->setAccessTokenConfigParamId('access_token');
-$oCombodoMonitoringController->setAccessAuthorizedNetworkConfigParamId('authorized_network');
+$oCombodoMonitoringController->SetAccessTokenConfigParamId('access_token');
+$oCombodoMonitoringController->SetAccessAuthorizedNetworkConfigParamId('authorized_network');
 $oCombodoMonitoringController->HandleOperation();
