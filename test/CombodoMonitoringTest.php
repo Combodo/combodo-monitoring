@@ -135,9 +135,9 @@ class CombodoMonitoringTest extends ItopDataTestCase {
         return [
             'wrong conf' => [ 'aNetworkRegexps' => '', 'iHttpCode' => 200 ],
             'empty' => [ 'aNetworkRegexps' => [], 'iHttpCode' => 200 ],
-            'ok 127.0.0.1' => [ 'aNetworkRegexps' => [$sLocalIp], 'iHttpCode' => 200 ],
-            'ok 127.X.X.X' => [ 'aNetworkRegexps' => [$sLocalIp . '/24'], 'iHttpCode' => 200 ],
-            'ok with further authorized networks' => [ 'aNetworkRegexps' => ['20.0.0.0/24', $sLocalIp], 'iHttpCode' => 200 ],
+            "ok for IP $sLocalIp" => [ 'aNetworkRegexps' => [$sLocalIp], 'iHttpCode' => 200 ],
+            "ok for $sLocalIp/24" => [ 'aNetworkRegexps' => [$sLocalIp . '/24'], 'iHttpCode' => 200 ],
+            "ok with further authorized networks + $sLocalIp" => [ 'aNetworkRegexps' => ['20.0.0.0/24', $sLocalIp], 'iHttpCode' => 200 ],
             'wrong network' => [ 'aNetworkRegexps' => ['20.0.0.0/24'], 'iHttpCode' => 500 ],
             'wrong IP' => [ 'aNetworkRegexps' => ['20.0.0.0'], 'iHttpCode' => 500 ],
         ];
