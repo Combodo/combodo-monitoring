@@ -8,9 +8,9 @@ require_once(APPROOT.'application/startup.inc.php');
 
 use Combodo\iTop\Monitoring\Controller\Controller;
 
-$oController = new Controller(MODULESROOT.'combodo-monitoring/src/view', 'combodo-monitoring');
-$oController->AllowOnlyAdmin();
-$oController->SetDefaultOperation('ExposePrometheusMetrics');
-$oController->setAccessTokenConfigParamId('access_token');
-$oController->setAccessAuthorizedNetworkConfigParamId('authorized_network');
-$oController->HandleOperation();
+$oCombodoMonitoringController = new Controller(MODULESROOT.'combodo-monitoring/src/view', 'combodo-monitoring');
+$oCombodoMonitoringController->AllowOnlyAdmin();
+$oCombodoMonitoringController->SetDefaultOperation('ExposePrometheusMetrics');
+$oCombodoMonitoringController->SetAccessTokenConfigParamId('access_token');
+$oCombodoMonitoringController->SetAccessAuthorizedNetworkConfigParamId('authorized_network');
+$oCombodoMonitoringController->HandleOperation();

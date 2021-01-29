@@ -1,5 +1,6 @@
 <?php
 
+use Combodo\iTop\Monitoring\Controller\Controller;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 use Combodo\iTop\Monitoring\Model\Constants;
 
@@ -10,7 +11,9 @@ class CombodoMonitoringTest extends ItopDataTestCase {
 
     public function setUp()
     {
-        require_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
+        @include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
+        @include_once '/home/combodo/workspace/iTop/approot.inc.php';
+
         parent::setUp();
 
         require_once(APPROOT . 'core/config.class.inc.php');
@@ -55,7 +58,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
     public function testMonitoringPage($aMetricConf, $sExpectedContentPath, $iExpectedHttpCode){
         @chmod($this->sConfigFile, 0770);
         \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
-        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', '');
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
         \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, $aMetricConf);
         \utils::GetConfig()->WriteToFile();
         @chmod($this->sConfigFile, 0444); // Read-only
@@ -114,7 +117,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
     public function testTokenConf(){
         @chmod($this->sConfigFile, 0770);
         \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
-        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', '');
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
         \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, ['collection1' => []]);
         \utils::GetConfig()->WriteToFile();
         @chmod($this->sConfigFile, 0444); // Read-only
@@ -125,16 +128,15 @@ class CombodoMonitoringTest extends ItopDataTestCase {
         $this->assertEquals(500, $aResp[1], "wrong http error code. $aResp[1] instead of 500");
         $this->assertContains('Exception : Invalid token', $aResp[0]);
     }
-
     /**
      * @dataProvider NetworkProvider
      * @throws ConfigException
      * @throws CoreException
      */
-    public function testAuthorizedNetwork($sNetworkRegexp, $iHttpCode){
+    public function testAuthorizedNetwork($aNetworkRegexps, $iHttpCode){
         @chmod($this->sConfigFile, 0770);
         \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
-        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', $sNetworkRegexp);
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', $aNetworkRegexps);
         \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, ['collection1' => []]);
         \utils::GetConfig()->WriteToFile();
         @chmod($this->sConfigFile, 0444); // Read-only
@@ -147,18 +149,24 @@ class CombodoMonitoringTest extends ItopDataTestCase {
         }
     }
 
-
     public function NetworkProvider(){
+        $sLocalIp = getHostByName(getHostName());
+        //$sLocalIp = gethostbyname(parse_url($this->sUrl, PHP_URL_HOST));
         return [
-            'network ok' => [ 'sNetworkRegexp' => '127\\.0\\.0\\.\\d{1,3}', 'iHttpCode' => 200 ],
-            'wrong network' => [ 'sNetworkRegexp' => '20\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}', 'iHttpCode' => 500 ],
+            'wrong conf' => [ 'aNetworkRegexps' => '', 'iHttpCode' => 200 ],
+            'empty' => [ 'aNetworkRegexps' => [], 'iHttpCode' => 200 ],
+            "ok for IP $sLocalIp" => [ 'aNetworkRegexps' => [$sLocalIp], 'iHttpCode' => 200 ],
+            "ok for $sLocalIp/24" => [ 'aNetworkRegexps' => [$sLocalIp . '/24'], 'iHttpCode' => 200 ],
+            "ok with further authorized networks + $sLocalIp" => [ 'aNetworkRegexps' => ['20.0.0.0/24', $sLocalIp], 'iHttpCode' => 200 ],
+            'wrong network' => [ 'aNetworkRegexps' => ['20.0.0.0/24'], 'iHttpCode' => 500 ],
+            'wrong IP' => [ 'aNetworkRegexps' => ['20.0.0.0'], 'iHttpCode' => 500 ],
         ];
     }
 
     public function testCollection(){
         @chmod($this->sConfigFile, 0770);
         \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
-        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', '');
+        \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
         \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, ['collection1' => []]);
         \utils::GetConfig()->WriteToFile();
         @chmod($this->sConfigFile, 0444); // Read-only
