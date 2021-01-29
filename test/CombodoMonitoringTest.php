@@ -3,6 +3,7 @@
 use Combodo\iTop\Monitoring\Controller\Controller;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 use Combodo\iTop\Monitoring\Model\Constants;
+use Symfony\Component\HttpFoundation\IpUtils;
 
 class CombodoMonitoringTest extends ItopDataTestCase {
     private $sUrl;
@@ -149,15 +150,24 @@ class CombodoMonitoringTest extends ItopDataTestCase {
         }
     }
 
+   /* public function testToto(){
+        $this->assertTrue(IpUtils::checkIp("127.0.0.1", ["127.0.0.1/24"]));
+        $this->assertTrue(IpUtils::checkIp("127.0.1.1", ["127.0.1.2/8"]));
+        $this->assertTrue(IpUtils::checkIp("127.0.1.1", ["127.0.1.2/32"]));
+    }*/
+
     public function NetworkProvider(){
         $sLocalIp = getHostByName(getHostName());
+        $aExploded = explode(".",  $sLocalIp);
+        $sSubnet = sprintf("%s.%s.0.1", $aExploded[0], $aExploded[1]);
+
         //$sLocalIp = gethostbyname(parse_url($this->sUrl, PHP_URL_HOST));
         return [
             'wrong conf' => [ 'aNetworkRegexps' => '', 'iHttpCode' => 200 ],
             'empty' => [ 'aNetworkRegexps' => [], 'iHttpCode' => 200 ],
-            "ok for IP $sLocalIp" => [ 'aNetworkRegexps' => [$sLocalIp], 'iHttpCode' => 200 ],
-            "ok for $sLocalIp/24" => [ 'aNetworkRegexps' => [$sLocalIp . '/24'], 'iHttpCode' => 200 ],
-            "ok with further authorized networks + $sLocalIp" => [ 'aNetworkRegexps' => ['20.0.0.0/24', $sLocalIp], 'iHttpCode' => 200 ],
+            //"ok for IP $sLocalIp" => [ 'aNetworkRegexps' => [$sLocalIp], 'iHttpCode' => 200 ],
+            "ok for $sSubnet/24" => [ 'aNetworkRegexps' => [$sSubnet . '/24'], 'iHttpCode' => 200 ],
+            "ok with further authorized networks + $sSubnet/24" => [ 'aNetworkRegexps' => ['20.0.0.0/24', "$sSubnet/24"], 'iHttpCode' => 200 ],
             'wrong network' => [ 'aNetworkRegexps' => ['20.0.0.0/24'], 'iHttpCode' => 500 ],
             'wrong IP' => [ 'aNetworkRegexps' => ['20.0.0.0'], 'iHttpCode' => 500 ],
         ];
