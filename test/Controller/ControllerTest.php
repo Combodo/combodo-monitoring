@@ -121,14 +121,14 @@ class ControllerTest extends ItopDataTestCase {
                 [["itop_backup_weekdays_count", 'User authorized quota', "monday, tuesday, wednesday, thursday, friday"]]
             ],
 
-            'conf itop-standard-email-synchro sub array' => [
-                ['itop_standard_email_synchro' =>
+            'conf authent-ldap sub array' => [
+                ['itop_authent-ldap' =>
                     [
-                        'description' => 'ticket logs',
-                        'conf' => [ 'MyModuleSettings', 'itop-standard-email-synchro', 'ticket_log', 'Incident']
+                        'description' => 'ldap option 17',
+                        'conf' => [ 'MyModuleSettings', 'authent-ldap', 'options', '17']
                     ]
                 ],
-                [["itop_standard_email_synchro", 'ticket logs', "public_log"]]
+                [["itop_authent-ldap", 'ldap option 17', "3"]]
             ],
             'oql_count with 2 labels, 1 not trimmed' => [
                 ['itop_user_count' =>
