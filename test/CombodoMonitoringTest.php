@@ -12,8 +12,8 @@ class CombodoMonitoringTest extends ItopDataTestCase {
 
     public function setUp()
     {
-        @include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
-        @include_once '/home/combodo/workspace/iTop/approot.inc.php';
+        //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
+        //@include_once '/home/combodo/workspace/iTop/approot.inc.php';
 
         parent::setUp();
 

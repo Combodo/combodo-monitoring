@@ -26,7 +26,7 @@ class ControllerTest extends ItopDataTestCase {
 
     public function setUp()
     {
-        require_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
+        //require_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         parent::setUp();
 
         require_once(APPROOT . 'core/config.class.inc.php');
