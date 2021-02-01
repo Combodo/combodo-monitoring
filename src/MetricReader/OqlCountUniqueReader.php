@@ -73,21 +73,10 @@ class OqlCountUniqueReader implements MetricReaderInterface
 
         $sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
 
-        try {
-            $oMysqli = \CMDBSource::Query($resQuery);
+        $iValue = $resQuery->num_rows;
 
+        \CMDBSource::FreeResult($resQuery);
 
-            if (is_null($oMysqli)) {
-                return [];
-            }
-
-            $iValue = $oMysqli->num_rows;
-
-            return [new MonitoringMetric($this->sMetricName, $sDescription, $iValue)];
-        }
-        finally
-        {
-            \CMDBSource::FreeResult($resQuery);
-        }
+        return [new MonitoringMetric($this->sMetricName, $sDescription, $iValue)];
     }
 }
