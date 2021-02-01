@@ -212,7 +212,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
     }
 
 
-    /*public function CheckIpProvider(){
+    public function CheckIpProvider(){
         return [
           'IP match' => ['127.0.0.1', ['127.0.0.1'], true],
           'IP no match' => ['127.0.0.1', ['127.0.0.2'], false],
@@ -229,6 +229,6 @@ class CombodoMonitoringTest extends ItopDataTestCase {
         $this->assertTrue(IpUtils::checkIp("127.0.0.1", ["127.0.0.1/24"]));
         $this->assertTrue(IpUtils::checkIp("127.0.1.1", ["127.0.1.2/8"]));
         $this->assertTrue(IpUtils::checkIp("127.0.1.1", ["127.0.1.2/24"]));
-    }*/
+    }
 
 }
