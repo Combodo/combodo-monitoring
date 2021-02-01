@@ -1,6 +1,5 @@
 <?php
 
-use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Symfony\Component\HttpFoundation\IpUtils;
 //use PhpIP\IPBlock;
@@ -13,7 +12,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
     public function setUp()
     {
         //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
-        //@include_once '/home/combodo/workspace/iTop/approot.inc.php';
+        @include_once '/home/combodo/workspace/iTop/approot.inc.php';
 
         parent::setUp();
 

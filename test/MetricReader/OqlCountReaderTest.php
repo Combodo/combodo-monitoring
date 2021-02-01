@@ -16,7 +16,6 @@
 namespace Combodo\iTop\Monitoring\Test\MetricReader;
 
 use Combodo\iTop\Monitoring\MetricReader\OqlCountReader;
-use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
 class OqlCountReaderTest extends ItopDataTestCase
