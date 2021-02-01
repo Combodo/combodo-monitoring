@@ -19,6 +19,7 @@ use Combodo\iTop\Monitoring\MetricReader\CustomReader;
 use Combodo\iTop\Monitoring\MetricReader\MetricReaderFactory;
 use Combodo\iTop\Monitoring\MetricReader\ConfReader;
 use Combodo\iTop\Monitoring\MetricReader\OqlCountReader;
+use Combodo\iTop\Monitoring\MetricReader\OqlCountUniqueReader;
 use Combodo\iTop\Monitoring\MetricReader\OqlGroupByReader;
 use Combodo\iTop\Monitoring\MetricReader\OqlSelectReader;
 use Combodo\iTop\Test\UnitTest\ItopTestCase;
@@ -82,6 +83,14 @@ class MetricReaderFactoryTest extends ItopTestCase
                     'conf' => [ ],
                 ],
                 'sExpectedClass' => ConfReader::class,
+                'sExpectedException' => null,
+            ],
+
+            'oql count unique' => [
+                'aMetric' => [
+                    'oql_count_unique' => [ ],
+                ],
+                'sExpectedClass' => OqlCountUniqueReader::class,
                 'sExpectedException' => null,
             ],
             'wrong parameter' => [

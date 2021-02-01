@@ -33,6 +33,7 @@ class MetricReaderFactory
             Constants::OQL_GROUPBY => OqlGroupByReader::class,
             Constants::OQL_COUNT => OqlCountReader::class,
             Constants::CONF => ConfReader::class,
+            Constants::OQL_COUNT_UNIQUE => OqlCountUniqueReader::class,
         ];
 
         $intersec = array_intersect_key($aKeyToClass, $aMetric);
