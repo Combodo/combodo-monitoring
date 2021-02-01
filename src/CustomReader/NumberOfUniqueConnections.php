@@ -39,13 +39,13 @@ class NumberOfUniqueConnections implements \Combodo\iTop\Monitoring\MetricReader
         $oFilter = \DBObjectSearch::FromOQL($sOQL);
         $oSet = new \DBObjectSet($oFilter);
 
-        $Counter = [];
-        foreach ($oSet->Fetch() as $oEventLoginUsage) {
-            $Counter[$oEventLoginUsage->Get('user_info')] = true;
+        $aCounter = [];
+        while ($oEventLoginUsage = $oSet->Fetch()) {
+            $aCounter[$oEventLoginUsage->Get('user_id')] = true;
         }
 
         $sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
 
-        return [ new MonitoringMetric('itop_distinct_users_count', $sDesc, count($Counter))];
+        return [ new MonitoringMetric('itop_distinct_users_count', $sDesc, count($aCounter))];
     }
 }

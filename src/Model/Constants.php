@@ -24,6 +24,7 @@ class Constants
     const OQL_COUNT = 'oql_count';
     const OQL_SELECT = 'oql_select';
     const OQL_GROUPBY = 'oql_groupby';
+    const OQL_COUNT_UNIQUE = 'oql_count_unique';
     const SELECT = 'select';
     const COLUMNS = 'columns';
     const GROUPBY = 'groupby';
