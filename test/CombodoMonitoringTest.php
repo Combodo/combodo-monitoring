@@ -3,6 +3,7 @@
 use Combodo\iTop\Monitoring\Model\Constants;
 use Symfony\Component\HttpFoundation\IpUtils;
 //use PhpIP\IPBlock;
+use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
 class CombodoMonitoringTest extends ItopDataTestCase {
     private $sUrl;
