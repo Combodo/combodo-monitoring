@@ -56,7 +56,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
     /**
      * @dataProvider MonitoringProvider
      */
-    /*public function testMonitoringPage($aMetricConf, $sExpectedContentPath, $iExpectedHttpCode){
+    public function testMonitoringPage($aMetricConf, $sExpectedContentPath, $iExpectedHttpCode){
         @chmod($this->sConfigFile, 0770);
         \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
         \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
@@ -68,7 +68,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
 
         $this->assertEquals($iExpectedHttpCode, $aResp[1], $aResp[0]);
         $this->assertEquals(file_get_contents($sExpectedContentPath), $aResp[0]);
-    }*/
+    }
 
     public function MonitoringProvider(){
         $sRessourcesDir = __DIR__ . "/ressources";
