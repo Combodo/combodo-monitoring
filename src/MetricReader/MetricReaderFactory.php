@@ -43,7 +43,7 @@ class MetricReaderFactory
             throw new \Exception(sprintf('reader not found for metric %s', $sMetricName));
         }
 
-        if ($count == 2) {
+        if ($count > 1) {
             $aKeys = implode(', ', array_keys($intersec));
             throw new \Exception(sprintf('only one metric at a time is authorized (found: %s) for metric %s', $aKeys, $sMetricName));
         }

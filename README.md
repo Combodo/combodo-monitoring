@@ -137,6 +137,23 @@ This Reader is the simplest possible one: it count the number of result .
 ]
 ```
 
+### OqlCountUniqueReaderTest
+
+This Reader count the number of unique result for a given attribute.
+> ! This should not be used on massive data !
+
+*Example*:
+```php 
+[
+    'description' => 'number of used profiles',
+    'oql_count_unique' => [
+        'select' => 'SELECT URP_Profiles JOIN URP_UserProfile ON URP_UserProfile.profileid = URP_Profiles.id',   
+        'groupby' => ['name' => 'name'],   
+    ],
+]
+```
+
+
 ### OqlGroupByReader
 
 This Reader count the number of rows for each group.

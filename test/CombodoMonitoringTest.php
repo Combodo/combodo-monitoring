@@ -12,7 +12,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
 
     public function setUp()
     {
-        //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
+        @include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         //@include_once '/home/combodo/workspace/iTop/approot.inc.php';
 
         parent::setUp();
@@ -107,6 +107,13 @@ class CombodoMonitoringTest extends ItopDataTestCase {
                             'description' => 'custom class (custom)',
                             'custom' => ['class' => '\Combodo\iTop\Monitoring\Test\MetricReader\CustomReaders\CustomReaderImpl']
                         ),
+                        'itop_profile_unique_count' => [
+                            'description' => 'number of profiles',
+                            'oql_count_unique' => [
+                                'select' => 'SELECT URP_Profiles',
+                                'groupby' => ['name' => 'name'],
+                            ],
+                        ],
                     ],
                 ],
                 'sExpectedContentPath' => "$sRessourcesDir/prometheus_content.txt",

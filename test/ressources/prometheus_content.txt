@@ -16,3 +16,6 @@ itop_backup_retention_count{shadok="gabuzomeu"} 5
 # custom class (custom)
 foo{baz="iste"} 42
 
+# number of profiles
+itop_profile_unique_count{} 13
+
