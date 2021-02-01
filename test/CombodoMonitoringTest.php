@@ -1,9 +1,9 @@
 <?php
 
-use Combodo\iTop\Monitoring\Controller\Controller;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Symfony\Component\HttpFoundation\IpUtils;
+//use PhpIP\IPBlock;
 
 class CombodoMonitoringTest extends ItopDataTestCase {
     private $sUrl;
@@ -56,7 +56,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
     /**
      * @dataProvider MonitoringProvider
      */
-    public function testMonitoringPage($aMetricConf, $sExpectedContentPath, $iExpectedHttpCode){
+    /*public function testMonitoringPage($aMetricConf, $sExpectedContentPath, $iExpectedHttpCode){
         @chmod($this->sConfigFile, 0770);
         \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
         \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
@@ -68,7 +68,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
 
         $this->assertEquals($iExpectedHttpCode, $aResp[1], $aResp[0]);
         $this->assertEquals(file_get_contents($sExpectedContentPath), $aResp[0]);
-    }
+    }*/
 
     public function MonitoringProvider(){
         $sRessourcesDir = __DIR__ . "/ressources";
@@ -151,12 +151,6 @@ class CombodoMonitoringTest extends ItopDataTestCase {
         }
     }
 
-   /* public function testToto(){
-        $this->assertTrue(IpUtils::checkIp("127.0.0.1", ["127.0.0.1/24"]));
-        $this->assertTrue(IpUtils::checkIp("127.0.1.1", ["127.0.1.2/8"]));
-        $this->assertTrue(IpUtils::checkIp("127.0.1.1", ["127.0.1.2/32"]));
-    }*/
-
     public function NetworkProvider(){
         $sLocalIp = getHostByName(getHostName());
         $aExploded = explode(".",  $sLocalIp);
@@ -188,4 +182,53 @@ class CombodoMonitoringTest extends ItopDataTestCase {
         $this->assertEquals(500, $aResp[1], "Missing collection in GET params. $aResp[1] instead of 500");
         $this->assertContains('Exception : Missing mandatory GET parameter collection', $aResp[0]);
     }
+
+    /**
+     * @dataProvider CheckIpProvider
+     */
+    public function testCheckIpFunction(string $clientIp, array $aNetworks, bool $bExpectedRes){
+        //$this->assertTrue($bExpectedRes, IpUtils::checkIp($clientIp, $aNetworks));
+
+        $this->assertEquals($bExpectedRes, $this->CheckIpFunction($clientIp, $aNetworks));
+    }
+
+    private function CheckIpFunction(string $clientIp, array $aNetworks){
+        foreach ($aNetworks as $sNetwork){
+            try{
+                $block = IPBlock::create($sNetwork);
+
+                if ($block->contains($clientIp)){
+                    return true;
+                }
+            } catch (\InvalidArgumentException $e){
+                //not a network: InvalidArgumentException : 127.0.0.2 does not appear to be an IPv4 or IPv6 block
+                //IP usecase
+                if ($sNetwork == $clientIp){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    /*public function CheckIpProvider(){
+        return [
+          'IP match' => ['127.0.0.1', ['127.0.0.1'], true],
+          'IP no match' => ['127.0.0.1', ['127.0.0.2'], false],
+          'network match' => ['127.0.0.1', ['127.0.0.2/8'], true],
+          'network match2' => ['127.0.1.1', ['127.0.0.1/16'], true], 
+          'network match3' => ['127.0.0.1', ['127.0.1.1/16'], true],
+          'network match4' => ['127.0.0.1', ['127.0.0.1/24'], true],
+          'network match5' => ['127.0.1.1', ['127.0.1.2/8'], true],
+          'network match6' => ['127.0.1.1', ['127.0.1.2/24'], true],
+        ];
+    }
+
+    public function testToto(){
+        $this->assertTrue(IpUtils::checkIp("127.0.0.1", ["127.0.0.1/24"]));
+        $this->assertTrue(IpUtils::checkIp("127.0.1.1", ["127.0.1.2/8"]));
+        $this->assertTrue(IpUtils::checkIp("127.0.1.1", ["127.0.1.2/24"]));
+    }*/
+
 }
