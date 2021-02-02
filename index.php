@@ -13,4 +13,5 @@ $oCombodoMonitoringController->AllowOnlyAdmin();
 $oCombodoMonitoringController->SetDefaultOperation('ExposePrometheusMetrics');
 $oCombodoMonitoringController->SetAccessTokenConfigParamId('access_token');
 $oCombodoMonitoringController->SetAccessAuthorizedNetworkConfigParamId('authorized_network');
+$oCombodoMonitoringController->CheckNetworkAccess();
 $oCombodoMonitoringController->HandleOperation();

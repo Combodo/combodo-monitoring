@@ -38,7 +38,7 @@ class CustomReader implements MetricReaderInterface
         $sClassName = $this->aMetric[Constants::CUSTOM]['class'] ?? null;
 
         if (!is_a($sClassName, CustomReaderInterface::class, true)) {
-            throw new \Exception("Metric $this->sMetricName is not properly configured: '$sClassName' must implements ".CustomReaderInterface::class);
+            throw new \Exception("Metric $this->sMetricName is not properly configured: '$sClassName' must implement ".CustomReaderInterface::class);
         }
 
         $oCustomReader = new $sClassName($this->aMetric);

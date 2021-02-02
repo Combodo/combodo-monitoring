@@ -1,8 +1,8 @@
 <?php
 
+use Combodo\iTop\Monitoring\Controller\Controller;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Symfony\Component\HttpFoundation\IpUtils;
-//use PhpIP\IPBlock;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
 class CombodoMonitoringTest extends ItopDataTestCase {
@@ -12,7 +12,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
 
     public function setUp()
     {
-//        @include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
+        //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         //@include_once '/home/combodo/workspace/iTop/approot.inc.php';
 
         parent::setUp();
@@ -191,33 +191,13 @@ class CombodoMonitoringTest extends ItopDataTestCase {
     }
 
     /**
-     * dataProvider CheckIpProvider
+     * @dataProvider CheckIpProvider
      */
-    /*public function testCheckIpFunction(string $clientIp, array $aNetworks, bool $bExpectedRes){
-        //$this->assertTrue($bExpectedRes, IpUtils::checkIp($clientIp, $aNetworks));
+    public function testCheckIpFunction(string $clientIp, array $aNetworks, bool $bExpectedRes){
+        $oController = new Controller('', '');
 
-        $this->assertEquals($bExpectedRes, $this->CheckIpFunction($clientIp, $aNetworks));
+        $this->assertEquals($bExpectedRes, $oController->CheckIpFunction($clientIp, $aNetworks));
     }
-
-    private function CheckIpFunction(string $clientIp, array $aNetworks){
-        foreach ($aNetworks as $sNetwork){
-            try{
-                $block = IPBlock::create($sNetwork);
-
-                if ($block->contains($clientIp)){
-                    return true;
-                }
-            } catch (\InvalidArgumentException $e){
-                //not a network: InvalidArgumentException : 127.0.0.2 does not appear to be an IPv4 or IPv6 block
-                //IP usecase
-                if ($sNetwork == $clientIp){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
 
     public function CheckIpProvider(){
         return [
@@ -231,11 +211,5 @@ class CombodoMonitoringTest extends ItopDataTestCase {
           'network match6' => ['127.0.1.1', ['127.0.1.2/24'], true],
         ];
     }
-
-    public function testToto(){
-        $this->assertTrue(IpUtils::checkIp("127.0.0.1", ["127.0.0.1/24"]));
-        $this->assertTrue(IpUtils::checkIp("127.0.1.1", ["127.0.1.2/8"]));
-        $this->assertTrue(IpUtils::checkIp("127.0.1.1", ["127.0.1.2/24"]));
-    }*/
 
 }
