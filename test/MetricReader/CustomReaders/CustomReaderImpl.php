@@ -15,10 +15,11 @@
 
 namespace Combodo\iTop\Monitoring\Test\MetricReader\CustomReaders;
 
+use Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
-class CustomReaderImpl implements \Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface
+class CustomReaderImpl implements CustomReaderInterface
 {
 
     private $aMetricConf;
