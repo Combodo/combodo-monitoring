@@ -1,9 +1,6 @@
 # Name of profile (oql_select)
 itop_user_select{column="profile"} Administrator
 
-# Name of profile (oql_select)
-itop_user_select{column="profile"} Support Agent
-
 # Nb of users (oql_count)
 itop_user_count{toto="titi"} 1
 
