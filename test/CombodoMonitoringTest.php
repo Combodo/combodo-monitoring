@@ -165,7 +165,7 @@ class CombodoMonitoringTest extends ItopDataTestCase {
 
         //$sLocalIp = gethostbyname(parse_url($this->sUrl, PHP_URL_HOST));
         return [
-            'wrong conf' => [ 'aNetworkRegexps' => '', 'iHttpCode' => 200 ],
+            'wrong conf' => [ 'aNetworkRegexps' => '', 'iHttpCode' => 500 ],
             'empty' => [ 'aNetworkRegexps' => [], 'iHttpCode' => 200 ],
             //"ok for IP $sLocalIp" => [ 'aNetworkRegexps' => [$sLocalIp], 'iHttpCode' => 200 ],
             "ok for $sSubnet/24" => [ 'aNetworkRegexps' => [$sSubnet . '/24'], 'iHttpCode' => 200 ],
