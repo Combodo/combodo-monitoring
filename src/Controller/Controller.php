@@ -133,7 +133,9 @@ class Controller extends BaseController {
         $aReadAllowedNetworkRegexpPatterns = \MetaModel::GetConfig()->GetModuleSetting($sExecModule, $this->m_sAccessAuthorizedNetworkConfigParamId);
         if (!is_array($aReadAllowedNetworkRegexpPatterns)){
             \IssueLog::Error("'$sExecModule' wrongly configured. please check $this->m_sAccessAuthorizedNetworkConfigParamId config (not an array).");
-            return;
+            http_response_code(500);
+            $aResponse = array('sError' => "Exception : Misconfigured network config (not an array).");
+            echo json_encode($aResponse);
         } else if (empty($aReadAllowedNetworkRegexpPatterns)){
             //no rule
             return;

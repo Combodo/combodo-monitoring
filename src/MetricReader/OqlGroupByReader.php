@@ -58,6 +58,28 @@ class OqlGroupByReader implements MetricReaderInterface
         return $sSQL;
     }
 
+
+    private function MakeSql(): string
+    {
+        $aVars = array (
+            'select' => 'SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid =URP_Profiles_profileid.id',
+            'groupby' => 'profile, URP_Profiles_profileid.friendlyname',
+        );
+
+        $oSearch = \DBSearch::FromOQL('SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid =URP_Profiles_profileid.id');
+        $aGroupBy = $this->aMetric[Constants::OQL_GROUPBY][Constants::GROUPBY];
+
+        $aGroupByExp = [];
+        foreach ($aGroupBy as $sAlias => $sOQLField) {
+            $aGroupByExp[$sAlias] = \Expression::FromOQL($sOQLField);
+        }
+
+        $sSQL = $oSearch->MakeGroupByQuery([], $aGroupByExp);
+
+        return $sSQL;
+    }
+
+
     /**
      * @return array|null
      * @throws \CoreException
