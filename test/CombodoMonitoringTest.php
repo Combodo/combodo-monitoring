@@ -94,8 +94,8 @@ class CombodoMonitoringTest extends ItopDataTestCase {
                         'itop_user_groupby_count' => array(
                             'description' => 'Nb of users (oql_groupby)',
                             'oql_groupby' => [
-                                'select' => 'SELECT URP_UserProfile JOIN URP_Profiles AS URP_Profiles_profileid ON URP_UserProfile.profileid =URP_Profiles_profileid.id WHERE URP_UserProfile.userid=1',
-                                'groupby' => ['profile' => 'URP_Profiles_profileid.friendlyname'],
+                                'select' => 'SELECT URP_UserProfile JOIN URP_Profiles ON URP_UserProfile.profileid =URP_Profiles.id WHERE URP_Profiles.id=1',
+                                'groupby' => ['profile' => 'URP_UserProfile.profile'],
                             ],
                         ),
                         'itop_backup_retention_count' => array(
