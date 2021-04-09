@@ -58,7 +58,8 @@ class ControllerTest extends ItopDataTestCase {
 
         $this->assertEquals(
             $aExpectedMetrics,
-            $aMetrics
+            $aMetrics,
+            var_export($aExpectedMetrics, true) . "\n\n" . var_export($aMetrics, true)
         );
     }
 
