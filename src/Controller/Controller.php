@@ -43,16 +43,20 @@ class Controller extends BaseController {
 
         header('Content-Type: text/plain; charset=UTF-8');
         $sOutput = "";
-        foreach ($aMetrics as $oMetric){
-            /** @var MonitoringMetric $oMetric*/
-            $sOutput .=  "# " . $oMetric->GetDescription() . "\n";
-            $sLabels = "";
-            foreach ($oMetric->GetLabels() as $sKey => $sValue) {
-                $sLabels .= empty($sLabels) ? "" : ",";
-                $sLabels .= "$sKey=\"$sValue\"" ;
+        if (is_array($aMetrics) && sizeof($aMetrics) !== 0) {
+            foreach ($aMetrics as $oMetric){
+                /** @var MonitoringMetric $oMetric*/
+                $sOutput .=  "# " . $oMetric->GetDescription() . "\n";
+                $sLabels = "";
+                if (is_array($oMetric->GetLabels()) && sizeof($oMetric->GetLabels()) !== 0) {
+                    foreach ($oMetric->GetLabels() as $sKey => $sValue) {
+                        $sLabels .= empty($sLabels) ? "" : ",";
+                        $sLabels .= "$sKey=\"$sValue\"";
+                    }
+                }
+                $sOutput .= $oMetric->GetName() . "{" . $sLabels . "} " . $oMetric->GetValue() . "\n";
+                $sOutput .=  "\n";
             }
-            $sOutput .= $oMetric->GetName() . "{" . $sLabels . "} " . $oMetric->GetValue() . "\n";
-            $sOutput .=  "\n";
         }
 
         echo $sOutput;
