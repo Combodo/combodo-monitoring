@@ -54,7 +54,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
         return [$sContent, $iCode];
     }
 
-    public function testMonitoringPage($aMetricConf, $sExpectedContentPath, $iExpectedHttpCode)
+    public function testMonitoringPage()
     {
         $sRessourcesDir = __DIR__.'/ressources';
         $aMetricConf = [
