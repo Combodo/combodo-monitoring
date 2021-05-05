@@ -99,7 +99,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
             ],
         ];
 
-        $oOqlCountUniqueReader = new \Combodo\iTop\Monitoring\MetricReader\OqlCountUniqueReader('itop_profile_unique_count', $aMetricConf['itop_profile_unique_count']);
+        $oOqlCountUniqueReader = new \Combodo\iTop\Monitoring\MetricReader\OqlCountUniqueReader('itop_profile_unique_count', $aMetricConf['collection1']['itop_profile_unique_count']);
         /** @var MonitoringMetric $oMetric*/
         $oMetric = $oOqlCountUniqueReader->GetMetrics()[0];
         $iTopProfileUniqueCount = $oMetric->GetValue();
@@ -114,7 +114,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
         $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123&collection=collection1");
 
         $this->assertEquals(200, $aResp[1], $aResp[0]);
-        $sContent = str_replace('XXX', $iTopProfileUniqueCount, file_get_contents($sRessourcesDir / prometheus_content.txt));
+        $sContent = str_replace('XXX', $iTopProfileUniqueCount, file_get_contents("$sRessourcesDir/prometheus_content.txt"));
         $this->assertEquals($sContent, $aResp[0]);
     }
 
