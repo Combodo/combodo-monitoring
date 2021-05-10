@@ -64,7 +64,7 @@ class ControllerTest extends ItopDataTestCase {
     }
 
     public function ReadMetricsProvider() {
-        $useCases = [
+        return [
            'conf MySettings' => [
                 ['access_mode' =>
                     [
@@ -176,22 +176,29 @@ class ControllerTest extends ItopDataTestCase {
                 []
             ],
         ];
+    }
 
-        $confFile = \utils::GetConfig()->GetLoadedFile();
-        $sContent = (is_null($confFile)) ? "" : file_get_contents($confFile);
-        if (strpos($sContent, 'authent-ldap') !== false){
-            $useCases['conf authent-ldap sub array'] = [
-                ['itop_authent-ldap' =>
-                    [
-                        'description' => 'ldap option 17',
-                        'conf' => [ 'MyModuleSettings', 'authent-ldap', 'options', '17']
-                    ]
-                ],
-                [["itop_authent-ldap", 'ldap option 17', "3"]]
-            ];
-        }
+    public function testConfSubArray(){
+	    $confFile = \utils::GetConfigFilePath();
+	    $sContent = (is_null($confFile)) ? "" : file_get_contents($confFile);
+	    if (strpos($sContent, 'authent-ldap') === false) {
+		    $this->doesNotPerformAssertions();
 
-        return $useCases;
+		    return;
+	    }
+
+	    //['conf authent-ldap sub array']
+	    $useCase = [
+		    ['itop_authent-ldap' =>
+			    [
+				    'description' => 'ldap option 17',
+				    'conf' => [ 'MyModuleSettings', 'authent-ldap', 'options', '17']
+			    ]
+		    ],
+		    [["itop_authent-ldap", 'ldap option 17', "3"]]
+	    ];
+
+	    $this->testReadMetrics($useCase[0], $useCase[1]);
     }
 
 
