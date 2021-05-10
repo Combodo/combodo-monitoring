@@ -64,7 +64,7 @@ class ControllerTest extends ItopDataTestCase {
     }
 
     public function ReadMetricsProvider() {
-        return [
+        $useCases = [
            'conf MySettings' => [
                 ['access_mode' =>
                     [
@@ -121,16 +121,6 @@ class ControllerTest extends ItopDataTestCase {
                 ],
                 [["itop_backup_weekdays_count", 'User authorized quota', "monday, tuesday, wednesday, thursday, friday"]]
             ],
-
-            'conf authent-ldap sub array' => [
-                ['itop_authent-ldap' =>
-                    [
-                        'description' => 'ldap option 17',
-                        'conf' => [ 'MyModuleSettings', 'authent-ldap', 'options', '17']
-                    ]
-                ],
-                [["itop_authent-ldap", 'ldap option 17', "3"]]
-            ],
             'oql_count with 2 labels, 1 not trimmed' => [
                 ['itop_user_count' =>
                     [
@@ -186,6 +176,22 @@ class ControllerTest extends ItopDataTestCase {
                 []
             ],
         ];
+
+        $confFile = \utils::GetConfig()->GetLoadedFile();
+        $sContent = (is_null($confFile)) ? "" : file_get_contents($confFile);
+        if (strpos($sContent, 'authent-ldap') !== false){
+            $useCases['conf authent-ldap sub array'] = [
+                ['itop_authent-ldap' =>
+                    [
+                        'description' => 'ldap option 17',
+                        'conf' => [ 'MyModuleSettings', 'authent-ldap', 'options', '17']
+                    ]
+                ],
+                [["itop_authent-ldap", 'ldap option 17', "3"]]
+            ];
+        }
+
+        return $useCases;
     }
 
 
