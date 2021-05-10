@@ -182,7 +182,7 @@ class ControllerTest extends ItopDataTestCase {
 	    $confFile = \utils::GetConfigFilePath();
 	    $sContent = (is_null($confFile)) ? "" : file_get_contents($confFile);
 	    if (strpos($sContent, 'authent-ldap') === false) {
-		    $this->assertTrue(true, "keep it instead of performnoassertion => risky ");
+		    $this->markTestSkipped();
 	    }else {
             //['conf authent-ldap sub array']
             $useCase = [
