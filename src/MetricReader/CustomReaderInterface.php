@@ -20,7 +20,7 @@ use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 interface CustomReaderInterface
 {
-    public function __construct($aMetricConf);
+    public function __construct($sMetricName, $aMetricConf);
 
     /**
      * @return MonitoringMetric[]

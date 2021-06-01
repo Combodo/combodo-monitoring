@@ -25,7 +25,7 @@ class CountTextOccurrencesTest extends ItopTestCase
     public function setUp()
     {
         //@include_once '/home/combodo/workspace/iTop/approot.inc.php';
-        @include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
+        //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         parent::setUp();
 
         require_once(APPROOT . 'env-production/combodo-monitoring/vendor/autoload.php');
@@ -36,7 +36,7 @@ class CountTextOccurrencesTest extends ItopTestCase
      */
     public function testFetchCounter($iExpectedCounter, $aMetricConf)
     {
-        $oCountTextOccurrences = new CountTextOccurrences($aMetricConf);
+        $oCountTextOccurrences = new CountTextOccurrences('fetch_counter', $aMetricConf);
 
         $reflector = new \ReflectionObject($oCountTextOccurrences);
         $method = $reflector->getMethod('FetchCounter');

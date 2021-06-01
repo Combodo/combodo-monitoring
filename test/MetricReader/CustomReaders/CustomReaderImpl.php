@@ -21,12 +21,13 @@ use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 class CustomReaderImpl implements CustomReaderInterface
 {
-
     private $aMetricConf;
+    private $sMetricName;
 
-    public function __construct($aMetricConf)
+    public function __construct($sMetricName, $aMetricConf)
     {
         $this->aMetricConf = $aMetricConf;
+        $this->sMetricName = $sMetricName;
     }
 
     /**
@@ -34,6 +35,6 @@ class CustomReaderImpl implements CustomReaderInterface
      */
     public function GetMetrics(): ?array
     {
-        return [ new MonitoringMetric('foo', $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '', 42, ['baz' => 'iste'])];
+        return [ new MonitoringMetric($this->sMetricName, $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '', 42, ['baz' => 'iste'])];
     }
 }

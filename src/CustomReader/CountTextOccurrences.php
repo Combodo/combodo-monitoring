@@ -22,10 +22,12 @@ use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 class CountTextOccurrences implements \Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface
 {
     private $aMetricConf;
+    private $sMetricName;
 
-    public function __construct($aMetricConf)
+    public function __construct($sMetricName, $aMetricConf)
     {
         $this->aMetricConf = $aMetricConf;
+        $this->sMetricName = $sMetricName;
     }
 
     /**
@@ -37,7 +39,7 @@ class CountTextOccurrences implements \Combodo\iTop\Monitoring\MetricReader\Cust
 
         $sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
 
-        return [ new MonitoringMetric('itop_deadlock_count', $sDesc, $iCounter)];
+        return [ new MonitoringMetric($this->sMetricName, $sDesc, $iCounter)];
     }
 
     /**

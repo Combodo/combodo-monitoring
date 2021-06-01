@@ -13,20 +13,21 @@
  * You should have received a copy of the GNU Affero General Public License
  */
 
-namespace Combodo\iTop\Monitoring\MetricReader;
+namespace Combodo\iTop\Monitoring\CustomReader;
 
 
 use Combodo\iTop\Monitoring\Model\Constants;
+use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
-class CustomReader implements MetricReaderInterface
+class ItopReadOnlyCustomerReader implements \Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface
 {
+    private $aMetricConf;
     private $sMetricName;
-    private $aMetric;
 
-    public function __construct($sMetricName, $aMetric)
+    public function __construct($sMetricName, $aMetricConf)
     {
+        $this->aMetricConf = $aMetricConf;
         $this->sMetricName = $sMetricName;
-        $this->aMetric = $aMetric;
     }
 
     /**
@@ -34,13 +35,14 @@ class CustomReader implements MetricReaderInterface
      */
     public function GetMetrics(): ?array
     {
-        $sClassName = $this->aMetric[Constants::CUSTOM]['class'] ?? null;
-
-        if (!is_a($sClassName, CustomReaderInterface::class, true)) {
-            throw new \Exception("Metric $this->sMetricName is not properly configured: '$sClassName' must implement ".CustomReaderInterface::class);
+        $iCounter = 0;
+        clearstatcache();
+        if (file_exists(APPROOT.'data/.readonly')){
+            $iCounter = 1;
         }
 
-        $oCustomReader = new $sClassName($this->sMetricName, $this->aMetric);
-        return $oCustomReader->GetMetrics() ;
+        $sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
+
+        return [ new MonitoringMetric($this->sMetricName, $sDesc, $iCounter)];
     }
 }
