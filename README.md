@@ -173,15 +173,16 @@ The labels names are the keys of the group by alias, and the label values are th
 
 ### OqlSelectReader
 
-This reader expose the value for each column, the column name being in the labels.
+This reader expose the value for each column as labels, the column key being in monitoring labels. value of the metric comes from 'value'.
 *Example*:
 ```php 
 [
     'description' => 'ordered users',
     'oql_select' => [
         'select' => 'SELECT User',
-        'columns' =>  ['first_name', 'last_name'],
-        
+        'labels' =>  ['firtname' => first_name', 'lastname' => last_name'],
+        'value' => 'id' //make no sense except this is an integer
+         
         // optional:
         'orderby' => ['first_name' => true, '_itop_count_' => false],         
         // optional:

@@ -61,17 +61,19 @@ class CombodoMonitoringTest extends ItopDataTestCase
             'collection1' => [
                 'itop_user_select' => [
                     'description' => 'Name of profile (oql_select)',
+	                'static_labels' => ['toto' => 'titi'],
                     'oql_select' => [
-                        'select' => 'SELECT URP_UserProfile',
-                        'columns' => ['profile'],
+                        'select' => 'SELECT URP_UserProfile WHERE URP_UserProfile.userid=1',
+                        'labels' => ['profile' => 'profile'],
+                        'value' => 'userid',
                     ],
                 ],
                 'itop_user_count' => [
                     'description' => 'Nb of users (oql_count)',
                     'oql_count' => [
-                        'select' => 'SELECT URP_UserProfile  WHERE URP_UserProfile.userid=1',
+                        'select' => 'SELECT URP_UserProfile WHERE URP_UserProfile.userid=1',
                     ],
-                    'label' => ['toto' => 'titi'],
+                    'static_labels' => ['toto' => 'titi'],
                 ],
                 'itop_user_groupby_count' => [
                     'description' => 'Nb of users (oql_groupby)',
@@ -83,7 +85,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
                 'itop_backup_retention_count' => [
                     'description' => 'Retention count (conf)',
                     'conf' => ['MyModuleSettings', 'itop-backup', 'retention_count'],
-                    'label' => ['shadok' => 'gabuzomeu'],
+                    'static_labels' => ['shadok' => 'gabuzomeu'],
                 ],
                 'itop_custom' => [
                     'description' => 'custom class (custom)',

@@ -70,7 +70,7 @@ class ControllerTest extends ItopDataTestCase {
                     [
                         'description' => 'access mode',
                         'conf' => [ 'MySettings', 'access_mode'],
-                        'label' => ['labelname1' => 'labelvalue1']
+                        'static_labels' => ['labelname1' => 'labelvalue1']
                     ]
                 ],
                 [["access_mode", 'access mode', "3", ["labelname1" => "labelvalue1"]]]
@@ -128,7 +128,7 @@ class ControllerTest extends ItopDataTestCase {
                         'oql_count' => [
                             'select' => 'SELECT User WHERE id=1',
                         ],
-                        'label' => ['labelname2' => 'labelvalue2', 'name with space at the end     ' =>'foo']
+                        'static_labels' => ['labelname2' => 'labelvalue2', 'name with space at the end     ' =>'foo']
                     ]
                 ],
                 [["itop_user_count", 'Nb of users', "1", ["labelname2" => "labelvalue2", 'name with space at the end     ' =>'foo']]]

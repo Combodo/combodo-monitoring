@@ -36,24 +36,34 @@ class OqlSelectReader implements MetricReaderInterface
     public function GetMetrics(): ?array
     {
         $sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
-        $aLabels = $this->aMetric[Constants::METRIC_LABEL] ?? [];
-        $aColumns = $this->aMetric[Constants::OQL_SELECT][Constants::COLUMNS] ?? [];
+        $aStaticLabels = $this->aMetric[Constants::METRIC_LABEL] ?? [];
+        $aColumns = $this->aMetric[Constants::OQL_SELECT][Constants::LABELS] ?? [];
+        $sColumnValue = $this->aMetric[Constants::OQL_SELECT][Constants::VALUE] ?? null;
 
         if (empty($aColumns)) {
             throw new \Exception("Metric $this->sMetricName Must provide at least one column to be read.");
         }
 
+        if ($sColumnValue === null) {
+            throw new \Exception("Metric $this->sMetricName Must provide at least one value to be read.");
+        }
+
         $oSet = $this->GetObjectSet();
         $aMetrics = [];
         while ($oObject = $oSet->Fetch()) {
-            foreach ($aColumns as $sColumn) {
-                $aMetrics[] = new MonitoringMetric(
-                    $this->sMetricName,
-                    $sDescription,
-                    $oObject->Get($sColumn),
-                    array_merge($aLabels, ['column' => $sColumn])
-                );
+            $aCurrentLabels = [];
+            foreach ($aColumns as $sLabel => $sColumn) {
+                $aCurrentLabels[$sLabel] = $oObject->Get($sColumn);
             }
+
+            $sMetricValue = $oObject->Get($sColumnValue);
+            $aCurrentLabels = array_merge($aStaticLabels, $aCurrentLabels);
+            $aMetrics[] = new MonitoringMetric(
+                $this->sMetricName,
+                $sDescription,
+                $sMetricValue,
+                $aCurrentLabels
+            );
         }
 
         return $aMetrics;
@@ -72,7 +82,8 @@ class OqlSelectReader implements MetricReaderInterface
         $aOrderBy = $this->aMetric[Constants::OQL_SELECT][Constants::ORDERBY] ?? [];
         $iLimitCount = $this->aMetric[Constants::OQL_SELECT][Constants::LIMIT_COUNT] ?? 0;
         $iLimitStart = $this->aMetric[Constants::OQL_SELECT][Constants::LIMIT_START] ?? 0;
-        $aColumns = $this->aMetric[Constants::OQL_SELECT][Constants::COLUMNS] ?? [];
+        $aColumns = $this->aMetric[Constants::OQL_SELECT][Constants::LABELS] ?? [];
+	    $sValue = $this->aMetric[Constants::OQL_SELECT][Constants::VALUE] ?? '';
 
         $oSet = new \DBObjectSet($oSearch);
         $oSet->SetOrderBy($aOrderBy);
@@ -80,8 +91,12 @@ class OqlSelectReader implements MetricReaderInterface
 
         $sAlias = $oSearch->GetClassAlias();
         $aOptimizeColumnsLoad = [];
-        foreach ($aColumns as $sAttribute) {
+        foreach ($aColumns as $sKey => $sAttribute) {
             $aOptimizeColumnsLoad[$sAlias][] = $sAttribute;
+        }
+        if ($sValue !== 'id'){
+			//id not an attribute def. cannot optimize it...
+	        $aOptimizeColumnsLoad[$sAlias][] = $sValue;
         }
 
         if (!empty($aOptimizeColumnsLoad)) {

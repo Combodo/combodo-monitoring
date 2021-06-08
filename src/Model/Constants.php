@@ -26,12 +26,13 @@ class Constants
     const OQL_GROUPBY = 'oql_groupby';
     const OQL_COUNT_UNIQUE = 'oql_count_unique';
     const SELECT = 'select';
-    const COLUMNS = 'columns';
+    const LABELS = 'labels';
+    const VALUE = 'value';
     const GROUPBY = 'groupby';
     const ORDERBY = 'orderby';
     const LIMIT_COUNT = 'limit_count';
     const LIMIT_START = 'limit_start';
     const METRIC_DESCRIPTION = 'description';
-    const METRIC_LABEL = 'label';
+    const METRIC_LABEL = 'static_labels';
     const METRICS = 'metrics';
 }

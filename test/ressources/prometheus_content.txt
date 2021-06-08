@@ -1,5 +1,5 @@
 # Name of profile (oql_select)
-itop_user_select{column="profile"} Administrator
+itop_user_select{toto="titi",profile="Administrator"} 1
 
 # Nb of users (oql_count)
 itop_user_count{toto="titi"} 1

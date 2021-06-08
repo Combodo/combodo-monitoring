@@ -58,11 +58,45 @@ class OqlSelectReaderTest extends ItopDataTestCase
     public function GetMetricsProvider(): array
     {
         return [
-            'oql_columns' => [
+	        'oql_columns with org_id (to optimize as well)' => [
+		        'aMetric' => [
+			        'oql_select' => [
+				        'select' => 'SELECT User',
+				        'labels' =>  ['firstname' => 'first_name', 'lastname' => 'last_name'],
+				        'value' => 'org_id'
+			        ],
+			        'description' => 'ordered users',
+		        ],
+		        'aExpectedResult' => "SELECT
+ DISTINCT `User`.`id` AS `Userid`,
+ `Person_contactid`.`first_name` AS `Userfirst_name`,
+ `Person_contactid_Contact`.`name` AS `Userlast_name`,
+ `Person_contactid_Contact`.`org_id` AS `Userorg_id`,
+ CAST(CONCAT(COALESCE(`Organization_org_id`.`name`, '')) AS CHAR) AS `Userorg_id_friendlyname`,
+ COALESCE((`Organization_org_id`.`status` = 'inactive'), 0) AS `Userorg_id_obsolescence_flag`,
+ CAST(CONCAT(COALESCE(`User`.`login`, '')) AS CHAR) AS `Userfriendlyname`,
+ `User`.`finalclass` AS `Userfinalclass`
+ FROM 
+   `priv_user` AS `User`
+   LEFT JOIN (
+      `person` AS `Person_contactid` 
+      INNER JOIN (
+         `contact` AS `Person_contactid_Contact` 
+         INNER JOIN 
+            `organization` AS `Organization_org_id`
+          ON `Person_contactid_Contact`.`org_id` = `Organization_org_id`.`id`
+      ) ON `Person_contactid`.`id` = `Person_contactid_Contact`.`id`
+   ) ON `User`.`contactid` = `Person_contactid`.`id`
+ WHERE 1
+ ORDER BY `Userfriendlyname` ASC
+ ",
+	        ],
+            'oql_columns with id (not an attributedef optimizable)' => [
                 'aMetric' => [
                     'oql_select' => [
                         'select' => 'SELECT User',
-                        'columns' =>  ['first_name', 'last_name'],
+                        'labels' =>  ['firstname' => 'first_name', 'lastname' => 'last_name'],
+	                    'value' => 'id'
                     ],
                     'description' => 'ordered users',
                 ],
@@ -90,6 +124,7 @@ class OqlSelectReaderTest extends ItopDataTestCase
                     'oql_select' => [
                         'select' => 'SELECT User',
                         'orderby' => ['first_name' => true, 'last_name' => false],
+	                    'value' => 'id'
                     ]
                 ],
                 'sExpectedSql' => "SELECT
@@ -130,6 +165,7 @@ class OqlSelectReaderTest extends ItopDataTestCase
                         'select' => 'SELECT User',
                         'limit_count' => '42',
                         'limit_start' => '24',
+	                    'value' => 'id'
                     ],
                 ],
                 'sExpectedSql' => "SELECT
@@ -175,7 +211,8 @@ class OqlSelectReaderTest extends ItopDataTestCase
                                             JOIN URP_Profiles ON URP_UserProfile.profileid = URP_Profiles.id WHERE URP_Profiles.name="Administrator"
                                     )
                                     ',
-                        'columns' => ['date'],
+                        'labels' => ['date' => 'date'],
+	                    'value' => 'id',
                         'orderby' => ['date' => false],
                         'limit_count' => '1',
                         'limit_start' => '0',
