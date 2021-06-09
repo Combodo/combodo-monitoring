@@ -238,4 +238,191 @@ class ControllerTest extends ItopDataTestCase {
 
         ];
     }
+
+	/**
+	 * @dataProvider RemoveDuplicatesProvider
+	 * @param array $aDuplicateMetricFields
+	 * @param array $aExpectedMetricFields
+	 */
+    public function testRemoveDuplicates(array $aDuplicateMetricFields, array $aExpectedMetricFields){
+    	$aMetrics = $this->BuildMetricArray($aDuplicateMetricFields);
+    	$aExpectedMetrics = $this->BuildMetricArray($aExpectedMetricFields);
+
+	    $this->assertEquals($aExpectedMetrics,
+		    $this->monitoringController->RemoveDuplicates($aMetrics));
+    }
+
+	public function BuildMetricArray(array $aDuplicateMetricFields) : array {
+		$aMetrics = [];
+		if (sizeof($aDuplicateMetricFields) === 0) {
+		    return $aMetrics;
+		}
+
+		foreach ($aDuplicateMetricFields as $aFields){
+			$aMetrics[] = new MonitoringMetric(
+				$aFields['name'],
+				'',
+				$aFields['value'],
+				$aFields['labels']
+			);
+		}
+
+		return $aMetrics;
+	}
+
+
+    public function RemoveDuplicatesProvider(){
+	    return [
+	    	'empty' => [
+			    'aDuplicateMetricFields' => [], 'aExpectedMetricFields' => []
+		    ],
+    		'one metric' => [
+			    'aDuplicateMetricFields' => [
+			    	'0' => [
+			    		'name' => 'toto',
+					    'labels' => [
+					        'ga' => 'bu',
+						    'zo' => 'meu'
+					    ],
+					    'value' => "1"
+                    ],
+			    ],
+			    'aExpectedMetricFields' => [
+				    '0' => [
+					    'name' => 'toto',
+					    'labels' => [
+						    'ga' => 'bu',
+						    'zo' => 'meu'
+					    ],
+					    'value' => "1"
+				    ],
+			    ],
+		    ],
+    		'one metric with no labels' => [
+			    'aDuplicateMetricFields' => [
+			    	'0' => [
+			    		'name' => 'toto',
+					    'labels' => [ ],
+					    'value' => "1"
+                    ],
+			    ],
+			    'aExpectedMetricFields' => [
+				    '0' => [
+					    'name' => 'toto',
+					    'labels' => [ ],
+					    'value' => "1"
+				    ],
+			    ],
+		    ],
+		    'no removal : one additional label' => [
+			    'aDuplicateMetricFields' => [
+				    '0' => [
+					    'name' => 'toto',
+					    'labels' => [
+						    'ga' => 'bu',
+						    'zo' => 'meu'
+					    ],
+					    'value' => "1"
+				    ],
+				    '1' => [
+					    'name' => 'toto',
+					    'labels' => [
+						    'ga' => 'bu',
+						    'zo' => 'meu',
+						    'zo2' => 'meu2'
+					    ],
+					    'value' => "1"
+				    ],
+			    ],
+			    'aExpectedMetricFields' => [
+				    '0' => [
+					    'name' => 'toto',
+					    'labels' => [
+						    'ga' => 'bu',
+						    'zo' => 'meu',
+					    ],
+					    'value' => "1"
+				    ],
+				    '1' => [
+					    'name' => 'toto',
+					    'labels' => [
+						    'ga' => 'bu',
+						    'zo' => 'meu',
+						    'zo2' => 'meu2'
+					    ],
+					    'value' => "1"
+				    ],
+			    ],
+		    ],
+		    'no removal : distinct names' => [
+			    'aDuplicateMetricFields' => [
+				    '0' => [
+					    'name' => 'toto',
+					    'labels' => [
+						    'ga' => 'bu',
+						    'zo' => 'meu'
+					    ],
+					    'value' => "1"
+				    ],
+				    '1' => [
+					    'name' => 'toto2',
+					    'labels' => [
+						    'ga' => 'bu',
+						    'zo' => 'meu',
+					    ],
+					    'value' => "1"
+				    ],
+			    ],
+			    'aExpectedMetricFields' => [
+				    '0' => [
+					    'name' => 'toto',
+					    'labels' => [
+						    'ga' => 'bu',
+						    'zo' => 'meu',
+					    ],
+					    'value' => "1"
+				    ],
+				    '1' => [
+					    'name' => 'toto2',
+					    'labels' => [
+						    'ga' => 'bu',
+						    'zo' => 'meu',
+					    ],
+					    'value' => "1"
+				    ],
+			    ],
+		    ],
+		    'removal' => [
+			    'aDuplicateMetricFields' => [
+				    '0' => [
+					    'name' => 'toto',
+					    'labels' => [
+						    'ga' => 'bu',
+						    'zo' => 'meu'
+					    ],
+					    'value' => "1"
+				    ],
+				    '1' => [
+					    'name' => 'toto',
+					    'labels' => [
+						    'ga' => 'bu',
+						    'zo' => 'meu',
+					    ],
+					    'value' => "2"
+				    ],
+			    ],
+			    'aExpectedMetricFields' => [
+				    '0' => [
+					    'name' => 'toto',
+					    'labels' => [
+						    'ga' => 'bu',
+						    'zo' => 'meu',
+					    ],
+					    'value' => "1"
+				    ],
+			    ],
+		    ]
+	    ];
+
+    }
 }

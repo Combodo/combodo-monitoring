@@ -16,6 +16,7 @@
 namespace Combodo\iTop\Monitoring\Test\MetricReader;
 
 use Combodo\iTop\Monitoring\MetricReader\OqlSelectReader;
+use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
 class OqlSelectReaderTest extends ItopDataTestCase
@@ -33,9 +34,8 @@ class OqlSelectReaderTest extends ItopDataTestCase
     /**
      * @dataProvider GetMetricsProvider
      */
-    public function testGetGetValue(array $aMetric, $aExpectedResult)
+    public function testGetGetValue(array $aMetric, $aExpectedResult, $aExpectedMetrics = null)
     {
-    	$this->markTestSkipped();
         $oOqlSelectReader = new OqlSelectReader('foo', $aMetric);
 
         $reflector = new \ReflectionObject($oOqlSelectReader);
@@ -53,19 +53,63 @@ class OqlSelectReaderTest extends ItopDataTestCase
         $method->setAccessible(true);
         $sSQL = $method->invoke($oSet, $m_aAttToLoad);
 
-        $this->assertEquals($aExpectedResult, $sSQL);
-
 	    $aMetrics = $oOqlSelectReader->GetMetrics();
-	    //var_dump($aMetrics);
+
+	    if ($aExpectedMetrics !== null){
+		    $this->assertNotEmpty($aMetrics);
+		    $this->assertEquals(sizeof($aExpectedMetrics), sizeof($aMetrics));
+		    $iIndex = 0;
+		    foreach ($aMetrics as $oMetric) {
+		    	/** @var MonitoringMetric $oMetric */
+			    $this->assertEquals("foo", $oMetric->GetName());
+			    $this->assertEquals("ordered users", $oMetric->GetDescription());
+			    $this->assertEquals($aExpectedMetrics[$iIndex]['value'], $oMetric->GetValue());
+			    $this->assertEquals($aExpectedMetrics[$iIndex]['labels'], $oMetric->GetLabels());
+		    }
+	    }
+
+	    $this->assertEquals($aExpectedResult, $sSQL);
     }
 
     public function GetMetricsProvider(): array
     {
-        return [
+	    $sJointSelect = "SELECT
+ DISTINCT `up`.`id` AS `upid`,
+ `p`.`name` AS `upprofile`,
+ `up`.`profileid` AS `upprofileid`,
+ CAST(CONCAT(COALESCE(`p`.`name`, '')) AS CHAR) AS `upprofileid_friendlyname`,
+ CAST(CONCAT(COALESCE(`up`.`userid`, '')) AS CHAR) AS `upfriendlyname`,
+ `p`.`id` AS `pid`,
+ `p`.`name` AS `pname`,
+ CAST(CONCAT(COALESCE(`p`.`name`, '')) AS CHAR) AS `pfriendlyname`
+ FROM 
+   `priv_urp_userprofile` AS `up`
+   INNER JOIN 
+      `priv_urp_profiles` AS `p`
+    ON `up`.`profileid` = `p`.`id`
+ WHERE (`up`.`profileid` = 1)
+ ORDER BY `upfriendlyname` ASC
+ ";
+	    $sJointSelect2 = "SELECT
+ DISTINCT `up`.`id` AS `upid`,
+ `p`.`name` AS `upprofile`,
+ `up`.`profileid` AS `upprofileid`,
+ CAST(CONCAT(COALESCE(`p`.`name`, '')) AS CHAR) AS `upprofileid_friendlyname`,
+ CAST(CONCAT(COALESCE(`up`.`userid`, '')) AS CHAR) AS `upfriendlyname`
+ FROM 
+   `priv_urp_userprofile` AS `up`
+   INNER JOIN 
+      `priv_urp_profiles` AS `p`
+    ON `up`.`profileid` = `p`.`id`
+ WHERE (`up`.`profileid` = 1)
+ ORDER BY `upfriendlyname` ASC
+ ";
+
+	    return [
 	        'oql_columns with org_id (to optimize as well)' => [
 		        'aMetric' => [
 			        'oql_select' => [
-				        'select' => 'SELECT User',
+				        'select' => 'SELECT User WHERE id=1',
 				        'labels' =>  ['firstname' => 'first_name', 'lastname' => 'last_name'],
 				        'value' => 'org_id'
 			        ],
@@ -91,14 +135,17 @@ class OqlSelectReaderTest extends ItopDataTestCase
           ON `Person_contactid_Contact`.`org_id` = `Organization_org_id`.`id`
       ) ON `Person_contactid`.`id` = `Person_contactid_Contact`.`id`
    ) ON `User`.`contactid` = `Person_contactid`.`id`
- WHERE 1
+ WHERE (`User`.`id` = 1)
  ORDER BY `Userfriendlyname` ASC
  ",
+		        'aExpectedMetrics' => [
+		        	[ 'value' => "1", 'labels' => [ 'firstname' => 'My first name', 'lastname' => 'My last name' ] ]
+		        ]
 	        ],
 	        'oql_columns with User.org_id (alias)' => [
 		        'aMetric' => [
 			        'oql_select' => [
-				        'select' => 'SELECT User',
+				        'select' => 'SELECT User WHERE id=1',
 				        'labels' =>  ['firstname' => 'first_name', 'lastname' => 'last_name'],
 				        'value' => 'User.org_id'
 			        ],
@@ -124,14 +171,17 @@ class OqlSelectReaderTest extends ItopDataTestCase
           ON `Person_contactid_Contact`.`org_id` = `Organization_org_id`.`id`
       ) ON `Person_contactid`.`id` = `Person_contactid_Contact`.`id`
    ) ON `User`.`contactid` = `Person_contactid`.`id`
- WHERE 1
+ WHERE (`User`.`id` = 1)
  ORDER BY `Userfriendlyname` ASC
  ",
+		        'aExpectedMetrics' => [
+			        [ 'value' => "1", 'labels' => [ 'firstname' => 'My first name', 'lastname' => 'My last name' ] ]
+		        ]
 	        ],
             'oql_columns with id (not an attributedef optimizable)' => [
                 'aMetric' => [
                     'oql_select' => [
-                        'select' => 'SELECT User',
+                        'select' => 'SELECT User WHERE id = 1',
                         'labels' =>  ['firstname' => 'first_name', 'lastname' => 'last_name'],
 	                    'value' => 'id'
                     ],
@@ -151,15 +201,18 @@ class OqlSelectReaderTest extends ItopDataTestCase
          `contact` AS `Person_contactid_Contact`
        ON `Person_contactid`.`id` = `Person_contactid_Contact`.`id`
    ) ON `User`.`contactid` = `Person_contactid`.`id`
- WHERE 1
+ WHERE (`User`.`id` = 1)
  ORDER BY `Userfriendlyname` ASC
  ",
+	            'aExpectedMetrics' => [
+		            [ 'value' => "1", 'labels' => [ 'firstname' => 'My first name', 'lastname' => 'My last name' ] ]
+	            ]
             ],
             'oql_order' => [
                 'aConf' => [
                     'description' => 'ordered users',
                     'oql_select' => [
-                        'select' => 'SELECT User',
+                        'select' => 'SELECT User WHERE id=1',
                         'orderby' => ['first_name' => true, 'last_name' => false],
 	                    'value' => 'id'
                     ]
@@ -191,17 +244,20 @@ class OqlSelectReaderTest extends ItopDataTestCase
           ON `Person_contactid_Contact`.`org_id` = `Organization_org_id`.`id`
       ) ON `Person_contactid`.`id` = `Person_contactid_Contact`.`id`
    ) ON `User`.`contactid` = `Person_contactid`.`id`
- WHERE 1
+ WHERE (`User`.`id` = 1)
  ORDER BY `Userfirst_name` ASC, `Userlast_name` DESC
  ",
+	            'aExpectedMetrics' => [
+		            [ 'value' => "1", 'labels' => [] ]
+	            ]
             ],
             'oql_limit' => [
                 'aConf' => [
                     'description' => 'ordered users',
                     'oql_select' => [
-                        'select' => 'SELECT User',
-                        'limit_count' => '42',
-                        'limit_start' => '24',
+                        'select' => 'SELECT User WHERE id=1',
+                        'limit_count' => '1',
+                        'limit_start' => '0',
 	                    'value' => 'id'
                     ],
                 ],
@@ -232,11 +288,14 @@ class OqlSelectReaderTest extends ItopDataTestCase
           ON `Person_contactid_Contact`.`org_id` = `Organization_org_id`.`id`
       ) ON `Person_contactid`.`id` = `Person_contactid_Contact`.`id`
    ) ON `User`.`contactid` = `Person_contactid`.`id`
- WHERE 1
+ WHERE (`User`.`id` = 1)
  ORDER BY `Userfriendlyname` ASC
- LIMIT 24, 42",
+ LIMIT 0, 1",
+	            'aExpectedMetrics' => [
+		            [ 'value' => "1", 'labels' => [] ]
+	            ]
             ],
-            'realife example' => [
+            /*'realife example' => [
                 'aConf' => [
                     'description' => 'dismantle free instances',
                     'oql_select' => [
@@ -282,45 +341,38 @@ class OqlSelectReaderTest extends ItopDataTestCase
   ))
  ORDER BY `EventLoginUsagedate` DESC
  LIMIT 0, 1",
-            ],
-	        'jointure using fields on both sides (makes no sense)' => [
+            ],*/
+	        /*'jointure using fields on both sides with -> syntax (metrics make no sense)' => [
 		        'aMetric' => [
 			        'oql_select' => [
-				        'select' => 'SELECT up, p FROM URP_UserProfile AS up JOIN URP_Profiles AS p ON up.profileid = p.id',
+				        'select' => 'SELECT up, p FROM URP_UserProfile AS up JOIN URP_Profiles AS p ON up.profileid = p.id WHERE up.profileid = 1',
 				        'labels' =>  [
-				        	'profile' => 'profile',
-					        'name' => 'profileid->name'
+				        	'profile' => 'p.name',
+					        'name' => 'profileid->profile'
 				        ],
-				        'value' => 'profileid'
+				        'value' => 'up.profileid'
 			        ],
 			        'description' => 'ordered users',
 		        ],
-		        'aExpectedResult' => "SELECT
- DISTINCT `up`.`id` AS `upid`,
- `up`.`userid` AS `upuserid`,
- `User_userid`.`login` AS `upuserlogin`,
- `up`.`profileid` AS `upprofileid`,
- `p`.`name` AS `upprofile`,
- `up`.`description` AS `upreason`,
- CAST(CONCAT(COALESCE(`up`.`userid`, '')) AS CHAR) AS `upfriendlyname`,
- CAST(CONCAT(COALESCE(`User_userid`.`login`, '')) AS CHAR) AS `upuserid_friendlyname`,
- `User_userid`.`finalclass` AS `upuserid_finalclass_recall`,
- CAST(CONCAT(COALESCE(`p`.`name`, '')) AS CHAR) AS `upprofileid_friendlyname`,
- `p`.`id` AS `pid`,
- `p`.`name` AS `pname`,
- `p`.`description` AS `pdescription`,
- CAST(CONCAT(COALESCE(`p`.`name`, '')) AS CHAR) AS `pfriendlyname`
- FROM 
-   `priv_urp_userprofile` AS `up`
-   INNER JOIN 
-      `priv_user` AS `User_userid`
-    ON `up`.`userid` = `User_userid`.`id`
-   INNER JOIN 
-      `priv_urp_profiles` AS `p`
-    ON `up`.`profileid` = `p`.`id`
- WHERE 1
- ORDER BY `upfriendlyname` ASC",
-	        ],
+		        'aExpectedResult' => $sJointSelect,
+	        ],*/
+		    'jointure using fields on both sides with FROM syntax' => [
+			    'aMetric' => [
+				    'oql_select' => [
+					    'select' => 'SELECT up, p FROM URP_UserProfile AS up JOIN URP_Profiles AS p ON up.profileid = p.id WHERE up.profileid = 1',
+					    'labels' =>  [
+						    'profile' => 'p.name',
+						    'name' => 'up.profile'
+					    ],
+					    'value' => 'up.profileid'
+				    ],
+				    'description' => 'ordered users',
+			    ],
+			    'aExpectedResult' => $sJointSelect,
+			    'aExpectedMetrics' => [
+				    [ 'value' => "1", 'labels' => [ 'profile' => 'Administrator', 'name' => 'Administrator' ] ]
+			    ]
+		    ],
         ];
     }
 }

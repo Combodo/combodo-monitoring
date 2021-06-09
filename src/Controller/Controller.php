@@ -27,7 +27,10 @@ class Controller extends BaseController {
 
         $aParams = array();
 
-        $aMetrics = $this->ReadMetrics($aMetricParams);
+        $aMetricsWithDuplicas = $this->ReadMetrics($aMetricParams);
+
+        //deduplicate metrics
+	    $aMetrics = $this->RemoveDuplicates($aMetricsWithDuplicas);
 
         $aTwigMetrics = [];
         if (is_array($aMetrics) && count($aMetrics) != 0){
@@ -60,6 +63,31 @@ class Controller extends BaseController {
         }
 
         echo $sOutput;
+    }
+
+    public function RemoveDuplicates(array $aDuplicateMetrics) : array
+    {
+	    $aMetrics = [];
+
+	    if (sizeof($aDuplicateMetrics) === 0){
+	    	return $aMetrics;
+	    }
+
+	    foreach ($aDuplicateMetrics as $oMetric){
+		    /** @var MonitoringMetric $oMetric*/
+		    $sKey = sprintf("%s_%s",
+			    $oMetric->GetName(),
+			    implode("_", $oMetric->GetLabels())
+		    );
+
+		    if (array_key_exists($sKey, $aMetrics)){
+		    	continue;
+		    }
+
+		    $aMetrics[$sKey] = $oMetric;
+	    }
+
+	    return array_values($aMetrics);
     }
 
     /**

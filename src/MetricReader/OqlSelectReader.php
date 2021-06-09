@@ -23,6 +23,7 @@ class OqlSelectReader implements MetricReaderInterface
 {
     private $sMetricName;
     private $aMetric;
+    private $sDefaultAlias;
 
     public function __construct($sMetricName, $aMetric)
     {
@@ -40,33 +41,60 @@ class OqlSelectReader implements MetricReaderInterface
         $aColumns = $this->aMetric[Constants::OQL_SELECT][Constants::LABELS] ?? [];
         $sColumnValue = $this->aMetric[Constants::OQL_SELECT][Constants::VALUE] ?? null;
 
-        if (empty($aColumns)) {
-            throw new \Exception("Metric $this->sMetricName Must provide at least one column to be read.");
-        }
-
         if ($sColumnValue === null) {
             throw new \Exception("Metric $this->sMetricName Must provide at least one value to be read.");
         }
 
         $oSet = $this->GetObjectSet();
         $aMetrics = [];
-        while ($oObject = $oSet->Fetch()) {
+        while ($aObjects = $oSet->FetchAssoc()) {
+        	if (sizeof($aObjects) === 0){
+        		continue;
+	        }
+
+        	//used only for simple OQL that retunr one  single object.
+	        //it is used for fields without any alias
+        	$oDefaultObject = $aObjects[$this->sDefaultAlias];
+
             $aCurrentLabels = [];
             foreach ($aColumns as $sLabel => $sColumn) {
-                $aCurrentLabels[$sLabel] = $oObject->Get($sColumn);
+            	$sValue = $this->GetColumnValueFromObjects($sColumn, $oDefaultObject, $aObjects);
+            	if ($sValue != null){
+		            $aCurrentLabels[$sLabel] = $sValue;
+	            }
             }
 
-            $sMetricValue = $oObject->Get($sColumnValue);
-            $aCurrentLabels = array_merge($aStaticLabels, $aCurrentLabels);
-            $aMetrics[] = new MonitoringMetric(
-                $this->sMetricName,
-                $sDescription,
-                $sMetricValue,
-                $aCurrentLabels
-            );
+	        $sMetricValue = $this->GetColumnValueFromObjects($sColumnValue, $oDefaultObject, $aObjects);
+	        if ($sMetricValue != null){
+		        $aCurrentLabels = array_merge($aStaticLabels, $aCurrentLabels);
+		        $aMetrics[] = new MonitoringMetric(
+			        $this->sMetricName,
+			        $sDescription,
+			        $sMetricValue,
+			        $aCurrentLabels
+		        );
+	        }
         }
 
         return $aMetrics;
+    }
+
+    private function GetColumnValueFromObjects(string $sColumn, $oDefaultObject, array $aObjects) {
+	    if (strpos($sColumn, ".") === false){
+		    return $oDefaultObject->Get($sColumn);
+	    } else {
+		    $aFields = explode(".", $sColumn);
+		    if (sizeof($aFields) === 2){
+			    $sAlias = $aFields[0];
+			    $sColumn = $aFields[1];
+
+			    if (array_key_exists($sAlias, $aObjects)){
+				    return $aObjects[$sAlias]->Get($sColumn);
+			    }
+		    }
+	    }
+
+	    return null;
     }
 
     /**
@@ -83,26 +111,46 @@ class OqlSelectReader implements MetricReaderInterface
         $iLimitCount = $this->aMetric[Constants::OQL_SELECT][Constants::LIMIT_COUNT] ?? 0;
         $iLimitStart = $this->aMetric[Constants::OQL_SELECT][Constants::LIMIT_START] ?? 0;
         $aColumns = $this->aMetric[Constants::OQL_SELECT][Constants::LABELS] ?? [];
-	    $sValue = $this->aMetric[Constants::OQL_SELECT][Constants::VALUE] ?? '';
+	    $sValueColumn = $this->aMetric[Constants::OQL_SELECT][Constants::VALUE] ?? '';
 
         $oSet = new \DBObjectSet($oSearch);
         $oSet->SetOrderBy($aOrderBy);
         $oSet->SetLimit($iLimitCount, $iLimitStart);
 
-        $sAlias = $oSearch->GetClassAlias();
-        $aOptimizeColumnsLoad = [];
-        foreach ($aColumns as $sKey => $sAttribute) {
-            $aOptimizeColumnsLoad[$sAlias][] = $sAttribute;
-        }
-        if ($sValue !== 'id'){
-			//id not an attribute def. cannot optimize it...
-	        $aOptimizeColumnsLoad[$sAlias][] = $sValue;
+        $aSelectedClasses = $oSearch->GetSelectedClasses();
+	    $aSelectedAliases = array_keys($aSelectedClasses);
+	    $this->sDefaultAlias = '';
+	    if (sizeof($aSelectedClasses) >= 1){
+	        $this->sDefaultAlias = $aSelectedAliases[0];
         }
 
-        /*if (!empty($aOptimizeColumnsLoad)) {
+        $aOptimizeColumnsLoad = [];
+        foreach ($aColumns as $sLabel => $sColumn) {
+	        $aOptimizeColumnsLoad = $this->CompleteColumnsLoadForOptimization($aOptimizeColumnsLoad, $sColumn);
+        }
+
+        if ($sValueColumn !== 'id'){
+			//id not an attribute def. cannot optimize it...
+	        $aOptimizeColumnsLoad = $this->CompleteColumnsLoadForOptimization($aOptimizeColumnsLoad, $sValueColumn);
+        }
+
+        if (!empty($aOptimizeColumnsLoad)) {
             $oSet->OptimizeColumnLoad($aOptimizeColumnsLoad);
-        }*/
+        }
 
         return $oSet;
+    }
+
+    private function CompleteColumnsLoadForOptimization(array $aOptimizeColumnsLoad, string $sColumn) : array{
+	    if (strpos($sColumn, ".") === false){
+		    $aOptimizeColumnsLoad[$this->sDefaultAlias][] = $sColumn;
+	    } else {
+		    $aFields = explode(".", $sColumn);
+		    if (sizeof($aFields) === 2){
+			    $aOptimizeColumnsLoad[$aFields[0]][] = $aFields[1];
+		    }
+	    }
+
+	    return $aOptimizeColumnsLoad;
     }
 }

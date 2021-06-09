@@ -174,14 +174,14 @@ The labels names are the keys of the group by alias, and the label values are th
 ### OqlSelectReader
 
 This reader expose the value for each column as labels, the column key being in monitoring labels. value of the metric comes from 'value'.
-*Example*:
+* Examples1: simple OQL*:
 ```php 
 [
     'description' => 'ordered users',
     'oql_select' => [
         'select' => 'SELECT User',
         'labels' =>  ['firtname' => first_name', 'lastname' => last_name'],
-        'value' => 'id' //make no sense except this is an integer
+        'value' => 'org_id' //make no sense except this is an integer
          
         // optional:
         'orderby' => ['first_name' => true, '_itop_count_' => false],         
@@ -195,6 +195,20 @@ This reader expose the value for each column as labels, the column key being in 
 
 Please note that `orderby`, `limit_count` and `limit_start` are optionals, and take the standard iTop's syntax.
 
+* Examples: OQL that returns different objects*:
+```php 
+[
+    'description' => 'ordered users',
+    'oql_select' => [
+        'select' => 'SELECT up, p FROM URP_UserProfile AS up JOIN URP_Profiles AS p ON up.profileid = p.id WHERE up.profileid = 1',
+        'labels' =>  [ 'profile' => 'p.name', 'name' => 'up.profile' ]
+		'value' => 'up.profileid'
+         
+    ],
+]
+```
+
+Please note how to use aliases to set metric labels or value. 
 
 ### CustomReader
 
