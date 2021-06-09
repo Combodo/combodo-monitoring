@@ -99,9 +99,9 @@ class OqlSelectReader implements MetricReaderInterface
 	        $aOptimizeColumnsLoad[$sAlias][] = $sValue;
         }
 
-        if (!empty($aOptimizeColumnsLoad)) {
+        /*if (!empty($aOptimizeColumnsLoad)) {
             $oSet->OptimizeColumnLoad($aOptimizeColumnsLoad);
-        }
+        }*/
 
         return $oSet;
     }
