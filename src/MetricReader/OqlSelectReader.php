@@ -48,6 +48,7 @@ class OqlSelectReader implements MetricReaderInterface
         $oSet = $this->GetObjectSet();
         $aMetrics = [];
         while ($aObjects = $oSet->FetchAssoc()) {
+	        $bExposeCurrentMetric = true;
         	if (sizeof($aObjects) === 0){
         		continue;
 	        }
@@ -59,9 +60,17 @@ class OqlSelectReader implements MetricReaderInterface
             $aCurrentLabels = [];
             foreach ($aColumns as $sLabel => $sColumn) {
             	$sValue = $this->GetColumnValueFromObjects($sColumn, $oDefaultObject, $aObjects);
-            	if ($sValue != null){
-		            $aCurrentLabels[$sLabel] = $sValue;
-	            }
+            	if ($sValue == null){
+	                //missing label: do not keep metric
+		            $bExposeCurrentMetric = false;
+		            break;
+            	}
+	            $aCurrentLabels[$sLabel] = $sValue;
+            }
+
+            if (false == $bExposeCurrentMetric){
+            	//missing label
+            	continue;
             }
 
 	        $sMetricValue = $this->GetColumnValueFromObjects($sColumnValue, $oDefaultObject, $aObjects);
@@ -89,7 +98,11 @@ class OqlSelectReader implements MetricReaderInterface
 			    $sColumn = $aFields[1];
 
 			    if (array_key_exists($sAlias, $aObjects)){
-				    return $aObjects[$sAlias]->Get($sColumn);
+				    $oObject = $aObjects[$sAlias];
+				    if ($oObject == null){
+			    		return null;
+				    }
+				    return $oObject->Get($sColumn);
 			    }
 		    }
 	    }
