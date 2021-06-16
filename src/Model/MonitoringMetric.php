@@ -78,4 +78,10 @@ class MonitoringMetric {
         $this->aLabels[$sKey] = $sValue;
     }
 
+    public function AddAllLabels($aNewLabels){
+        foreach ($aNewLabels as $sLabelName => $sLabelValue){
+            $this->aLabels[$sLabelName] = $sLabelValue;
+        }
+    }
+
 }

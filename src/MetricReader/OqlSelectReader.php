@@ -21,9 +21,9 @@ use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 class OqlSelectReader implements MetricReaderInterface
 {
-    private $sMetricName;
-    private $aMetric;
-    private $sDefaultAlias;
+    protected $sMetricName;
+	protected $aMetric;
+	protected $sDefaultAlias;
 
     public function __construct($sMetricName, $aMetric)
     {

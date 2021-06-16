@@ -20,8 +20,8 @@ use Combodo\iTop\Monitoring\Model\Constants;
 
 class CustomReader implements MetricReaderInterface
 {
-    private $sMetricName;
-    private $aMetric;
+	protected $sMetricName;
+	protected $aMetric;
 
     public function __construct($sMetricName, $aMetric)
     {

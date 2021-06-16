@@ -23,8 +23,8 @@ class ConfReader implements MetricReaderInterface
 {
     const CONF = 'conf';
 
-    private $sMetricName;
-    private $aMetric;
+	protected $sMetricName;
+	protected $aMetric;
 
     public function __construct($sMetricName, $aMetric)
     {
