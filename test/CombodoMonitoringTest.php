@@ -98,6 +98,14 @@ class CombodoMonitoringTest extends ItopDataTestCase
                         'groupby' => ['name' => 'name'],
                     ],
                 ],
+	            'itop_version' => [
+		            'description' => 'test itop version',
+		            'custom' => ['class' => '\Combodo\iTop\Monitoring\CustomReader\ItopVersionReader'],
+	            ],
+	            'itop_setup_version' => [
+		            'description' => 'test itop setup version',
+		            'custom' => ['class' => '\Combodo\iTop\Monitoring\CustomReader\ItopSetupVersionReader'],
+	            ],
             ],
         ];
 

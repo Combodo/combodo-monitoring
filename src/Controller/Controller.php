@@ -114,7 +114,6 @@ class Controller extends BaseController {
         /** @var array[MonitoringMetric] $aMetrics */
         $aMetrics = [];
         if (!is_array($aMetricParams) || empty($aMetricParams)){
-            \IssueLog::Info("No metrics configured");
             return $aMetrics;
         }
 
@@ -126,7 +125,6 @@ class Controller extends BaseController {
                 if (!isset($aMetric[Constants::METRIC_DESCRIPTION])) {
                     throw new \Exception("Metric $sMetricName has no description. Please provide it.");
                 }
-
                 $oReader = $oMetricReaderFactory->GetReader($sMetricName, $aMetric);
                 if (is_null($oReader)) {
                     continue;

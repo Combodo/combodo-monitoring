@@ -16,3 +16,9 @@ itop_custom{baz="iste"} 42
 # number of profiles
 itop_profile_unique_count{} XXX
 
+# iTop applicative version
+itop_version{} svn
+
+# iTop after setup version (code + datamodel)
+itop_setup_version{} 0
+

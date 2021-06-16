@@ -27,7 +27,7 @@ class ItopSetupVersionReader extends OqlSelectReader implements CustomReaderInte
     	$sOql = sprintf("SELECT ModuleInstallation WHERE name = '%s'", ITOP_APPLICATION);
         $aMetricConf = array_merge($aMetricConf,
             [
-                Constants::METRIC_DESCRIPTION => 'iTop applicative version',
+                Constants::METRIC_DESCRIPTION => 'iTop after setup version (code + datamodel)',
                 Constants::OQL_SELECT => [
                     Constants::SELECT => $sOql,
                     Constants::VALUE => 'version',
@@ -51,7 +51,6 @@ class ItopSetupVersionReader extends OqlSelectReader implements CustomReaderInte
 			    /** @var MonitoringMetric $oMetric */
 			    $sNewValue = $this->GetItopShortVersionId($oMetric);
 			    $oMetric->SetValue($sNewValue);
-			    preg_match('', $oMetric->GetValue(), $aMatches);
 		    }
 	    }
         return $aMetrics;
@@ -67,7 +66,6 @@ class ItopSetupVersionReader extends OqlSelectReader implements CustomReaderInte
 	        sizeof($aMatches) !== 2){
 	    	return '0';
 	    }
-	    var_dump($aMatches);
 	    return $aMatches[1];
     }
 }

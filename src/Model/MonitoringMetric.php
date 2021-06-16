@@ -39,33 +39,25 @@ class MonitoringMetric {
         $this->aLabels = $aLabels;
     }
 
-    /**
-     * @return string
-     */
-    public function GetName() {
+    public function GetName() : string {
         return $this->sName;
     }
 
-    /**
-     * @return string
-     */
-    public function GetDescription() {
+    public function GetDescription() : string {
         return $this->sDescription;
     }
 
-    /**
-     * @param string $sDescription
-     */
     public function SetDescription(string $sDescription): void {
         $this->sDescription = $sDescription;
     }
 
-    /**
-     * @return string
-     */
-    public function GetValue() {
+    public function GetValue() : string {
         return $this->sValue;
     }
+
+	public function setValue(string $sValue): void {
+		$this->sValue = $sValue;
+	}
 
     /**
      * @return string[]
@@ -83,5 +75,4 @@ class MonitoringMetric {
             $this->aLabels[$sLabelName] = $sLabelValue;
         }
     }
-
 }
