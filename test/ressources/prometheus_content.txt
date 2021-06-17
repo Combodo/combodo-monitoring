@@ -17,8 +17,8 @@ itop_custom{baz="iste"} 42
 itop_profile_unique_count{} XXX
 
 # iTop applicative version
-itop_version{} svn
+itop_version{} ITOP_VERSION
 
 # iTop after setup version (code + datamodel)
-itop_setup_version{} 0
+itop_setup_version{} ITOP_SETUP_VERSION
 

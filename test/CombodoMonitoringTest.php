@@ -124,7 +124,19 @@ class CombodoMonitoringTest extends ItopDataTestCase
         $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123&collection=collection1");
 
         $this->assertEquals(200, $aResp[1], $aResp[0]);
-        $sContent = str_replace('XXX', $iTopProfileUniqueCount, file_get_contents("$sRessourcesDir/prometheus_content.txt"));
+	    $sContent = file_get_contents("$sRessourcesDir/prometheus_content.txt");
+	    $sContent = str_replace('XXX', $iTopProfileUniqueCount, $sContent);
+
+	    if (! defined('ITOP_REVISION') || utils::IsDevelopmentEnvironment()) {
+		    $sItopApplicativeVersion = '0';
+		    $sItopSetupVersion = '0';
+	    } else {
+		    $sItopApplicativeVersion = ITOP_REVISION;
+		    $sItopSetupVersion = ITOP_REVISION;
+	    }
+	    $sContent = str_replace('ITOP_SETUP_VERSION', $sItopSetupVersion, $sContent);
+	    $sContent = str_replace('ITOP_VERSION', $sItopApplicativeVersion, $sContent);
+
         $this->assertEquals($sContent, $aResp[0]);
     }
 

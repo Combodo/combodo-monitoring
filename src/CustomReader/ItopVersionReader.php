@@ -35,7 +35,7 @@ class ItopVersionReader implements CustomReaderInterface
      */
     public function GetMetrics(): ?array
     {
-	    if (! defined('ITOP_REVISION')) {
+	    if (! defined('ITOP_REVISION') || \utils::IsDevelopmentEnvironment()) {
 		    $sValue = 0;
 	    } else {
 	    	$sValue = ITOP_REVISION;
