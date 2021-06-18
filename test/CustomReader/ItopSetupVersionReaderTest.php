@@ -33,7 +33,7 @@ class ItopSetupVersionReaderTest extends ItopDataTestCase {
 	public function GetItopVersionIdProvider(){
 		return [
 			'no version found' => ['3.0.0-dev-svn', '0' ],
-			'no version found bis' => ['bla', '0' ],
+			'no version found bis' => ['LATEST', '0' ],
 			'version found' => [ '3.0.0-dev-6517', '6517']
 		];
 	}

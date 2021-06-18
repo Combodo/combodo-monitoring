@@ -127,13 +127,14 @@ class CombodoMonitoringTest extends ItopDataTestCase
 	    $sContent = file_get_contents("$sRessourcesDir/prometheus_content.txt");
 	    $sContent = str_replace('XXX', $iTopProfileUniqueCount, $sContent);
 
-	    if (! defined('ITOP_REVISION') || utils::IsDevelopmentEnvironment()) {
-		    $sItopApplicativeVersion = '0';
-		    $sItopSetupVersion = '0';
-	    } else {
+	    if (defined('ITOP_REVISION') && filter_var(ITOP_VERSION, FILTER_VALIDATE_INT)) {
 		    $sItopApplicativeVersion = ITOP_REVISION;
 		    $sItopSetupVersion = ITOP_REVISION;
+	    } else {
+		    $sItopApplicativeVersion = '0';
+		    $sItopSetupVersion = '0';
 	    }
+
 	    $sContent = str_replace('ITOP_SETUP_VERSION', $sItopSetupVersion, $sContent);
 	    $sContent = str_replace('ITOP_VERSION', $sItopApplicativeVersion, $sContent);
 
