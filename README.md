@@ -79,6 +79,7 @@ Let's see all the builtins Metric readers:
 As seen before, this reader simply extract data from itop's configuration.
 You can either read from `MySettings` or from `MyModuleSettings`
 *Example*:
+
 ```php 
 array(
   'cron_max_execution_time' =>
@@ -98,6 +99,7 @@ array(
 
 If you want to extract data from multidimensional arrays, simply add all the keys.
 example:
+
 ```php 
 array(
   'monitoring_access_key' =>
@@ -128,6 +130,7 @@ $MyModuleSettings = [
 This Reader is the simplest possible one: it count the number of result .
 
 *Example*:
+
 ```php 
 [
     'oql_count' => [
@@ -143,6 +146,7 @@ This Reader count the number of unique result for a given attribute.
 > ! This should not be used on massive data !
 
 *Example*:
+
 ```php 
 [
     'description' => 'number of used profiles',
@@ -174,7 +178,8 @@ The labels names are the keys of the group by alias, and the label values are th
 ### OqlSelectReader
 
 This reader expose the value for each column as labels, the column key being in monitoring labels. value of the metric comes from 'value'.
-* Examples1: simple OQL*:
+* Examples1: simple OQL:
+
 ```php 
 [
     'description' => 'ordered users',
@@ -196,6 +201,7 @@ This reader expose the value for each column as labels, the column key being in 
 Please note that `orderby`, `limit_count` and `limit_start` are optionals, and take the standard iTop's syntax.
 
 * Examples: OQL that returns different objects*:
+
 ```php 
 [
     'description' => 'ordered users',
@@ -208,7 +214,24 @@ Please note that `orderby`, `limit_count` and `limit_start` are optionals, and t
 ]
 ```
 
-Please note how to use aliases to set metric labels or value. 
+Please note how to use aliases to set metric labels or value.
+
+### X509CertificateReader
+
+This reader reports the remaining number of days **before the expiration** of an X509 certificate.
+
+*Example*:
+
+```php
+'metrics' => [
+        'certificate-exipration' => [
+                [
+                        'description' => 'SSL Certificate Expiration',
+                        'custom' => ['class' => \Combodo\iTop\Monitoring\CustomReader\X509CertificateReader::class],
+                        'certificate_file' => '/etc/letsencrypt/live/some-domain/cert.pem',
+                ],
+        ],
+```
 
 ### CustomReader
 
