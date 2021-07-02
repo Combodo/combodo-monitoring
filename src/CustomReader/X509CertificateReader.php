@@ -28,7 +28,7 @@ class X509CertificateReader implements CustomReaderInterface
     
     public function __construct($sMetricName, $aMetricConf)
     {
-        $this->aMetricConf = $aMetricConf;
+        $this->aMetricConf = $aMetricConf ?? 'days_until_certificate_expiration';
         $this->sMetricName = $sMetricName;
     }
     
@@ -38,6 +38,7 @@ class X509CertificateReader implements CustomReaderInterface
     public function GetMetrics(): ?array
     {
         $x509cert = $this->aMetricConf['certificate_file'];
+        $labels = $this->aMetricConf['labels'] ?? [];
         if (!is_readable($x509cert))
         {
             IssueLog::Error("Combodo-monitoring - Error: failed to read certificate file '$x509cert'.");
@@ -65,8 +66,8 @@ class X509CertificateReader implements CustomReaderInterface
             $iRemainingDays = -1;
         }
         
-        $sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
+        $sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? 'Number of days until certificate expiration';
         
-        return [ new MonitoringMetric($this->sMetricName, $sDesc, $iRemainingDays) ];
+        return [ new MonitoringMetric($this->sMetricName, $sDesc, $iRemainingDays, $labels) ];
     }
 }
