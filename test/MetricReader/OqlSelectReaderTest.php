@@ -23,7 +23,7 @@ class OqlSelectReaderTest extends ItopDataTestCase
 {
     public function setUp()
     {
-        //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
+        require_once '/home/combodo/workspace/iTop/approot.inc.php';
         parent::setUp();
 
         require_once(APPROOT . 'env-production/combodo-monitoring/vendor/autoload.php');
@@ -78,7 +78,7 @@ class OqlSelectReaderTest extends ItopDataTestCase
  `p`.`name` AS `upprofile`,
  `up`.`profileid` AS `upprofileid`,
  CAST(CONCAT(COALESCE(`p`.`name`, '')) AS CHAR) AS `upprofileid_friendlyname`,
- CAST(CONCAT(COALESCE(`up`.`userid`, '')) AS CHAR) AS `upfriendlyname`,
+ CAST(CONCAT(COALESCE('Link between ', ''), COALESCE(`User_userid`.`login`, ''), COALESCE(' and ', ''), COALESCE(`p`.`name`, '')) AS CHAR) AS `upfriendlyname`,
  `p`.`id` AS `pid`,
  `p`.`name` AS `pname`,
  CAST(CONCAT(COALESCE(`p`.`name`, '')) AS CHAR) AS `pfriendlyname`
@@ -87,6 +87,9 @@ class OqlSelectReaderTest extends ItopDataTestCase
    INNER JOIN 
       `priv_urp_profiles` AS `p`
     ON `up`.`profileid` = `p`.`id`
+   INNER JOIN 
+      `priv_user` AS `User_userid`
+    ON `up`.`userid` = `User_userid`.`id`
  WHERE (`up`.`profileid` = 1)
  ORDER BY `upfriendlyname` ASC
  ";
