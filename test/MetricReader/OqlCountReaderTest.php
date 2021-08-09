@@ -66,10 +66,10 @@ class OqlCountReaderTest extends ItopDataTestCase
                     'description' => 'ordered users',
                 ],
                 'aExpectedResult' => "SELECT COUNT(*) AS COUNT FROM (SELECT
- DISTINCT COALESCE(`User`.`id`, 0) 
+ DISTINCT COALESCE(`User`.`id`, 0) AS idCount0 
  FROM 
    `priv_user` AS `User`
- WHERE 1 ) AS _alderaan_",
+ WHERE 1 ) AS _alderaan_ WHERE idCount0>0",
             ],
 
         ];
