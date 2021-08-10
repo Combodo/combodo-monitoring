@@ -2,7 +2,7 @@
 
 namespace Combodo\iTop\Monitoring\Test\CustomReader;
 
-use Combodo\iTop\Monitoring\CustomReader\ItoBackupReader;
+use Combodo\iTop\Monitoring\CustomReader\ItopBackupReader;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
 class ItopBackupReaderTest extends ItopDataTestCase
@@ -46,7 +46,7 @@ class ItopBackupReaderTest extends ItopDataTestCase
     public function testGetMetrics()
     {
         $aLabels = ['toto' => 'titi'];
-        $oItoBackupReader = new ItoBackupReader('', ['static_labels' => $aLabels]);
+        $oItopBackupReader = new ItopBackupReader('', ['static_labels' => $aLabels]);
 
         $this->createFile($this->sDir.'/manual', '.zip');
         $this->createFile($this->sDir.'/manual', '.tar.gz');
@@ -54,7 +54,7 @@ class ItopBackupReaderTest extends ItopDataTestCase
         $sLastBackupPath = $this->createFile($this->sDir.'/auto', '.zip');
         $iLastBackupSize = filesize($sLastBackupPath);
         touch($sLastBackupPath, strtotime('-13 hours'));
-        $oMetrics = $oItoBackupReader->GetMetrics($this->sDir);
+        $oMetrics = $oItopBackupReader->GetMetrics($this->sDir);
         $this->assertEquals(3, sizeof($oMetrics));
 
         /* MonitoringMetric $oMetric */
@@ -80,9 +80,9 @@ class ItopBackupReaderTest extends ItopDataTestCase
     public function testGetMetricsNoFiles()
     {
         $aLabels = ['toto' => 'titi'];
-        $oItoBackupReader = new ItoBackupReader('', ['static_labels' => $aLabels]);
+        $oItopBackupReader = new ItopBackupReader('', ['static_labels' => $aLabels]);
 
-        $oMetrics = $oItoBackupReader->GetMetrics($this->sDir);
+        $oMetrics = $oItopBackupReader->GetMetrics($this->sDir);
         $this->assertEquals(3, sizeof($oMetrics));
 
         /* MonitoringMetric $oMetric */

@@ -19,7 +19,7 @@ use Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
-class ItoBackupReader implements CustomReaderInterface
+class ItopBackupReader implements CustomReaderInterface
 {
     private $aMetricConf;
     private $sMetricName;
