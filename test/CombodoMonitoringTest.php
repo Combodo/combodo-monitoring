@@ -61,7 +61,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
             'collection1' => [
                 'itop_user_select' => [
                     'description' => 'Name of profile (oql_select)',
-	                'static_labels' => ['toto' => 'titi'],
+                    'static_labels' => ['toto' => 'titi'],
                     'oql_select' => [
                         'select' => 'SELECT URP_UserProfile WHERE URP_UserProfile.userid=1',
                         'labels' => ['profile' => 'profile'],
@@ -98,19 +98,19 @@ class CombodoMonitoringTest extends ItopDataTestCase
                         'groupby' => ['name' => 'name'],
                     ],
                 ],
-	            'itop_version' => [
-		            'description' => 'test itop version',
-		            'custom' => ['class' => '\Combodo\iTop\Monitoring\CustomReader\ItopVersionReader'],
-	            ],
-	            'itop_setup_version' => [
-		            'description' => 'test itop setup version',
-		            'custom' => ['class' => '\Combodo\iTop\Monitoring\CustomReader\ItopSetupVersionReader'],
-	            ],
+                'itop_version' => [
+                    'description' => 'test itop version',
+                    'custom' => ['class' => '\Combodo\iTop\Monitoring\CustomReader\ItopVersionReader'],
+                ],
+                'itop_setup_version' => [
+                    'description' => 'test itop setup version',
+                    'custom' => ['class' => '\Combodo\iTop\Monitoring\CustomReader\ItopSetupVersionReader'],
+                ],
             ],
         ];
 
         $oOqlCountUniqueReader = new \Combodo\iTop\Monitoring\MetricReader\OqlCountUniqueReader('itop_profile_unique_count', $aMetricConf['collection1']['itop_profile_unique_count']);
-        /** @var MonitoringMetric $oMetric*/
+        /** @var MonitoringMetric $oMetric */
         $oMetric = $oOqlCountUniqueReader->GetMetrics()[0];
         $iTopProfileUniqueCount = $oMetric->GetValue();
 
@@ -124,20 +124,20 @@ class CombodoMonitoringTest extends ItopDataTestCase
         $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123&collection=collection1");
 
         $this->assertEquals(200, $aResp[1], $aResp[0]);
-	    $sContent = file_get_contents("$sRessourcesDir/prometheus_content.txt");
-	    $sContent = str_replace('XXX', $iTopProfileUniqueCount, $sContent);
+        $sContent = file_get_contents("$sRessourcesDir/prometheus_content.txt");
+        $sContent = str_replace('XXX', $iTopProfileUniqueCount, $sContent);
 
-	    if (defined('ITOP_REVISION') &&
-            (ITOP_REVISION == (int) ITOP_REVISION)) {
-		    $sItopApplicativeVersion = ITOP_REVISION;
-		    $sItopSetupVersion = ITOP_REVISION;
-	    } else {
-		    $sItopApplicativeVersion = '0';
-		    $sItopSetupVersion = '0';
-	    }
+        if (defined('ITOP_REVISION')
+            && filter_var(ITOP_REVISION, FILTER_VALIDATE_INT)) {
+            $sItopApplicativeVersion = ITOP_REVISION;
+            $sItopSetupVersion = ITOP_REVISION;
+        } else {
+            $sItopApplicativeVersion = '0';
+            $sItopSetupVersion = '0';
+        }
 
-	    $sContent = str_replace('ITOP_SETUP_VERSION', $sItopSetupVersion, $sContent);
-	    $sContent = str_replace('ITOP_VERSION', $sItopApplicativeVersion, $sContent);
+        $sContent = str_replace('ITOP_SETUP_VERSION', $sItopSetupVersion, $sContent);
+        $sContent = str_replace('ITOP_VERSION', $sItopApplicativeVersion, $sContent);
 
         $this->assertEquals($sContent, $aResp[0]);
     }
