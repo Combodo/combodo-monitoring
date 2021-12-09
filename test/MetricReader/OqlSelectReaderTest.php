@@ -19,6 +19,9 @@ use Combodo\iTop\Monitoring\MetricReader\OqlSelectReader;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
+/**
+ * @group sampleDataNeeded
+ */
 class OqlSelectReaderTest extends ItopDataTestCase
 {
     public function setUp()
