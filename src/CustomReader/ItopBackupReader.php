@@ -55,7 +55,7 @@ class ItopBackupReader implements CustomReaderInterface
         $iLastBackupSizeInBytes = -1;
         $iLastBackupAgeInDays = -1;
         if (0 != $iSize) {
-            $sLastBackupPath = $aFiles[0];
+            $sLastBackupPath = $aFiles[$iSize-1];
             $iLastBackupSizeInBytes = filesize($sLastBackupPath);
             $iLastBackupAgeInDays = (strtotime('now') - filemtime($sLastBackupPath)) / 3600;
         }

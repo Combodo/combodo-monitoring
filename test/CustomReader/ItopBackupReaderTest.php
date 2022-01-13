@@ -50,7 +50,10 @@ class ItopBackupReaderTest extends ItopDataTestCase
 
         $this->createFile($this->sDir.'/manual', '.zip');
         $this->createFile($this->sDir.'/manual', '.tar.gz');
+
         $this->createFile($this->sDir.'/auto', '.tar.gz');
+        $this->createFile($this->sDir.'/auto', '.zip');
+
         $sLastBackupPath = $this->createFile($this->sDir.'/auto', '.zip');
         $iLastBackupSize = filesize($sLastBackupPath);
         touch($sLastBackupPath, strtotime('-13 hours'));
