@@ -25,7 +25,7 @@ class OqlGroupByReaderTest extends ItopDataTestCase
         //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         parent::setUp();
 
-        require_once(APPROOT . 'env-production/combodo-monitoring/vendor/autoload.php');
+        @require_once(APPROOT . 'env-production/combodo-monitoring/vendor/autoload.php');
         require_once(APPROOT . 'core/config.class.inc.php');
 
     }

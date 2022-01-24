@@ -29,7 +29,7 @@ class OqlSelectReaderTest extends ItopDataTestCase
         //require_once '/home/combodo/workspace/iTop/approot.inc.php';
         parent::setUp();
 
-        require_once(APPROOT . 'env-production/combodo-monitoring/vendor/autoload.php');
+        @require_once(APPROOT . 'env-production/combodo-monitoring/vendor/autoload.php');
         require_once(APPROOT . 'core/config.class.inc.php');
 
     }
@@ -305,11 +305,11 @@ class OqlSelectReaderTest extends ItopDataTestCase
                 'aConf' => [
                     'description' => 'dismantle free instances',
                     'oql_select' => [
-                        'select' => 'SELECT EventLoginUsage 
+                        'select' => 'SELECT EventLoginUsage
                                     JOIN User ON EventLoginUsage.user_id = User.id
                                     WHERE User.id NOT IN (
-                                        SELECT User   
-                                            JOIN URP_UserProfile ON URP_UserProfile.userid = User.id    
+                                        SELECT User
+                                            JOIN URP_UserProfile ON URP_UserProfile.userid = User.id
                                             JOIN URP_Profiles ON URP_UserProfile.profileid = URP_Profiles.id WHERE URP_Profiles.name="Administrator"
                                     )
                                     ',
@@ -325,21 +325,21 @@ class OqlSelectReaderTest extends ItopDataTestCase
  `EventLoginUsage_Event`.`date` AS `EventLoginUsagedate`,
  CAST(CONCAT(COALESCE('EventLoginUsage', '')) AS CHAR) AS `EventLoginUsagefriendlyname`,
  `EventLoginUsage_Event`.`realclass` AS `EventLoginUsagefinalclass`
- FROM 
+ FROM
    `priv_event_loginusage` AS `EventLoginUsage`
-   INNER JOIN 
+   INNER JOIN
       `priv_user` AS `User`
     ON `EventLoginUsage`.`user_id` = `User`.`id`
-   INNER JOIN 
+   INNER JOIN
       `priv_event` AS `EventLoginUsage_Event`
     ON `EventLoginUsage`.`id` = `EventLoginUsage_Event`.`id`
  WHERE (`User`.`id` NOT IN (SELECT
  DISTINCT `User1`.`id` AS `User1id`
- FROM 
+ FROM
    `priv_user` AS `User1`
    INNER JOIN (
-      `priv_urp_userprofile` AS `URP_UserProfile` 
-      INNER JOIN 
+      `priv_urp_userprofile` AS `URP_UserProfile`
+      INNER JOIN
          `priv_urp_profiles` AS `URP_Profiles`
        ON `URP_UserProfile`.`profileid` = `URP_Profiles`.`id`
    ) ON `User1`.`id` = `URP_UserProfile`.`userid`
