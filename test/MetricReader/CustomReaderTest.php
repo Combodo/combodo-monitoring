@@ -36,29 +36,16 @@ class CustomReaderTest extends ItopTestCase
         @require_once(APPROOT . 'env-production/combodo-monitoring/vendor/autoload.php');
     }
 
-    /**
-     * @dataProvider GetMetricsProvider
-     */
-    public function testGetGetValue(array $aMetric, $aExpectedResult)
+    public function testGetGetValue()
     {
+	    $aMetric = [
+		    'custom' => ['class' => CustomReaderImpl::class],
+		    'description' => 'descriptionFromConf'
+	    ];
         $oCustomReader = new CustomReader('foo', $aMetric);
         $aResult = $oCustomReader->GetMetrics();
 
-        $this->assertEquals($aExpectedResult, $aResult);
-    }
-
-    public function GetMetricsProvider(): array
-    {
-        $this->setUp();
-
-        return [
-            'MySettings nominal' => [
-                'aMetric' => [
-                    'custom' => ['class' => CustomReaderImpl::class],
-                    'description' => 'descriptionFromConf'
-                ],
-                'aExpectedResult' => [ new MonitoringMetric('foo', 'descriptionFromConf', 42, ['baz' => 'iste'])],
-            ],
-        ];
+	    $aExpectedResult = [ new MonitoringMetric('foo', 'descriptionFromConf', 42, ['baz' => 'iste'])];
+	    $this->assertEquals($aExpectedResult, $aResult);
     }
 }
