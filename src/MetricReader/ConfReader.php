@@ -15,7 +15,6 @@
 
 namespace Combodo\iTop\Monitoring\MetricReader;
 
-
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
@@ -23,8 +22,8 @@ class ConfReader implements MetricReaderInterface
 {
     const CONF = 'conf';
 
-	protected $sMetricName;
-	protected $aMetric;
+    protected $sMetricName;
+    protected $aMetric;
 
     public function __construct($sMetricName, $aMetric)
     {
@@ -33,12 +32,11 @@ class ConfReader implements MetricReaderInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function GetMetrics(): ?array
     {
-        if (! is_array($this->aMetric) || !array_key_exists(self::CONF, $this->aMetric))
-        {
+        if (!is_array($this->aMetric) || !array_key_exists(self::CONF, $this->aMetric)) {
             return null;
         }
 
@@ -46,7 +44,8 @@ class ConfReader implements MetricReaderInterface
 
         $sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
         $aLabels = $this->aMetric[Constants::METRIC_LABEL] ?? [];
-        return [ new MonitoringMetric($this->sMetricName, $sDescription, $sValue, $aLabels) ] ;
+
+        return [new MonitoringMetric($this->sMetricName, $sDescription, $sValue, $aLabels)];
     }
 
     private function GetValue(?\Config $config = null)
@@ -59,10 +58,13 @@ class ConfReader implements MetricReaderInterface
             throw new \Exception(sprintf('Metric %s is not configured with a proper array ("%s" given).', $this->sMetricName, $aMetricConf));
         }
 
-        if ($aMetricConf[0] == 'MySettings') {
+        if ('MySettings' == $aMetricConf[0]) {
+            if (!$config->IsProperty($aMetricConf[1])) {
+                throw new \Exception("Metric $this->sMetricName was not found in configuration.");
+            }
+
             $sValue = $config->Get($aMetricConf[1]);
             $aParamPath = array_slice($aMetricConf, 2);
-            
         } else {
             $sValue = $config->GetModuleSetting($aMetricConf[1], $aMetricConf[2], null);
             $aParamPath = array_slice($aMetricConf, 3);
@@ -77,5 +79,5 @@ class ConfReader implements MetricReaderInterface
         }
 
         return $sValue;
-}
+    }
 }
