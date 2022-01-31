@@ -18,6 +18,11 @@ namespace Combodo\iTop\Monitoring\Test\MetricReader;
 use Combodo\iTop\Monitoring\MetricReader\OqlGroupByReader;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ * @backupGlobals disabled
+ */
 class OqlGroupByReaderTest extends ItopDataTestCase
 {
     public function setUp()

@@ -5,6 +5,11 @@ namespace Combodo\iTop\Monitoring\Test\CustomReader;
 use Combodo\iTop\Monitoring\CustomReader\ItopBackupReader;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ * @backupGlobals disabled
+ */
 class ItopBackupReaderTest extends ItopDataTestCase
 {
     private $sDir;
@@ -48,15 +53,14 @@ class ItopBackupReaderTest extends ItopDataTestCase
         $aLabels = ['toto' => 'titi'];
         $oItopBackupReader = new ItopBackupReader('', ['static_labels' => $aLabels]);
 
-        $this->createFile($this->sDir.'/manual', '.zip');
-        $this->createFile($this->sDir.'/manual', '.tar.gz');
+        $this->createFile($this->sDir.'/manual', '.zip', '-14 hours');
+        $this->createFile($this->sDir.'/manual', '.tar.gz', '-14 hours');
 
-        $this->createFile($this->sDir.'/auto', '.tar.gz');
-        $this->createFile($this->sDir.'/auto', '.zip');
+        $this->createFile($this->sDir.'/auto', '.tar.gz', '-14 hours');
+        $this->createFile($this->sDir.'/auto', '.zip', '-14 hours');
 
-        $sLastBackupPath = $this->createFile($this->sDir.'/auto', '.zip');
+        $sLastBackupPath = $this->createFile($this->sDir.'/auto', '.zip', '-13 hours');
         $iLastBackupSize = filesize($sLastBackupPath);
-        touch($sLastBackupPath, strtotime('-13 hours'));
         $oMetrics = $oItopBackupReader->GetMetrics($this->sDir);
         $this->assertEquals(3, sizeof($oMetrics));
 
@@ -108,15 +112,16 @@ class ItopBackupReaderTest extends ItopDataTestCase
         $this->assertEquals('last iTop backup file age in hours.', $oMetric->GetDescription());
     }
 
-    private function createFile($sDirPath, $sSuffix): string
+    private function createFile($sDirPath, $sSuffix, $sTimeOffset): string
     {
         if (!is_dir($sDirPath)) {
             mkdir($sDirPath);
         }
         $sDate = date('c');
-        $sFilePath = "$sDirPath/$sDate.$sSuffix";
+        $sFilePath = "$sDirPath/${sDate}${sSuffix}";
         file_put_contents($sFilePath, $sDate);
 
+        touch($sFilePath, strtotime($sTimeOffset));
         return $sFilePath;
     }
 }

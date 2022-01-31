@@ -52,12 +52,14 @@ class ItopBackupReader implements CustomReaderInterface
             $aLabels
         );
 
+        clearstatcache();
         $iLastBackupSizeInBytes = -1;
         $iLastBackupAgeInDays = -1;
         if (0 != $iSize) {
-            $sLastBackupPath = $aFiles[$iSize-1];
+            $sLastBackupPath = $aFiles[$iSize - 1];
             $iLastBackupSizeInBytes = filesize($sLastBackupPath);
-            $iLastBackupAgeInDays = (strtotime('now') - filemtime($sLastBackupPath)) / 3600;
+            $fLastBackupAgeInDays = (strtotime('now') - filemtime($sLastBackupPath)) / 3600;
+            $iLastBackupAgeInDays = (int) $fLastBackupAgeInDays;
         }
 
         $oLastBackupSizeMetric = new MonitoringMetric($this->sMetricName.'lastbackup_inbytes_size',
@@ -71,7 +73,6 @@ class ItopBackupReader implements CustomReaderInterface
             $iLastBackupAgeInDays,
             $aLabels
         );
-
         $aMetrics = [$oCountBackupMetric, $oLastBackupSizeMetric, $oLastBackupAgeMetric];
 
         return $aMetrics;

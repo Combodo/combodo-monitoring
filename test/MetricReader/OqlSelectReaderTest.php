@@ -21,6 +21,9 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
 /**
  * @group sampleDataNeeded
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ * @backupGlobals disabled
  */
 class OqlSelectReaderTest extends ItopDataTestCase
 {

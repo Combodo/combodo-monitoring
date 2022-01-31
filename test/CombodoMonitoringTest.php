@@ -4,7 +4,13 @@ use Combodo\iTop\Monitoring\Controller\Controller;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
+use Combodo\iTop\Monitoring\Test\MetricReader\CustomReaders\CustomReaderImpl;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ * @backupGlobals disabled
+ */
 class CombodoMonitoringTest extends ItopDataTestCase
 {
     private $sUrl;

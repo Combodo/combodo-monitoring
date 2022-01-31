@@ -22,6 +22,11 @@ use Combodo\iTop\Monitoring\MetricReader\ConfReader;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 use Combodo\iTop\Test\UnitTest\ItopTestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ * @backupGlobals disabled
+ */
 class ItopReadOnlyCustomReaderInterfaceTest extends ItopTestCase
 {
     public function setUp()

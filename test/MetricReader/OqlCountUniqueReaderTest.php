@@ -19,6 +19,11 @@ use Combodo\iTop\Monitoring\MetricReader\OqlCountUniqueReader;
 use Combodo\iTop\Monitoring\MetricReader\OqlGroupByReader;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ * @backupGlobals disabled
+ */
 class OqlCountUniqueReaderTest extends ItopDataTestCase
 {
     public function setUp()

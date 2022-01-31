@@ -6,6 +6,11 @@ use Combodo\iTop\Monitoring\CustomReader\ItopSetupVersionReader;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ * @backupGlobals disabled
+ */
 class ItopSetupVersionReaderTest extends ItopDataTestCase {
 
     public function setUp()
