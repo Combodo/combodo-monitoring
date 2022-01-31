@@ -202,7 +202,7 @@ class ControllerTest extends ItopDataTestCase
         if (null !== $sExpectedException) {
             $this->expectExceptionMessageRegExp($sExpectedException);
         }
-        
+
         // We are using PHPUnit\Framework\MockObject\Generator::generateMock that is throwing notice !
         // Changing config so that those won't be caught by \DeprecatedCallsLog::DeprecatedNoticesErrorHandler
         // disabling devenv is easier than changing log config O:)

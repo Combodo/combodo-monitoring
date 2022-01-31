@@ -60,7 +60,7 @@ class ConfReader implements MetricReaderInterface
 
         if ('MySettings' == $aMetricConf[0]) {
             if (!$config->IsProperty($aMetricConf[1])) {
-                throw new \Exception("Metric $this->sMetricName was not found in configuration.");
+                throw new \Exception("Metric $this->sMetricName was not found in configuration found.");
             }
 
             $sValue = $config->Get($aMetricConf[1]);

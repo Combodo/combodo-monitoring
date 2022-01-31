@@ -24,6 +24,11 @@ use Combodo\iTop\Monitoring\MetricReader\OqlGroupByReader;
 use Combodo\iTop\Monitoring\MetricReader\OqlSelectReader;
 use Combodo\iTop\Test\UnitTest\ItopTestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ * @backupGlobals disabled
+ */
 class MetricReaderFactoryTest extends ItopTestCase
 {
     public function setUp()

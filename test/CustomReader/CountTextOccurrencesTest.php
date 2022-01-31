@@ -20,6 +20,11 @@ use Combodo\iTop\Monitoring\CustomReader\CountTextOccurrences;
 use Combodo\iTop\Monitoring\MetricReader\ConfReader;
 use Combodo\iTop\Test\UnitTest\ItopTestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ * @backupGlobals disabled
+ */
 class CountTextOccurrencesTest extends ItopTestCase
 {
     public function setUp()

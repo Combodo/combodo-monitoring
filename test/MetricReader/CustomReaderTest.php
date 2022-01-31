@@ -20,6 +20,11 @@ use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 use Combodo\iTop\Monitoring\Test\MetricReader\CustomReaders\CustomReaderImpl;
 use Combodo\iTop\Test\UnitTest\ItopTestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ * @backupGlobals disabled
+ */
 class CustomReaderTest extends ItopTestCase
 {
     public function setUp()

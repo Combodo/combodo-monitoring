@@ -20,111 +20,139 @@ use Combodo\iTop\Test\UnitTest\ItopTestCase;
 use Config;
 use ReflectionObject;
 
-class ConfReaderTest extends ItopTestCase
-{
-    public function setUp()
-    {
-        //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
-        parent::setUp();
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ * @backupGlobals disabled
+ */
+class ConfReaderTest extends ItopTestCase {
+	public function setUp() {
+		//@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
+		parent::setUp();
 
-        @require_once(APPROOT . 'env-production/combodo-monitoring/vendor/autoload.php');
-    }
+		@require_once(APPROOT.'env-production/combodo-monitoring/vendor/autoload.php');
+	}
 
-    /**
-     * @dataProvider GetMetricsProvider
-     */
-    public function testGetGetValue(array $aMetric, $aConfigGetterResponse, $aExpectedResult, ?string $sExpectedException)
-    {
-        $oConfigMock = $this->createMock(Config::class);
-        $oConfigMock->expects($this->any())
-            ->method('GetModuleSetting')
-            ->willReturn( $aConfigGetterResponse)
-        ;
-        $oConfigMock->expects($this->any())
-            ->method('Get')
-            ->willReturn( $aConfigGetterResponse)
-        ;
+	/**
+	 * @dataProvider GetMetricsMySettingsProvider
+	 */
+	public function testGetGetValueMySettings(array $aMetric, $aMySetting, $aExpectedResult, ?string $sExpectedException) {
+		if (is_array($aMySetting)) {
+			$reflector = new ReflectionObject(\utils::GetConfig());
+			$property = $reflector->getProperty('m_aSettings');
+			$property->setAccessible(true);
+			$m_aSettings = $property->getValue(\utils::GetConfig());
 
-        if (null != $sExpectedException) {
-            $this->expectExceptionMessageRegExp($sExpectedException);
-        }
+			foreach ($aMySetting as $key => $value) {
+				$m_aSettings[$key] = [
+					'type' => is_array($value) ? 'array' : 'string',
+					'value' => $value,
+					'source_of_value' => 'unknown',
+				];
+			}
+			$property->setValue(\utils::GetConfig(), $m_aSettings);
+		}
 
-        $oOqlConfReader = new ConfReader('foo', $aMetric);
+		if (null != $sExpectedException) {
+			$this->expectExceptionMessageRegExp($sExpectedException);
+		}
 
-        $reflector = new ReflectionObject($oOqlConfReader);
-        $method = $reflector->getMethod('GetValue');
-        $method->setAccessible(true);
-        $aResult = $method->invoke($oOqlConfReader, $oConfigMock);
+		$oOqlConfReader = new ConfReader('foo', $aMetric);
 
-        $this->assertEquals($aExpectedResult, $aResult);
-    }
+		$reflector = new ReflectionObject($oOqlConfReader);
+		$method = $reflector->getMethod('GetValue');
+		$method->setAccessible(true);
+		$aResult = $method->invoke($oOqlConfReader, \utils::GetConfig());
 
-    public function GetMetricsProvider()
-    {
-        return [
-            'conf must be an array' => [
-                'aMetric' => ['conf' => 'Not an array wich is forbidden'],
-                'aConfigGetterResponse' => ['not even read'],
-                'aExpectedResult' => null,
-                'sExpectedException' => '/Metric foo is not configured with a proper array/',
-            ],
-            'MySettings nominal' => [
-                'aMetric' => ['conf' => ['MySettings', 'foo']],
-                'aConfigGetterResponse' => 'bar',
-                'aExpectedResult' => 'bar',
-                'sExpectedException' => null,
-            ],
-            'MySettings with depth 1' => [
-                'aMetric' => ['conf' => ['MySettings', 'foo', 'bar']],
-                'aConfigGetterResponse' =>  ['bar' => 'baz'],
-                'aExpectedResult' => 'baz',
-                'sExpectedException' => null,
-            ],
-            'MySettings with depth 3' => [
-                'aMetric' => ['conf' => ['MySettings', 'foo', 'bar', 'baz', 3]],
-                'aConfigGetterResponse' =>  ['bar' => ['baz' => [3 => 42]]],
-                'aExpectedResult' => 42,
-                'sExpectedException' => null,
-            ],
-            'MySettings with invalid path' => [
-                'aMetric' => ['conf' => ['MySettings', 'foo', 'bar', 'baz', 3]],
-                'aConfigGetterResponse' =>  ['bar' => ['baz' => ['no key "3"']]],
-                'aExpectedResult' => null,
-                'sExpectedException' => '/Metric foo was not found in configuration found./',
-            ],
-            'MySettings no matching conf' => [
-                'aMetric' => ['conf' => ['MySettings', 'foo']],
-                'aConfigGetterResponse' => null,
-                'aExpectedResult' => null,
-                'sExpectedException' => '/Metric foo was not found in configuration found./',
-            ],
+		$this->assertEquals($aExpectedResult, $aResult, print_r($aResult));
+	}
 
-            'MyModuleSettings nominal' => [
-                'aMetric' => ['conf' => ['MyModuleSettings', 'module-name', 'foo']],
-                'aConfigGetterResponse' => ['foo' => 'bar'],
-                'aExpectedResult' => ['foo' => 'bar'],
-                'sExpectedException' => null,
-            ],
-            'MyModuleSettings with depth' => [
-                'aMetric' => ['conf' => ['MyModuleSettings', 'module-name', 'foo', 'bar']],
-                'aConfigGetterResponse' => ['bar' => 'baz'],
-                'aExpectedResult' => 'baz',
-                'sExpectedException' => null,
-            ],
-            'MyModuleSettings no matching conf' => [
-                'aMetric' => ['conf' => ['MyModuleSettings', 'module-name', 'foo']],
-                'aConfigGetterResponse' => null,
-                'aExpectedResult' => null,
-                'sExpectedException' => '/Metric foo was not found in configuration found./',
-            ],
+	public function GetMetricsMySettingsProvider() {
+		return [
+			'conf must be an array' => [
+				'aMetric' => ['conf' => 'Not an array which is forbidden'],
+				'aMySetting' => null,
+				'aExpectedResult' => null,
+				'sExpectedException' => '/Metric foo is not configured with a proper array/',
+			],
+			'MySettings nominal' => [
+				'aMetric' => ['conf' => ['MySettings', 'foo']],
+				'aMySetting' => ['foo' => 'bar'],
+				'aExpectedResult' => 'bar',
+				'sExpectedException' => null,
+			],
+			'MySettings with depth 1' => [
+				'aMetric' => ['conf' => ['MySettings', 'foo', 'bar']],
+				'aMySetting' => ['foo' => ['bar' => 'baz']],
+				'aExpectedResult' => 'baz',
+				'sExpectedException' => null,
+			],
+			'MySettings with depth 3' => [
+				'aMetric' => ['conf' => ['MySettings', 'foo', 'bar', 'baz', 3]],
+				'aMySetting' => ['foo' => ['bar' => ['baz' => [3 => 42]]]],
+				'aExpectedResult' => 42,
+				'sExpectedException' => null,
+			],
+			'MySettings with invalid path' => [
+				'aMetric' => ['conf' => ['MySettings', 'foo', 'bar', 'baz', 3]],
+				'aMySetting' => ['foo' => ['bar' => ['baz' => ['no key "3"']]]],
+				'aExpectedResult' => null,
+				'sExpectedException' => '/Metric foo was not found in configuration found./',
+			],
+			'MySettings no matching conf' => [
+				'aMetric' => ['conf' => ['MySettings', 'foo']],
+				'aMySetting' => null,
+				'aExpectedResult' => null,
+				'sExpectedException' => '/Metric foo was not found in configuration found./',
+			],
+		];
+	}
 
-            'MyModuleSettings backup weekdays' => [
-                'aMetric' => ['conf' => ['MyModuleSettings', 'module-name', 'foo']],
-                'aConfigGetterResponse' => 'monday, tuesday, wednesday, thursday, friday',
-                'aExpectedResult' => 'monday, tuesday, wednesday, thursday, friday',
-                'sExpectedException' => null,
-            ],
+	public function GetMetricsMyModuleProvider() {
+		return [
+			'MyModuleSettings nominal' => [
+				'aMetric' => ['conf' => ['MyModuleSettings', 'module-name', 'foo']],
+				'aMyModuleSetting' => ['foo' => 'bar'],
+				'aExpectedResult' => 'bar',
+				'sExpectedException' => null,
+			],
+			'MyModuleSettings with depth' => [
+				'aMetric' => ['conf' => ['MyModuleSettings', 'module-name', 'foo', 'bar']],
+				'aMyModuleSetting' => ['foo'=> ['bar' => 'baz']],
+				'aExpectedResult' => 'baz',
+				'sExpectedException' => null,
+			],
+			'MyModuleSettings no matching conf' => [
+				'aMetric' => ['conf' => ['MyModuleSettings', 'module-name', 'foo']],
+				'aMyModuleSetting' => null,
+				'aExpectedResult' => null,
+				'sExpectedException' => '/Metric foo was not found in configuration found./',
+			],
+		];
+	}
 
-        ];
-    }
+	/**
+	 * @dataProvider GetMetricsMyModuleProvider
+	 */
+	public function testGetGetValueMyModuleSettings(array $aMetric, $aMyModuleSetting, $aExpectedResult, ?string $sExpectedException) {
+		if (is_array($aMyModuleSetting)) {
+			foreach ($aMyModuleSetting as $key => $value) {
+				\utils::GetConfig()->SetModuleSetting('module-name', $key, $value);
+			}
+		}
+
+		if (null != $sExpectedException) {
+			$this->expectExceptionMessageRegExp($sExpectedException);
+		}
+
+		$oOqlConfReader = new ConfReader('foo', $aMetric);
+
+		$reflector = new ReflectionObject($oOqlConfReader);
+		$method = $reflector->getMethod('GetValue');
+		$method->setAccessible(true);
+		$aResult = $method->invoke($oOqlConfReader, \utils::GetConfig());
+
+		$this->assertEquals($aExpectedResult, $aResult);
+	}
+
 }
