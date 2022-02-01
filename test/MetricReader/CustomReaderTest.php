@@ -24,6 +24,7 @@ use Combodo\iTop\Test\UnitTest\ItopTestCase;
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
  * @backupGlobals disabled
+ * @group cbd-monitoring-ci
  */
 class CustomReaderTest extends ItopTestCase
 {

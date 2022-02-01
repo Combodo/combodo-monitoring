@@ -60,6 +60,9 @@ class CombodoMonitoringTest extends ItopDataTestCase
         return [$sContent, $iCode];
     }
 
+    /**
+     * @group cbd-monitoring-ci
+     */
     public function testMonitoringPage()
     {
         $sRessourcesDir = __DIR__.'/ressources';
