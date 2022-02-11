@@ -6,11 +6,12 @@ use AttributeDateTime;
 use Combodo\iTop\Monitoring\CustomReader\ItopEventLoginReader;
 
 /**
+ * @group user_profiles
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
  * @backupGlobals disabled
  */
-class ItopArchiveReaderTest extends ItopDataTestCase
+class ItopEventLoginReaderTest extends ItopDataTestCase
 {
     const USE_TRANSACTION = false;
     private array $aProfiles = [];

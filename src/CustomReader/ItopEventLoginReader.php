@@ -23,7 +23,6 @@ class ItopEventLoginReader implements CustomReaderInterface
 {
     private $aMetricConf;
     private $sMetricName;
-    private array $aProfiles;
 
     public function __construct($sMetricName, $aMetricConf)
     {
