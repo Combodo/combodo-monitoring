@@ -64,10 +64,10 @@ class ItopEventLoginReader implements CustomReaderInterface
 
         $sOql = <<<OQL
 SELECT u,e FROM EventLoginUsage AS e JOIN User AS u ON e.user_id=u.id
-WHERE e.date> ":date"
+WHERE e.date> "$currentDate"
 OQL;
 
-        $oSearch = \DBObjectSearch::FromOQL($sOql, ['date' => $currentDate]);
+        $oSearch = \DBObjectSearch::FromOQL($sOql);
         $oSet = new \DBObjectSet($oSearch);
 
         $aRes = [];
