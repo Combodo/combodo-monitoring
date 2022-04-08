@@ -66,8 +66,8 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
                 ],
                 'event_login' => [
                     ['user' => 'user1', 'recent' => false],
-                    ['user' => 'user1', 'recent' => true],
-                    ['user' => 'user1', 'recent' => false],
+                    ['user' => 'user2', 'recent' => true],
+                    ['user' => 'user3', 'recent' => false],
                 ],
                 'expected_metrics' => [
                     ['metric_name' => 'itop_eventlogin', 'metric_value' => 1, 'account_type' => 'userlocal',  'profiles' => 'administrator'],
@@ -121,18 +121,20 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
 
         foreach ($aEventLogins as $aEventLogin) {
             $oUser = $this->aUsers[$aEventLogin['user']];
-            $oEventLoginObject = $this->CreateObject('EventLoginUsage', [
-                'date' => date(AttributeDateTime::GetFormat()),
+	        $initialDate = date(AttributeDateTime::GetFormat());
+	        var_dump(['INIT', $aEventLogin, $initialDate, $oEventLoginObject]);
+	        $oEventLoginObject = $this->CreateObject('EventLoginUsage', [
+                'date' => $initialDate,
                 'userinfo' => $oUser,
                 'user_id' => $oUser->GetKey(),
                 'message' => 'Successful login',
             ]);
 
-	        var_dump($aEventLogin);
 	        if (!$aEventLogin['recent']) {
-	            var_dump([$aEventLogin['user'], '-2 HOURS']);
-                $oEventLoginObject->Set('date', date(AttributeDateTime::GetFormat(), strtotime('-2 HOURS')));
+		        $updatedDate = date(AttributeDateTime::GetFormat(), strtotime('-2 HOURS'));
+		        $oEventLoginObject->Set('date', $updatedDate);
                 $oEventLoginObject->DBWrite();
+		        var_dump(['-2 HOURS', $aEventLogin, $updatedDate, $oEventLoginObject]);
             }
         }
 
