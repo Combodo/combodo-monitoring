@@ -134,7 +134,7 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
 		        $oEventLoginObject->Set('date', $updatedDate);
                 $oEventLoginObject->DBWrite();
 	        }
-	        var_dump(['id' => $oEventLoginObject->GetKey(), 'date' => $oEventLoginObject->Get('date') ]);
+	        //var_dump(['id' => $oEventLoginObject->GetKey(), 'date' => $oEventLoginObject->Get('date') ]);
         }
 
         $aLabels = ['toto' => 'titi'];
@@ -142,7 +142,7 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
 
         $aMetrics = $oItopEventLoginReader->GetMetrics();
         $sizeof = sizeof($aExpectedMetrics);
-        var_dump($aExpectedMetrics);
+        //var_dump($aExpectedMetrics);
         $this->assertEquals($sizeof, sizeof($aMetrics));
         for ($i = 0; $i < $sizeof; ++$i) {
             /* @var \Combodo\iTop\Monitoring\Model\MonitoringMetric $oMetric */

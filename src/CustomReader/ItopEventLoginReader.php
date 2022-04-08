@@ -60,12 +60,14 @@ class ItopEventLoginReader implements CustomReaderInterface
 
     public function ListEventLogin(): array
     {
+        $currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-1 HOURS'));
+
         $sOql = <<<OQL
 SELECT u,e FROM EventLoginUsage AS e JOIN User AS u ON e.user_id=u.id
-WHERE e.date> DATE_SUB(NOW(), INTERVAL 60 MINUTE)
+WHERE e.date> ":date"
 OQL;
 
-        $oSearch = \DBObjectSearch::FromOQL($sOql);
+        $oSearch = \DBObjectSearch::FromOQL($sOql, ['date' => $currentDate]);
         $oSet = new \DBObjectSet($oSearch);
 
         $aRes = [];
