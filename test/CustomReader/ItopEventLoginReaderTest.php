@@ -115,7 +115,7 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
         foreach ($aUsers as $sUserId => $aUser) {
             $sLogin = $aUser['login'];
             $aUserProfiles = $aUser['profiles'];
-            $oUser = $this->CreateUserWithProfiles($sLogin, $aUserProfiles, '123456789#123');
+            $oUser = $this->CreateUserWithProfiles($sLogin, $aUserProfiles);
             $this->aUsers[$sUserId] = $oUser;
         }
 
