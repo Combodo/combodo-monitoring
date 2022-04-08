@@ -122,13 +122,13 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
         foreach ($aEventLogins as $aEventLogin) {
             $oUser = $this->aUsers[$aEventLogin['user']];
 	        $initialDate = date(AttributeDateTime::GetFormat());
-	        var_dump(['INIT', $aEventLogin, $initialDate, $oEventLoginObject]);
 	        $oEventLoginObject = $this->CreateObject('EventLoginUsage', [
                 'date' => $initialDate,
                 'userinfo' => $oUser,
                 'user_id' => $oUser->GetKey(),
                 'message' => 'Successful login',
             ]);
+	        var_dump(['INIT', $aEventLogin, $initialDate, $oEventLoginObject]);
 
 	        if (!$aEventLogin['recent']) {
 		        $updatedDate = date(AttributeDateTime::GetFormat(), strtotime('-2 HOURS'));
