@@ -66,8 +66,8 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
                 ],
                 'event_login' => [
                     ['user' => 'user1', 'recent' => false],
-                    ['user' => 'user2', 'recent' => true],
-                    ['user' => 'user3', 'recent' => false],
+                    ['user' => 'user1', 'recent' => true],
+                    ['user' => 'user1', 'recent' => false],
                 ],
                 'expected_metrics' => [
                     ['metric_name' => 'itop_eventlogin', 'metric_value' => 1, 'account_type' => 'userlocal',  'profiles' => 'administrator'],
