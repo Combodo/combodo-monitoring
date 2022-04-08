@@ -128,14 +128,13 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
                 'user_id' => $oUser->GetKey(),
                 'message' => 'Successful login',
             ]);
-	        var_dump(['INIT', $aEventLogin, $initialDate, $oEventLoginObject]);
 
-	        if (!$aEventLogin['recent']) {
+	        if (false === $aEventLogin['recent']) {
 		        $updatedDate = date(AttributeDateTime::GetFormat(), strtotime('-2 HOURS'));
 		        $oEventLoginObject->Set('date', $updatedDate);
                 $oEventLoginObject->DBWrite();
-		        var_dump(['-2 HOURS', $aEventLogin, $updatedDate, $oEventLoginObject]);
-            }
+	        }
+	        var_dump(['id' => $oEventLoginObject->GetKey(), 'date' => $oEventLoginObject->Get('date') ]);
         }
 
         $aLabels = ['toto' => 'titi'];
