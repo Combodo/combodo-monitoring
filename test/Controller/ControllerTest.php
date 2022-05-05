@@ -203,11 +203,6 @@ class ControllerTest extends ItopDataTestCase
             $this->expectExceptionMessageRegExp($sExpectedException);
         }
 
-        // We are using PHPUnit\Framework\MockObject\Generator::generateMock that is throwing notice !
-        // Changing config so that those won't be caught by \DeprecatedCallsLog::DeprecatedNoticesErrorHandler
-        // disabling devenv is easier than changing log config O:)
-        \utils::GetConfig()->Set('developer_mode.enabled', false);
-
         $oConfigMock = $this->createMock(\Config::class);
         $oConfigMock->expects($this->any())
             ->method('GetModuleSetting')
