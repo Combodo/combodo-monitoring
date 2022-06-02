@@ -38,6 +38,21 @@ class CombodoMonitoringTest extends ItopDataTestCase
 
         $this->sConfBackupPath = tempnam(sys_get_temp_dir(), 'conf.php');
         copy($this->sConfigFile, $this->sConfBackupPath);
+
+        //create fake mailbox
+	    $this->createObject('MailInboxStandard',
+		    [
+			    "server" => "monserver.net",
+			    "login" => "monlogin",
+			    "password" => "monpassword",
+			    "protocol" => "imap",
+			    "port" => "993",
+			    "mailbox" => "",
+			    "active" => "yes",
+			    "title_pattern" => "/R-([0-9]+)/",
+			    "unknown_caller_behavior" => "reject_email",
+		    ]
+	    );
     }
 
     public function tearDown()
@@ -115,6 +130,10 @@ class CombodoMonitoringTest extends ItopDataTestCase
                     'description' => 'test itop setup version',
                     'custom' => ['class' => '\Combodo\iTop\Monitoring\CustomReader\ItopSetupVersionReader'],
                 ],
+	            'itop_mailbox_connection_failure' => array (
+		            'description' => 'Failures to connect to polled mailboxes',
+		            'custom' => ['class' => '\Combodo\iTop\Monitoring\CustomReader\ItopMailboxReader'],
+	            ),
             ],
         ];
 
@@ -148,6 +167,13 @@ class CombodoMonitoringTest extends ItopDataTestCase
         $sContent = str_replace('ITOP_SETUP_VERSION', $sItopSetupVersion, $sContent);
         $sContent = str_replace('ITOP_VERSION', $sItopApplicativeVersion, $sContent);
 
+	    $oSearch = new DBObjectSearch('MailInboxBase');
+	    $oSearch->AddCondition('active', 'yes');
+	    $oSet = new DBObjectSet($oSearch);
+	    var_dump($oSet->Count());
+	    /*while($oInbox = $oSet->Fetch()) {
+	    	$oInbox->GetEmailSource();
+	    }*/
         $this->assertEquals($sContent, $aResp[0]);
     }
 

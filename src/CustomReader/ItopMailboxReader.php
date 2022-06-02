@@ -50,6 +50,8 @@ class ItopMailboxReader implements CustomReaderInterface
 			{
 				try
 				{
+					//N°5177 - Failure to connect to a mailbox crashes the monitoring
+					//when mailbox is not reachable there is annoying print_r in IMAPEmailSource that breaks monitoring output format (prometheus usually)
 					ob_start();
 					$oInbox->GetEmailSource(); // Will try to connect to the mailbox and throw an error in case of failure
 				}
