@@ -27,13 +27,13 @@ class ItopMailboxReader implements CustomReaderInterface
 {
 	private $aMetricConf;
 	private $sMetricName;
-	
+
 	public function __construct($sMetricName, $aMetricConf)
 	{
 		$this->aMetricConf = $aMetricConf;
 		$this->sMetricName = 'itop_mailbox_failed_connection_count';
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -50,12 +50,15 @@ class ItopMailboxReader implements CustomReaderInterface
 			{
 				try
 				{
+					ob_start();
 					$oInbox->GetEmailSource(); // Will try to connect to the mailbox and throw an error in case of failure
 				}
 				catch(Exception $e)
 				{
 					$result++;
-				};
+				} finally {
+					ob_end_clean();
+				}
 			}
 			$aMetrics[] = new MonitoringMetric(
 				$this->sMetricName,
@@ -64,7 +67,7 @@ class ItopMailboxReader implements CustomReaderInterface
 				[],
 			);
 		}
-		
+
 		return $aMetrics;
 	}
 }
