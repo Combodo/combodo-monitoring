@@ -40,7 +40,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
         copy($this->sConfigFile, $this->sConfBackupPath);
 
         //create fake mailbox
-	    $this->createObject('MailInboxStandard',
+	    /*$this->createObject('MailInboxStandard',
 		    [
 			    "server" => "monserver.net",
 			    "login" => "monlogin",
@@ -52,7 +52,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
 			    "title_pattern" => "/R-([0-9]+)/",
 			    "unknown_caller_behavior" => "reject_email",
 		    ]
-	    );
+	    );*/
     }
 
     public function tearDown()
