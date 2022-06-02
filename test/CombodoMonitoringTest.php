@@ -167,11 +167,11 @@ class CombodoMonitoringTest extends ItopDataTestCase
         $sContent = str_replace('ITOP_SETUP_VERSION', $sItopSetupVersion, $sContent);
         $sContent = str_replace('ITOP_VERSION', $sItopApplicativeVersion, $sContent);
 
-	    $oSearch = new DBObjectSearch('MailInboxBase');
+	    /*$oSearch = new DBObjectSearch('MailInboxBase');
 	    $oSearch->AddCondition('active', 'yes');
 	    $oSet = new DBObjectSet($oSearch);
 	    var_dump($oSet->Count());
-	    /*while($oInbox = $oSet->Fetch()) {
+	    while($oInbox = $oSet->Fetch()) {
 	    	$oInbox->GetEmailSource();
 	    }*/
         $this->assertEquals($sContent, $aResp[0]);
