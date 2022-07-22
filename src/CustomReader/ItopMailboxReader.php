@@ -53,6 +53,11 @@ class ItopMailboxReader implements CustomReaderInterface
 					//N°5177 - Failure to connect to a mailbox crashes the monitoring
 					//when mailbox is not reachable there is annoying print_r in IMAPEmailSource that breaks monitoring output format (prometheus usually)
 					ob_start();
+					// When OVH is crashed, the opening/reading of the IMAP mailboxes can be very slow AND
+					// if the monitoring page does not reply within a few seconds, the monitoring considers the whole target as DOWN
+					// So let put some "relatively" short timeouts here
+					imap_timeout(IMAP_OPENTIMEOUT, 1);
+					imap_timeout(IMAP_READTIMEOUT, 1);
 					$oInbox->GetEmailSource(); // Will try to connect to the mailbox and throw an error in case of failure
 				}
 				catch(Exception $e)
