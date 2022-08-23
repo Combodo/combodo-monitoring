@@ -13,7 +13,7 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
  */
 class ItopSetupVersionReaderTest extends ItopDataTestCase {
 
-    public function setUp()
+    public function setUp(): void
 	{
 		//@include_once '/home/combodo/workspace/iTop/approot.inc.php';
 		//@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';

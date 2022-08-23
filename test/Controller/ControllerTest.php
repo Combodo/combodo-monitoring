@@ -29,7 +29,7 @@ class ControllerTest extends ItopDataTestCase
     /** @var Controller */
     private $monitoringController;
 
-    public function setUp()
+    public function setUp(): void
     {
         //require_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         parent::setUp();

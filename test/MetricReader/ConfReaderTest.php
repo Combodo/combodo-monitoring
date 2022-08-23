@@ -26,7 +26,7 @@ use ReflectionObject;
  * @backupGlobals disabled
  */
 class ConfReaderTest extends ItopTestCase {
-	public function setUp() {
+	public function setUp(): void {
 		//@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
 		parent::setUp();
 

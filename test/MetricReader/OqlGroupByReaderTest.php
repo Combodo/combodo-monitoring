@@ -25,7 +25,7 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
  */
 class OqlGroupByReaderTest extends ItopDataTestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         parent::setUp();

@@ -17,7 +17,7 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
     private array $aProfiles = [];
     private array $aUsers = [];
 
-    public function setUp()
+    public function setUp(): void
     {
         //@include_once '/home/combodo/workspaceSAAS/iTopSaasManager/approot.inc.php';
         parent::setUp();
