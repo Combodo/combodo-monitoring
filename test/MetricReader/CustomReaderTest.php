@@ -28,7 +28,7 @@ use Combodo\iTop\Test\UnitTest\ItopTestCase;
  */
 class CustomReaderTest extends ItopTestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         //@include_once '/home/combodo/workspace/iTop/approot.inc.php';
         //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';

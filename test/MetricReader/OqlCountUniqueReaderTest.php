@@ -26,7 +26,7 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
  */
 class OqlCountUniqueReaderTest extends ItopDataTestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
 //        @include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         parent::setUp();

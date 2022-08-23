@@ -27,7 +27,7 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
  */
 class OqlSelectReaderTest extends ItopDataTestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         //require_once '/home/combodo/workspace/iTop/approot.inc.php';
         parent::setUp();

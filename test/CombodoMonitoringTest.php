@@ -17,7 +17,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
     private $sConfigFile;
     private $sConfBackupPath;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         //@include_once '/home/combodo/workspace/iTop/approot.inc.php';
@@ -55,7 +55,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
 	    );*/
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         @chmod($this->sConfigFile, 0770);
         copy($this->sConfBackupPath, $this->sConfigFile);

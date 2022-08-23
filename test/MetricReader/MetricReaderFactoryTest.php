@@ -31,7 +31,7 @@ use Combodo\iTop\Test\UnitTest\ItopTestCase;
  */
 class MetricReaderFactoryTest extends ItopTestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         parent::setUp();

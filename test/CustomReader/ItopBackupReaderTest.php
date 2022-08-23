@@ -14,7 +14,7 @@ class ItopBackupReaderTest extends ItopDataTestCase
 {
     private $sDir;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         @include_once '/home/combodo/workspace/iTop/approot.inc.php';
         //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
@@ -29,7 +29,7 @@ class ItopBackupReaderTest extends ItopDataTestCase
         mkdir($this->sDir, 0777, $recursive = true);
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         $this->unlinkRecursive($this->sDir);
     }
