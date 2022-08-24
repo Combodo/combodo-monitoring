@@ -45,7 +45,7 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
                 'users' => [
                     'user1' => ['login' => 'login1', 'profiles' => ['Administrator']],
                     'user2' => ['login' => 'login2', 'profiles' => ['Portal user']],
-                    'user3' => ['login' => 'login3', 'profiles' => ['Service Desk Agent', 'Portal power user']],
+                    'user3' => ['login' => 'login3', 'profiles' => ['Configuration manager', 'Portal power user']],
                     'user4' => ['login' => 'login4', 'profiles' => ['Portal power user', 'Configuration manager']],
                 ],
                 'event_login' => [
