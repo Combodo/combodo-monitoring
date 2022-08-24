@@ -46,7 +46,7 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
                     'user1' => ['login' => 'login1', 'profiles' => ['Administrator']],
                     'user2' => ['login' => 'login2', 'profiles' => ['Portal user']],
                     'user3' => ['login' => 'login3', 'profiles' => ['Service Desk Agent', 'Portal power user']],
-                    'user4' => ['login' => 'login4', 'profiles' => ['Portal power user', 'Service Desk Agent']],
+                    'user4' => ['login' => 'login4', 'profiles' => ['Portal power user', 'Configuration manager']],
                 ],
                 'event_login' => [
                     ['user' => 'user1', 'recent' => true],
@@ -57,7 +57,7 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
                 'expected_metrics' => [
                     ['metric_name' => 'itop_eventlogin', 'metric_value' => 1, 'account_type' => 'userlocal',  'profiles' => 'administrator'],
                     ['metric_name' => 'itop_eventlogin', 'metric_value' => 1, 'account_type' => 'userlocal',  'profiles' => 'portal_user'],
-                    ['metric_name' => 'itop_eventlogin', 'metric_value' => 2, 'account_type' => 'userlocal',  'profiles' => 'portal_power_user+service_desk_agent'],
+                    ['metric_name' => 'itop_eventlogin', 'metric_value' => 2, 'account_type' => 'userlocal',  'profiles' => 'portal_power_user+configuration_manager'],
                 ],
             ],
             'test eventlogin in the last hour only' => [
