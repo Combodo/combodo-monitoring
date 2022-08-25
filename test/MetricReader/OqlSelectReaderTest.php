@@ -365,23 +365,62 @@ class OqlSelectReaderTest extends ItopDataTestCase
 		        ],
 		        'aExpectedResult' => $sJointSelect,
 	        ],*/
-		    'jointure using fields on both sides with FROM syntax' => [
-			    'aMetric' => [
-				    'oql_select' => [
-					    'select' => 'SELECT up, p FROM URP_UserProfile AS up JOIN URP_Profiles AS p ON up.profileid = p.id WHERE up.profileid = 1',
-					    'labels' =>  [
-						    'profile' => 'p.name',
-						    'name' => 'up.profile'
-					    ],
-					    'value' => 'up.profileid'
-				    ],
-				    'description' => 'ordered users',
-			    ],
-			    'aExpectedResult' => $sJointSelect,
-			    'aExpectedMetrics' => [
-				    [ 'value' => "1", 'labels' => [ 'profile' => 'Administrator', 'name' => 'Administrator' ] ]
-			    ]
-		    ],
         ];
     }
+
+
+	/**
+	 * @group cbd-monitoring-ci
+	 * separate this test to avoid losing time on making it work with saas team target
+	 */
+	/**
+	 * @dataProvider GetMetricsProvider2
+	 */
+	public function testGetGetValue_OQLJointUsingFieldsOnBothSides(array $aMetric, $aExpectedResult, $aExpectedMetrics = null)
+	{
+		$this->testGetGetValue($aMetric, $aExpectedResult, $aExpectedMetrics);
+	}
+
+	public function GetMetricsProvider2(): array
+	{
+		$sJointSelect = "SELECT
+ DISTINCT `up`.`id` AS `upid`,
+ `p`.`name` AS `upprofile`,
+ `up`.`profileid` AS `upprofileid`,
+ CAST(CONCAT(COALESCE(`p`.`name`, '')) AS CHAR) AS `upprofileid_friendlyname`,
+ CAST(CONCAT(COALESCE('Link between ', ''), COALESCE(`User_userid`.`login`, ''), COALESCE(' and ', ''), COALESCE(`p`.`name`, '')) AS CHAR) AS `upfriendlyname`,
+ `p`.`id` AS `pid`,
+ `p`.`name` AS `pname`,
+ CAST(CONCAT(COALESCE(`p`.`name`, '')) AS CHAR) AS `pfriendlyname`
+ FROM 
+   `priv_urp_userprofile` AS `up`
+   INNER JOIN 
+      `priv_urp_profiles` AS `p`
+    ON `up`.`profileid` = `p`.`id`
+   INNER JOIN 
+      `priv_user` AS `User_userid`
+    ON `up`.`userid` = `User_userid`.`id`
+ WHERE (`up`.`profileid` = 1)
+ ORDER BY `upfriendlyname` ASC
+ ";
+		return [
+			'jointure using fields on both sides with FROM syntax' => [
+				'aMetric' => [
+					'oql_select' => [
+						'select' => 'SELECT up, p FROM URP_UserProfile AS up JOIN URP_Profiles AS p ON up.profileid = p.id WHERE up.profileid = 1',
+						'labels' =>  [
+							'profile' => 'p.name',
+							'name' => 'up.profile'
+						],
+						'value' => 'up.profileid'
+					],
+					'description' => 'ordered users',
+				],
+				'aExpectedResult' => $sJointSelect,
+				'aExpectedMetrics' => [
+					[ 'value' => "1", 'labels' => [ 'profile' => 'Administrator', 'name' => 'Administrator' ] ]
+				]
+			],
+		];
+	}
 }
