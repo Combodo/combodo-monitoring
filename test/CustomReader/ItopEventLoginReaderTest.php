@@ -57,7 +57,7 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
                 'expected_metrics' => [
                     ['metric_name' => 'itop_eventlogin', 'metric_value' => 1, 'account_type' => 'userlocal',  'profiles' => 'administrator'],
                     ['metric_name' => 'itop_eventlogin', 'metric_value' => 1, 'account_type' => 'userlocal',  'profiles' => 'portal_user'],
-                    ['metric_name' => 'itop_eventlogin', 'metric_value' => 2, 'account_type' => 'userlocal',  'profiles' => 'portal_power_user+configuration_manager'],
+                    ['metric_name' => 'itop_eventlogin', 'metric_value' => 2, 'account_type' => 'userlocal',  'profiles' => 'configuration_manager+portal_power_user'],
                 ],
             ],
             'test eventlogin in the last hour only' => [
