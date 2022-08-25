@@ -62,10 +62,12 @@ class ControllerTest extends ItopDataTestCase
 
         $aMetrics = $this->monitoringController->ReadMetrics($aMetricConf);
 
+	    var_dump($aExpectedMetrics,true);
+	    var_dump($aMetrics, true);
+
         $this->assertEquals(
             $aExpectedMetrics,
-            $aMetrics,
-            var_export($aExpectedMetrics, true)."\n\n".var_export($aMetrics, true)
+            $aMetrics
         );
     }
 
