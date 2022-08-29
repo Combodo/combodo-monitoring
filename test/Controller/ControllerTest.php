@@ -138,17 +138,6 @@ class ControllerTest extends ItopDataTestCase
                 ],
                 [['itop_user_count', 'Nb of users', '1', ['labelname2' => 'labelvalue2', 'name with space at the end     ' => 'foo']]],
             ],
-            'oql_groupby with labels' => [
-                ['itop_user_count' => [
-                        'description' => 'Nb of URP_UserProfile par type',
-                        'oql_groupby' => [
-                            'select' => 'SELECT URP_UserProfile JOIN URP_Profiles ON URP_UserProfile.profileid =URP_Profiles.id WHERE URP_Profiles.id=1',
-                            'groupby' => ['profile' => 'URP_UserProfile.profile'],
-                        ],
-                    ],
-                ],
-                [['itop_user_count', 'Nb of URP_UserProfile par type', '1', ['profile' => 'Administrator']]],
-            ],
             'no_description_in_oql_metric' => [
                 ['itop_user_nodescription_count' => [
                         'oql_count' => [
@@ -176,6 +165,27 @@ class ControllerTest extends ItopDataTestCase
                 [],
             ],
         ];
+    }
+
+    /*
+     * test separated from provider to fix f...ing error: Test was run in child process and ended unexpectedly
+     */
+    public function testReadMetrics_OqlGroupByWithDynamicLabels()
+    {
+        $aUseCase = [
+            [
+                'itop_user_count' => [
+                    'description' => 'Nb of URP_UserProfile par type',
+                    'oql_groupby' => [
+                        'select' => 'SELECT URP_UserProfile JOIN URP_Profiles ON URP_UserProfile.profileid =URP_Profiles.id WHERE URP_Profiles.id=1',
+                        'groupby' => ['profile' => 'URP_UserProfile.profile'],
+                    ],
+                ],
+            ],
+            [['itop_user_count', 'Nb of URP_UserProfile par type', '1', ['profile' => 'Administrator']]],
+        ];
+
+        $this->testReadMetrics($aUseCase[0], $aUseCase[1]);
     }
 
     public function testConfSubArray()
