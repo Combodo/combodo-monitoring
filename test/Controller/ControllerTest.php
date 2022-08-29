@@ -168,6 +168,7 @@ class ControllerTest extends ItopDataTestCase
     }
 
     /*
+     * @group cbd-monitoring-ci
      * test separated from provider to fix f...ing error: Test was run in child process and ended unexpectedly
      */
     public function testReadMetrics_OqlGroupByWithDynamicLabels()
