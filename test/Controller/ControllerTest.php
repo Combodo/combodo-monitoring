@@ -53,22 +53,25 @@ class ControllerTest extends ItopDataTestCase
      */
     public function testReadMetrics($aMetricConf, $aExpectedMetricFields)
     {
-        $aExpectedMetrics = [];
+        $aExpectedMetrics = null;
 
         foreach ($aExpectedMetricFields as $aPerMetricValues) {
             $aLabel = 4 == count($aPerMetricValues) ? $aPerMetricValues[3] : [];
-            $aExpectedMetrics[] = new MonitoringMetric($aPerMetricValues[0], $aPerMetricValues[1], $aPerMetricValues[2], $aLabel);
+            $aExpectedMetric = new MonitoringMetric($aPerMetricValues[0], $aPerMetricValues[1], $aPerMetricValues[2], $aLabel);
+            break;
         }
 
         $aMetrics = $this->monitoringController->ReadMetrics($aMetricConf);
 
-	    var_dump($aExpectedMetrics,true);
-	    var_dump($aMetrics, true);
-
-        $this->assertEquals(
-            $aExpectedMetrics,
-            $aMetrics
-        );
+        if ($aExpectedMetric == null){
+            $this->assertEquals(0, sizeof($aMetrics), var_export($aMetrics, true));
+        } else{
+            $this->assertEquals(1, sizeof($aMetrics), var_export($aMetrics, true));
+            $this->assertEquals(
+                $aExpectedMetric,
+                $aMetrics[0]
+            );
+        }
     }
 
     public function ReadMetricsProvider()

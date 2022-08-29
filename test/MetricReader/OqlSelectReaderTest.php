@@ -370,11 +370,9 @@ class OqlSelectReaderTest extends ItopDataTestCase
 
 
 	/**
+     * @dataProvider GetMetricsProvider2
 	 * @group cbd-monitoring-ci
 	 * separate this test to avoid losing time on making it work with saas team target
-	 */
-	/**
-	 * @dataProvider GetMetricsProvider2
 	 */
 	public function testGetGetValue_OQLJointUsingFieldsOnBothSides(array $aMetric, $aExpectedResult, $aExpectedMetrics = null)
 	{

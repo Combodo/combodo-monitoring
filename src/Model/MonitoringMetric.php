@@ -75,4 +75,13 @@ class MonitoringMetric {
             $this->aLabels[$sLabelName] = $sLabelValue;
         }
     }
+
+    public function __toString() {
+        return sprintf("name:%s\nvalue:%s\ndescription:%s\nlabels:%s\n",
+            $this->sName,
+            $this->sValue,
+            $this->sDescription,
+            var_export($this->aLabels, true)
+        );
+    }
 }
