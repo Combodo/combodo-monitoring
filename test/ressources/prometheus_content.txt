@@ -22,3 +22,7 @@ itop_version{} ITOP_VERSION
 # iTop after setup version (code + datamodel)
 itop_setup_version{} ITOP_SETUP_VERSION
 
+# Failed connections to a mailbox
+itop_mailbox_failed_connection_count{} 0
+
+

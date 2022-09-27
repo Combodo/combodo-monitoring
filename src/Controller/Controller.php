@@ -9,6 +9,7 @@ use Combodo\iTop\Monitoring\MetricReader\MetricReaderFactory;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Application\TwigBase\Controller\Controller as BaseController;
+use Combodo\iTop\Monitoring\Service\MonitoringService;
 use Symfony\Component\HttpFoundation\IpUtils;
 use utils;
 
@@ -34,20 +35,16 @@ class Controller extends BaseController {
 			return;
 		}
 
+		$oMonitoringServive = new MonitoringService();
+
         $sCollection = utils::ReadParam('collection', null);
 
         if (is_null($sCollection)) {
             throw new \Exception('Missing mandatory GET parameter collection');
         }
 
-        $aMetricParams = $this->ReadMetricConf($sCollection);
-
-        $aParams = array();
-
-        $aMetricsWithDuplicas = $this->ReadMetrics($aMetricParams);
-
         //deduplicate metrics
-	    $aMetrics = $this->RemoveDuplicates($aMetricsWithDuplicas);
+	    $aMetrics = $oMonitoringServive->GetMetrics($sCollection);
 
         $aTwigMetrics = [];
         if (is_array($aMetrics) && count($aMetrics) != 0){

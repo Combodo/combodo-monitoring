@@ -15,7 +15,7 @@
 
 namespace Combodo\iTop\Monitoring\Model;
 
-class MonitoringMetric {
+class MonitoringMetric implements MonitoringMetricInterface {
     /** @var string $sName */
     private $sName;
     /** @var string $sDescription */
@@ -62,7 +62,7 @@ class MonitoringMetric {
     /**
      * @return string[]
      */
-    public function GetLabels() {
+    public function GetLabels() : array {
         return $this->aLabels;
     }
 

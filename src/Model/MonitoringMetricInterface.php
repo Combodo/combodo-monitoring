@@ -15,25 +15,32 @@
 
 namespace Combodo\iTop\Monitoring\Model;
 
+/**
+ * Interface MonitoringMetricInterface
+ *
+ * @package Combodo\iTop\Monitoring\Model
+ */
+interface MonitoringMetricInterface {
+	/**
+	 * get metric name
+	 */
+    public function GetName() : string;
 
-class Constants
-{
-    const CUSTOM = 'custom';
-    const CONF = 'conf';
-    const EXEC_MODULE = 'combodo-monitoring';
-    const OQL_COUNT = 'oql_count';
-    const OQL_SELECT = 'oql_select';
-    const SQL_SELECT = 'sql_select';
-    const OQL_GROUPBY = 'oql_groupby';
-    const OQL_COUNT_UNIQUE = 'oql_count_unique';
-    const SELECT = 'select';
-    const LABELS = 'labels';
-    const VALUE = 'value';
-    const GROUPBY = 'groupby';
-    const ORDERBY = 'orderby';
-    const LIMIT_COUNT = 'limit_count';
-    const LIMIT_START = 'limit_start';
-    const METRIC_DESCRIPTION = 'description';
-    const METRIC_LABEL = 'static_labels';
-    const METRICS = 'metrics';
+	/**
+	 * get metric name
+	 */
+    public function GetDescription(): string;
+
+	/**
+	 * return metric value... should be a float cast into string otherwise prometheus will consider target as down (unparsable format)
+	 */
+    public function GetValue(): string;
+
+    /**
+     * return metric labels (key/values)
+     * example: [ 'impact' => "object-storage-collector", 'issue' => "Collect-BackupArchivalCollector"  ]
+    ),
+     * @return string[]
+     */
+    public function GetLabels() : array ;
 }

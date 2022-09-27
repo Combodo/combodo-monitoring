@@ -17,6 +17,7 @@ namespace Combodo\iTop\Monitoring\Test\Controller;
 
 use Combodo\iTop\Monitoring\Controller\Controller;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
+use Combodo\iTop\Monitoring\Service\MonitoringService;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
 /**
@@ -24,10 +25,10 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
  * @preserveGlobalState disabled
  * @backupGlobals disabled
  */
-class ControllerTest extends ItopDataTestCase
+class MonitoringServiceTest extends ItopDataTestCase
 {
-    /** @var Controller */
-    private $monitoringController;
+    /** @var \Combodo\iTop\Monitoring\Service\MonitoringService */
+    private $oMonitoringService;
 
     protected function setUp(): void
     {
@@ -41,7 +42,7 @@ class ControllerTest extends ItopDataTestCase
             define('MODULESROOT', APPROOT.'env-production/');
         }
 
-        $this->monitoringController = new Controller(MODULESROOT.'combodo-monitoring/src/view');
+        $this->oMonitoringService = new MonitoringService();
     }
 
     /**
@@ -63,7 +64,7 @@ class ControllerTest extends ItopDataTestCase
             break;
         }
 
-        $aMetrics = $this->monitoringController->ReadMetrics($aMetricConf);
+        $aMetrics = $this->oMonitoringService->ReadMetrics($aMetricConf);
 
         if ($aExpectedMetric == null){
             $this->assertEquals(0, sizeof($aMetrics), var_export($aMetrics, true));
@@ -230,7 +231,7 @@ class ControllerTest extends ItopDataTestCase
             ->method('GetModuleSetting')
             ->willReturn($aConf);
 
-        $result = $this->monitoringController->ReadMetricConf($sCollection, $oConfigMock);
+        $result = $this->oMonitoringService->ReadMetricConf($sCollection, $oConfigMock);
 
         $this->assertEquals($aExpectedResult, $result);
     }
@@ -262,7 +263,7 @@ class ControllerTest extends ItopDataTestCase
         $aExpectedMetrics = $this->BuildMetricArray($aExpectedMetricFields);
 
         $this->assertEquals($aExpectedMetrics,
-            $this->monitoringController->RemoveDuplicates($aMetrics));
+            $this->oMonitoringService->RemoveDuplicates($aMetrics));
     }
 
     public function BuildMetricArray(array $aDuplicateMetricFields): array
