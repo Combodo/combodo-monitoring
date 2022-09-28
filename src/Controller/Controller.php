@@ -16,7 +16,17 @@ class Controller extends BaseController {
     /** @var string */
     private $m_sAccessAuthorizedNetworkConfigParamId = null;
 
-    public function OperationExposePrometheusMetrics() {
+	public function OperationStatus()
+	{
+		$aParams = [
+			'status' => 'OK',
+			'code' => 0,
+		];
+		$this->DisplayJSONPage($aParams);
+	}
+
+
+	public function OperationExposePrometheusMetrics() {
         $sCollection = utils::ReadParam('collection', null);
 
         if (is_null($sCollection)) {
