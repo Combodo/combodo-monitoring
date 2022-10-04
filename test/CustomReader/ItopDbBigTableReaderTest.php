@@ -114,7 +114,7 @@ class ItopDbBigTableReaderTest extends ItopDataTestCase
                 ],
                 'aExpectedMetrics' => [
                     [
-                        'itop_big_table_diskspace',
+                        'itop_big_table_diskspace_in_megabytes',
                         'itop tables that reach (configurable) 250 mb in disk space.',
                         '300',
                         ['table' => 'diskspace_threshold_reached', 'toto' => 'titi']
@@ -139,7 +139,7 @@ class ItopDbBigTableReaderTest extends ItopDataTestCase
                         ['table' => 'both_threshold_reached', 'toto' => 'titi']
                     ],
                     [
-                        'itop_big_table_diskspace',
+                        'itop_big_table_diskspace_in_megabytes',
                         'itop tables that reach (configurable) 250 mb in disk space.',
                         '300',
                         ['table' => 'both_threshold_reached', 'toto' => 'titi']

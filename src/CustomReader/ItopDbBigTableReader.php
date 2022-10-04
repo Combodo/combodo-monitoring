@@ -81,7 +81,7 @@ class ItopDbBigTableReader implements CustomReaderInterface
             $iTotalSpace = (int) $sTotalSpace;
             if ($iTotalSpace > $iDiskSpaceThreshold) {
                 $aCurrentLabels = $this->GetLabels($aCurrentLabels, $sTableName, $aLabels);
-                $aMetrics[] = new MonitoringMetric($this->sMetricName . 'diskspace',
+                $aMetrics[] = new MonitoringMetric($this->sMetricName . 'diskspace_in_megabytes',
                     "itop tables that reach (configurable) $iDiskSpaceThreshold mb in disk space.",
                     $iTotalSpace,
                     $aCurrentLabels
