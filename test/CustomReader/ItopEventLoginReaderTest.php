@@ -112,6 +112,12 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
      */
     public function testGetMetrics($aUsers, $aEventLogins, $aExpectedMetrics)
     {
+	    $oObjSearch = new \DBObjectSearch('EventLoginUsage');
+	    $oSet = new \DBObjectSet($oObjSearch);
+	    while ($oEventLoginUsage = $oSet->Fetch()) {
+		    $oEventLoginUsage->DBDelete();
+	    }
+
         foreach ($aUsers as $sUserId => $aUser) {
             $sLogin = $aUser['login'];
             $aUserProfiles = $aUser['profiles'];

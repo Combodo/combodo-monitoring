@@ -38,6 +38,7 @@ class OqlSelectReaderTest extends ItopDataTestCase
     }
 
     /**
+     * @group cbd-monitoring-ci
      * @dataProvider GetMetricsProvider
      */
     public function testGetGetValue(array $aMetric, $aExpectedResult, $aExpectedMetrics = null)
