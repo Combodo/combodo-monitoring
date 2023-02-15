@@ -48,6 +48,9 @@ class ControllerTest extends ItopDataTestCase
     /**
      * @dataProvider ReadMetricsProvider
      *
+     * @group cbd-monitoring-ci
+     * test separated from provider to fix f...ing error: Test was run in child process and ended unexpectedly
+     *
      * @param array $aMetricConf
      * @param array $aExpectedMetrics
      */
