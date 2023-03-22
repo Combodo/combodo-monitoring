@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitfc59e146b6a5b1cf8f4d126cf62f323f
+class ComposerStaticInit6234adff7aad7893ba404b61d49eb912
 {
     public static $prefixLengthsPsr4 = array (
         'C' => 
@@ -26,15 +26,53 @@ class ComposerStaticInitfc59e146b6a5b1cf8f4d126cf62f323f
     );
 
     public static $classMap = array (
+        'Combodo\\iTop\\Monitoring\\Controller\\Controller' => __DIR__ . '/../..' . '/src/Controller/Controller.php',
+        'Combodo\\iTop\\Monitoring\\CustomReader\\CountTextOccurrences' => __DIR__ . '/../..' . '/src/CustomReader/CountTextOccurrences.php',
+        'Combodo\\iTop\\Monitoring\\CustomReader\\DbToolsService' => __DIR__ . '/../..' . '/src/CustomReader/DbToolsService.php',
+        'Combodo\\iTop\\Monitoring\\CustomReader\\ItopBackupReader' => __DIR__ . '/../..' . '/src/CustomReader/ItopBackupReader.php',
+        'Combodo\\iTop\\Monitoring\\CustomReader\\ItopDbBigTableReader' => __DIR__ . '/../..' . '/src/CustomReader/ItopDbBigTableReader.php',
+        'Combodo\\iTop\\Monitoring\\CustomReader\\ItopEventLoginReader' => __DIR__ . '/../..' . '/src/CustomReader/ItopEventLoginReader.php',
+        'Combodo\\iTop\\Monitoring\\CustomReader\\ItopMailboxReader' => __DIR__ . '/../..' . '/src/CustomReader/ItopMailboxReader.php',
+        'Combodo\\iTop\\Monitoring\\CustomReader\\ItopReadOnlyCustomerReader' => __DIR__ . '/../..' . '/src/CustomReader/ItopReadOnlyCustomerReader.php',
+        'Combodo\\iTop\\Monitoring\\CustomReader\\ItopSetupVersionReader' => __DIR__ . '/../..' . '/src/CustomReader/ItopSetupVersionReader.php',
+        'Combodo\\iTop\\Monitoring\\CustomReader\\ItopSynchroLogReader' => __DIR__ . '/../..' . '/src/CustomReader/ItopSynchroLogReader.php',
+        'Combodo\\iTop\\Monitoring\\CustomReader\\ItopVersionReader' => __DIR__ . '/../..' . '/src/CustomReader/ItopVersionReader.php',
+        'Combodo\\iTop\\Monitoring\\CustomReader\\X509CertificateReader' => __DIR__ . '/../..' . '/src/CustomReader/X509CertificateReader.php',
+        'Combodo\\iTop\\Monitoring\\MetricReader\\ConfReader' => __DIR__ . '/../..' . '/src/MetricReader/ConfReader.php',
+        'Combodo\\iTop\\Monitoring\\MetricReader\\CustomReader' => __DIR__ . '/../..' . '/src/MetricReader/CustomReader.php',
+        'Combodo\\iTop\\Monitoring\\MetricReader\\CustomReaderInterface' => __DIR__ . '/../..' . '/src/MetricReader/CustomReaderInterface.php',
+        'Combodo\\iTop\\Monitoring\\MetricReader\\MetricReaderFactory' => __DIR__ . '/../..' . '/src/MetricReader/MetricReaderFactory.php',
+        'Combodo\\iTop\\Monitoring\\MetricReader\\MetricReaderInterface' => __DIR__ . '/../..' . '/src/MetricReader/MetricReaderInterface.php',
+        'Combodo\\iTop\\Monitoring\\MetricReader\\OqlCountReader' => __DIR__ . '/../..' . '/src/MetricReader/OqlCountReader.php',
+        'Combodo\\iTop\\Monitoring\\MetricReader\\OqlCountUniqueReader' => __DIR__ . '/../..' . '/src/MetricReader/OqlCountUniqueReader.php',
+        'Combodo\\iTop\\Monitoring\\MetricReader\\OqlGroupByReader' => __DIR__ . '/../..' . '/src/MetricReader/OqlGroupByReader.php',
+        'Combodo\\iTop\\Monitoring\\MetricReader\\OqlSelectReader' => __DIR__ . '/../..' . '/src/MetricReader/OqlSelectReader.php',
+        'Combodo\\iTop\\Monitoring\\Model\\Constants' => __DIR__ . '/../..' . '/src/Model/Constants.php',
+        'Combodo\\iTop\\Monitoring\\Model\\MonitoringMetric' => __DIR__ . '/../..' . '/src/Model/MonitoringMetric.php',
+        'Combodo\\iTop\\Monitoring\\Test\\Controller\\ControllerTest' => __DIR__ . '/../..' . '/test/Controller/ControllerTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\CountTextOccurrencesTest' => __DIR__ . '/../..' . '/test/CustomReader/CountTextOccurrencesTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ItopBackupReaderTest' => __DIR__ . '/../..' . '/test/CustomReader/ItopBackupReaderTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ItopDbBigTableReaderTest' => __DIR__ . '/../..' . '/test/CustomReader/ItopDbBigTableReaderTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ItopReadOnlyCustomReaderInterfaceTest' => __DIR__ . '/../..' . '/test/CustomReader/ItopReadOnlyCustomReaderInterfaceTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ItopSetupVersionReaderTest' => __DIR__ . '/../..' . '/test/CustomReader/ItopSetupVersionReaderTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ItopSynchroLogReaderTest' => __DIR__ . '/../..' . '/test/CustomReader/ItopSynchroLogReaderTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\ConfReaderTest' => __DIR__ . '/../..' . '/test/MetricReader/ConfReaderTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\CustomReaderTest' => __DIR__ . '/../..' . '/test/MetricReader/CustomReaderTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\CustomReaders\\CustomReaderImpl' => __DIR__ . '/../..' . '/test/MetricReader/CustomReaders/CustomReaderImpl.php',
+        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\MetricReaderFactoryTest' => __DIR__ . '/../..' . '/test/MetricReader/MetricReaderFactoryTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\OqlCountReaderTest' => __DIR__ . '/../..' . '/test/MetricReader/OqlCountReaderTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\OqlCountUniqueReaderTest' => __DIR__ . '/../..' . '/test/MetricReader/OqlCountUniqueReaderTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\OqlGroupByReaderTest' => __DIR__ . '/../..' . '/test/MetricReader/OqlGroupByReaderTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\OqlSelectReaderTest' => __DIR__ . '/../..' . '/test/MetricReader/OqlSelectReaderTest.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitfc59e146b6a5b1cf8f4d126cf62f323f::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitfc59e146b6a5b1cf8f4d126cf62f323f::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitfc59e146b6a5b1cf8f4d126cf62f323f::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit6234adff7aad7893ba404b61d49eb912::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit6234adff7aad7893ba404b61d49eb912::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit6234adff7aad7893ba404b61d49eb912::$classMap;
 
         }, null, ClassLoader::class);
     }
