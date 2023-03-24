@@ -21,6 +21,8 @@ use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 class ItopSynchroLogReader implements CustomReaderInterface
 {
+	const STRTOTIME_MIN_STARTDATE="STRTOTIME_MIN_STARTDATE";
+
     private $aMetricConf;
     private $sMetricName;
 
@@ -118,15 +120,40 @@ class ItopSynchroLogReader implements CustomReaderInterface
      */
     public function ListSynchroLogObjects() : array
     {
+		if (array_key_exists(self::STRTOTIME_MIN_STARTDATE, $this->aMetricConf)){
+			$sLimit = $this->aMetricConf[self::STRTOTIME_MIN_STARTDATE];
+		} else {
+			$sLimit = '-24 HOURS';
+		}
+	    $currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime($sLimit));
+
 	    $sOql = <<<OQL
 SELECT sl, sds FROM 
 SynchroLog AS sl
 JOIN SynchroDataSource AS sds
 ON sl.sync_source_id = sds.id
+WHERE sl.start_date>"$currentDate"
 OQL;
 
 	    $oSearch = \DBObjectSearch::FromOQL($sOql);
 	    $oSet = new \DBObjectSet($oSearch, ['start_date'=> false], [], null, 0 , 1);
+	    $aOptimizeColumnsLoad=[
+		    'sds' => [
+				'name',
+		    ],
+		    'sl' => [
+				'stats_nb_replica_total',
+				'start_date',
+				'end_date',
+			    'status',
+			    'stats_nb_obj_obsoleted_errors',
+			    'stats_nb_obj_deleted_errors',
+			    'stats_nb_obj_created_errors',
+			    'stats_nb_obj_updated_errors',
+			    'stats_nb_replica_reconciled_errors'
+		    ],
+	    ];
+	    $oSet->OptimizeColumnLoad($aOptimizeColumnsLoad);
 	    $aSynchroLogs = [];
 
 	    /* var DBObject $oObject  */

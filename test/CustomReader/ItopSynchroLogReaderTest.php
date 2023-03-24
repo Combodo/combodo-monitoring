@@ -266,6 +266,46 @@ OQL;
 		}
 	}
 
+	public function SynchroTooOldProvider(){
+		return [
+			'default STRTOTIME_MIN_STARTDATE of 24h | no synchrologs' => [
+				'sCreatedSynchroLogsStartDateStrToTime' => '-25 HOURS',
+				'sMinStartDateConfValue' => null,
+				'bIsEmpty' => true,
+			],
+			'default STRTOTIME_MIN_STARTDATE of 24h | 1 synchrolog found' => [
+				'sCreatedSynchroLogsStartDateStrToTime' => '-23 HOURS',
+				'sMinStartDateConfValue' => null,
+				'bIsEmpty' => false,
+			],
+			'STRTOTIME_MIN_STARTDATE set to 4h | no synchrologs' => [
+				'sCreatedSynchroLogsStartDateStrToTime' => '-5 HOURS',
+				'sMinStartDateConfValue' => '-4 HOURS',
+				'bIsEmpty' => true,
+			],
+			'STRTOTIME_MIN_STARTDATE set to 4h | 1 synchrolog found' => [
+				'sCreatedSynchroLogsStartDateStrToTime' => '-3 HOURS',
+				'sMinStartDateConfValue' => '-4 HOURS',
+				'bIsEmpty' => false,
+			],
+		];
+	}
+	/**
+	 * @dataProvider SynchroTooOldProvider
+	 */
+	public function testListSynchroLogObjects_SynchroTooOld($sCreatedSynchroLogsStartDateStrToTime, $sMinStartDateConfValue, $bIsEmpty){
+		$oSynchroSource = $this->CreateSynchroSource("synchro1");
+		$sStartDate = date(\AttributeDateTime::GetSQLFormat(), strtotime($sCreatedSynchroLogsStartDateStrToTime));
+		$this->CreateSynchroObj($oSynchroSource->GetKey(), $sStartDate);
+
+		$aMetricConf = [];
+		if ($sMinStartDateConfValue!==null){
+			$aMetricConf[ItopSynchroLogReader::STRTOTIME_MIN_STARTDATE]=$sMinStartDateConfValue;
+		}
+		$oItopSynchroLogReader = new ItopSynchroLogReader('', $aMetricConf);
+		$this->assertEquals($bIsEmpty, empty($oItopSynchroLogReader->ListSynchroLogObjects()));
+	}
+
 	private function CreateSynchroSource($sName){
 		return $this->createObject(\SynchroDataSource::class, ['name' => $sName]);
 	}
