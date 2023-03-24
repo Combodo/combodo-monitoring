@@ -74,12 +74,6 @@ class ItopSynchroLogReader implements CustomReaderInterface
 			    $aCurrentLabels
 		    );
 
-		    $aMetrics[] = new MonitoringMetric($this->sMetricName.'memorypeak',
-			    'synchro log memory peak.',
-			    $oSynchroLog->Get('memory_usage_peak'),
-			    $aCurrentLabels
-		    );
-
 		    $aMetrics[] = new MonitoringMetric($this->sMetricName.'replica_count',
 			    'synchro log replica count.',
 			    $oSynchroLog->Get('stats_nb_replica_total'),
@@ -89,7 +83,7 @@ class ItopSynchroLogReader implements CustomReaderInterface
 		    $sStartDate = $oSynchroLog->Get('start_date');
 		    $oStartDate = \DateTime::createFromFormat(\AttributeDateTime::GetSQLFormat(), $sStartDate);
 		    $iAgeInMinutes = (int) ((strtotime('now') - $oStartDate->getTimestamp()) / 60);
-		    $aMetrics[] = new MonitoringMetric($this->sMetricName.'ageinminutes',
+		    $aMetrics[] = new MonitoringMetric($this->sMetricName.'inminutes_age',
 			    'synchro log age in minutes.',
 			    $iAgeInMinutes,
 			    $aCurrentLabels
@@ -107,7 +101,7 @@ class ItopSynchroLogReader implements CustomReaderInterface
 				$iElapsedInSeconds=0;
 			}
 
-		    $aMetrics[] = new MonitoringMetric($this->sMetricName.'elapsedinseconds',
+		    $aMetrics[] = new MonitoringMetric($this->sMetricName.'inseconds_elapsed',
 			    'synchro log elapsed time in seconds.',
 			    $iElapsedInSeconds,
 			    $aCurrentLabels
@@ -124,18 +118,15 @@ class ItopSynchroLogReader implements CustomReaderInterface
      */
     public function ListSynchroLogObjects() : array
     {
-	    $currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-24 HOURS'));
-
 	    $sOql = <<<OQL
 SELECT sl, sds FROM 
 SynchroLog AS sl
 JOIN SynchroDataSource AS sds
 ON sl.sync_source_id = sds.id
-WHERE sl.start_date>"$currentDate"
 OQL;
 
 	    $oSearch = \DBObjectSearch::FromOQL($sOql);
-	    $oSet = new \DBObjectSet($oSearch, ['start_date'=> false]);
+	    $oSet = new \DBObjectSet($oSearch, ['start_date'=> false], [], null, 0 , 1);
 	    $aSynchroLogs = [];
 
 	    /* var DBObject $oObject  */

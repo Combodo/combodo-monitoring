@@ -101,7 +101,7 @@ OQL;
 
 		$oItopSynchroLogReader = new ItopSynchroLogReader('', [Constants::METRIC_LABEL => ['titi' => 'toto']]);
 		$aMetrics = $oItopSynchroLogReader->GetMetrics();
-		$this->assertEquals(5, sizeof($aMetrics));
+		$this->assertEquals(4, sizeof($aMetrics));
 
 		$aExpectedLabels = [
 			'titi' => 'toto',
@@ -117,26 +117,20 @@ OQL;
 
 		$oMonitoringMetric = $aMetrics[1];
 		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
-		$this->assertEquals('synchro log memory peak.', $oMonitoringMetric->GetDescription());
-		$this->assertEquals('itop_synchrolog_memorypeak', $oMonitoringMetric->GetName());
-		$this->assertEquals($iExpectedMemoryPeak, $oMonitoringMetric->GetValue());
-
-		$oMonitoringMetric = $aMetrics[2];
-		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
 		$this->assertEquals('synchro log replica count.', $oMonitoringMetric->GetDescription());
 		$this->assertEquals('itop_synchrolog_replica_count', $oMonitoringMetric->GetName());
 		$this->assertEquals(456, $oMonitoringMetric->GetValue());
 
-		$oMonitoringMetric = $aMetrics[3];
+		$oMonitoringMetric = $aMetrics[2];
 		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
 		$this->assertEquals('synchro log age in minutes.', $oMonitoringMetric->GetDescription());
-		$this->assertEquals('itop_synchrolog_ageinminutes', $oMonitoringMetric->GetName());
+		$this->assertEquals('itop_synchrolog_inminutes_age', $oMonitoringMetric->GetName());
 		$this->assertEquals($iExpectedAgeInMinutes, $oMonitoringMetric->GetValue());
 
-		$oMonitoringMetric = $aMetrics[4];
+		$oMonitoringMetric = $aMetrics[3];
 		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
 		$this->assertEquals('synchro log elapsed time in seconds.', $oMonitoringMetric->GetDescription());
-		$this->assertEquals('itop_synchrolog_elapsedinseconds', $oMonitoringMetric->GetName());
+		$this->assertEquals('itop_synchrolog_inseconds_elapsed', $oMonitoringMetric->GetName());
 		$this->assertEquals($iExpectedElapsedInSeconds, $oMonitoringMetric->GetValue());
 	}
 
@@ -179,7 +173,7 @@ OQL;
 
 		$oItopSynchroLogReader = new ItopSynchroLogReader('', [Constants::METRIC_LABEL => ['titi' => 'toto']]);
 		$aMetrics = $oItopSynchroLogReader->GetMetrics();
-		$this->assertEquals(5, sizeof($aMetrics));
+		$this->assertEquals(4, sizeof($aMetrics));
 
 		$aExpectedLabels = [
 			'titi' => 'toto',
@@ -195,35 +189,19 @@ OQL;
 
 		$oMonitoringMetric = $aMetrics[1];
 		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
-		$this->assertEquals('synchro log memory peak.', $oMonitoringMetric->GetDescription());
-		$this->assertEquals('itop_synchrolog_memorypeak', $oMonitoringMetric->GetName());
-		$this->assertEquals($iExpectedMemoryPeak, $oMonitoringMetric->GetValue());
-
-		$oMonitoringMetric = $aMetrics[2];
-		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
 		$this->assertEquals('synchro log replica count.', $oMonitoringMetric->GetDescription());
 		$this->assertEquals('itop_synchrolog_replica_count', $oMonitoringMetric->GetName());
 		$this->assertEquals(456, $oMonitoringMetric->GetValue());
 
-		$oMonitoringMetric = $aMetrics[3];
+		$oMonitoringMetric = $aMetrics[2];
 		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
 		$this->assertEquals('synchro log age in minutes.', $oMonitoringMetric->GetDescription());
-		$this->assertEquals('itop_synchrolog_ageinminutes', $oMonitoringMetric->GetName());
+		$this->assertEquals('itop_synchrolog_inminutes_age', $oMonitoringMetric->GetName());
 
-		$oMonitoringMetric = $aMetrics[4];
+		$oMonitoringMetric = $aMetrics[3];
 		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
 		$this->assertEquals('synchro log elapsed time in seconds.', $oMonitoringMetric->GetDescription());
-		$this->assertEquals('itop_synchrolog_elapsedinseconds', $oMonitoringMetric->GetName());
-	}
-
-	public function testListSynchroLogObjects_SynchroTooOld(){
-		$oSynchroSource = $this->CreateSynchroSource("synchro1");
-		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-48 HOURS'));
-		$this->CreateSynchroObj($oSynchroSource->GetKey(), $currentDate);
-
-
-		$oItopSynchroLogReader = new ItopSynchroLogReader('', []);
-		$this->assertEquals([], $oItopSynchroLogReader->ListSynchroLogObjects());
+		$this->assertEquals('itop_synchrolog_inseconds_elapsed', $oMonitoringMetric->GetName());
 	}
 
 	public function testListSynchroLogObjects_OneSynchroLogPerSource(){
