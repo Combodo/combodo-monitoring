@@ -13,8 +13,6 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
  */
 class ItopSynchroLogReaderTest extends ItopDataTestCase
 {
-	private $sDir;
-
 	protected function setUp(): void
 	{
 		//@include_once '/home/combodo/workspace/iTop/approot.inc.php';
