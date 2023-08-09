@@ -237,12 +237,14 @@ class OqlSelectReaderTest extends ItopDataTestCase
  `User`.`login` AS `Userlogin`,
  `User`.`language` AS `Userlanguage`,
  `User`.`status` AS `Userstatus`,
+ `User`.`log` AS `Userlog`,
  `User`.`finalclass` AS `Userfinalclass`,
  CAST(CONCAT(COALESCE(`User`.`login`, '')) AS CHAR) AS `Userfriendlyname`,
  CAST(CONCAT(COALESCE(`Person_contactid`.`first_name`, ''), COALESCE(' ', ''), COALESCE(`Person_contactid_Contact`.`name`, '')) AS CHAR) AS `Usercontactid_friendlyname`,
  COALESCE((`Person_contactid_Contact`.`status` = 'inactive'), 0) AS `Usercontactid_obsolescence_flag`,
  CAST(CONCAT(COALESCE(`Organization_org_id`.`name`, '')) AS CHAR) AS `Userorg_id_friendlyname`,
- COALESCE((`Organization_org_id`.`status` = 'inactive'), 0) AS `Userorg_id_obsolescence_flag`
+ COALESCE((`Organization_org_id`.`status` = 'inactive'), 0) AS `Userorg_id_obsolescence_flag`,
+ `User`.`log_index` AS `Userlog_index`
  FROM 
    `priv_user` AS `User`
    LEFT JOIN (
@@ -281,12 +283,14 @@ class OqlSelectReaderTest extends ItopDataTestCase
  `User`.`login` AS `Userlogin`,
  `User`.`language` AS `Userlanguage`,
  `User`.`status` AS `Userstatus`,
+ `User`.`log` AS `Userlog`,
  `User`.`finalclass` AS `Userfinalclass`,
  CAST(CONCAT(COALESCE(`User`.`login`, '')) AS CHAR) AS `Userfriendlyname`,
  CAST(CONCAT(COALESCE(`Person_contactid`.`first_name`, ''), COALESCE(' ', ''), COALESCE(`Person_contactid_Contact`.`name`, '')) AS CHAR) AS `Usercontactid_friendlyname`,
  COALESCE((`Person_contactid_Contact`.`status` = 'inactive'), 0) AS `Usercontactid_obsolescence_flag`,
  CAST(CONCAT(COALESCE(`Organization_org_id`.`name`, '')) AS CHAR) AS `Userorg_id_friendlyname`,
- COALESCE((`Organization_org_id`.`status` = 'inactive'), 0) AS `Userorg_id_obsolescence_flag`
+ COALESCE((`Organization_org_id`.`status` = 'inactive'), 0) AS `Userorg_id_obsolescence_flag`,
+ `User`.`log_index` AS `Userlog_index`
  FROM 
    `priv_user` AS `User`
    LEFT JOIN (
