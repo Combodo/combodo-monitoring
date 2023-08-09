@@ -4,7 +4,6 @@ use Combodo\iTop\Monitoring\Controller\Controller;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
-use Combodo\iTop\Monitoring\Test\MetricReader\CustomReaders\CustomReaderImpl;
 
 /**
  * @runTestsInSeparateProcesses
@@ -190,7 +189,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
         $this->assertEquals(200, $aResp[1], "wrong http error code. $aResp[1] instead of 200");
         $aResp = $this->CallRestApi("$this->sUrl&access_token=toto124&collection=collection1");
         $this->assertEquals(500, $aResp[1], "wrong http error code. $aResp[1] instead of 500");
-        $this->assertContains('Exception : Invalid token', $aResp[0]);
+        $this->assertStringContainsString('Exception : Invalid token', $aResp[0]);
     }
 
     /**
@@ -212,7 +211,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
         $sErrorCode = $aResp[1];
         $this->assertEquals($iHttpCode, $sErrorCode, "wrong http error code. $sErrorCode instead of $iHttpCode. ".$aResp[0]);
         if (500 == $sErrorCode) {
-            $this->assertContains('Exception : Unauthorized network', $aResp[0]);
+            $this->assertStringContainsString('Exception : Unauthorized network', $aResp[0]);
         }
     }
 
@@ -247,7 +246,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
         $this->assertEquals(200, $aResp[1], "wrong http error code. $aResp[1] instead of 200");
         $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123");
         $this->assertEquals(500, $aResp[1], "Missing collection in GET params. $aResp[1] instead of 500");
-        $this->assertContains('Exception : Missing mandatory GET parameter collection', $aResp[0]);
+        $this->assertStringContainsString('Exception : Missing mandatory GET parameter collection', $aResp[0]);
     }
 
     /**

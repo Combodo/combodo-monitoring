@@ -15,9 +15,9 @@
 
 namespace Combodo\iTop\Monitoring\Test\MetricReader;
 
+use Combodo\iTop\Monitoring\MetricReader\ConfReader;
 use Combodo\iTop\Monitoring\MetricReader\CustomReader;
 use Combodo\iTop\Monitoring\MetricReader\MetricReaderFactory;
-use Combodo\iTop\Monitoring\MetricReader\ConfReader;
 use Combodo\iTop\Monitoring\MetricReader\OqlCountReader;
 use Combodo\iTop\Monitoring\MetricReader\OqlCountUniqueReader;
 use Combodo\iTop\Monitoring\MetricReader\OqlGroupByReader;
@@ -45,7 +45,11 @@ class MetricReaderFactoryTest extends ItopTestCase
     public function testGetReader($aMetric, $sExpectedClass, $sExpectedException)
     {
         if (! is_null($sExpectedException)) {
-            $this->expectExceptionMessageRegExp($sExpectedException);
+	        if (method_exists($this, 'expectExceptionMessageRegExp')){
+		        $this->expectExceptionMessageRegExp($sExpectedException);
+	        } else {
+		        $this->expectExceptionMessageMatches($sExpectedException);
+	        }
         }
         $oMetricReaderFactory = new MetricReaderFactory();
         $result = $oMetricReaderFactory->GetReader('foo', $aMetric);

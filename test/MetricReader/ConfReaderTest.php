@@ -17,7 +17,6 @@ namespace Combodo\iTop\Monitoring\Test\MetricReader;
 
 use Combodo\iTop\Monitoring\MetricReader\ConfReader;
 use Combodo\iTop\Test\UnitTest\ItopTestCase;
-use Config;
 use ReflectionObject;
 
 /**
@@ -54,7 +53,11 @@ class ConfReaderTest extends ItopTestCase {
 		}
 
 		if (null != $sExpectedException) {
-			$this->expectExceptionMessageRegExp($sExpectedException);
+			if (method_exists($this, 'expectExceptionMessageRegExp')){
+				$this->expectExceptionMessageRegExp($sExpectedException);
+			} else {
+				$this->expectExceptionMessageMatches($sExpectedException);
+			}
 		}
 
 		$oOqlConfReader = new ConfReader('foo', $aMetric);
@@ -142,7 +145,11 @@ class ConfReaderTest extends ItopTestCase {
 		}
 
 		if (null != $sExpectedException) {
-			$this->expectExceptionMessageRegExp($sExpectedException);
+			if (method_exists($this, 'expectExceptionMessageRegExp')){
+				$this->expectExceptionMessageRegExp($sExpectedException);
+			} else {
+				$this->expectExceptionMessageMatches($sExpectedException);
+			}
 		}
 
 		$oOqlConfReader = new ConfReader('foo', $aMetric);

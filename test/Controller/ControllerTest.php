@@ -219,7 +219,11 @@ class ControllerTest extends ItopDataTestCase
     public function testReadMetricConf(string $sCollection, array $aConf, $aExpectedResult, ?string $sExpectedException)
     {
         if (null !== $sExpectedException) {
-            $this->expectExceptionMessageRegExp($sExpectedException);
+	        if (method_exists($this, 'expectExceptionMessageRegExp')){
+		        $this->expectExceptionMessageRegExp($sExpectedException);
+	        } else {
+		        $this->expectExceptionMessageMatches($sExpectedException);
+	        }
         }
 
         $oConfigMock = $this->createMock(\Config::class);
