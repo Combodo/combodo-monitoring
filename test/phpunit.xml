@@ -1,4 +1,17 @@
-<phpunit bootstrap="../unittestautoload.php">
+<phpunit bootstrap="../unittestautoload.php"
+         backupGlobals="true"
+         colors="true"
+         columns="120"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         processIsolation="true"
+         stopOnError="false"
+         stopOnFailure="false"
+         stopOnIncomplete="false"
+         stopOnRisky="false"
+         stopOnSkipped="false"
+         verbose="true">
   <php>
     <ini name="error_reporting" value="E_ALL &amp; ~E_DEPRECATED"/>
     <ini name="display_errors" value="On"/>
