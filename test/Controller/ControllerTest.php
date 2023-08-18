@@ -56,7 +56,7 @@ class ControllerTest extends ItopDataTestCase
      */
     public function testReadMetrics($aMetricConf, $aExpectedMetricFields)
     {
-        $aExpectedMetrics = null;
+        $aExpectedMetric = null;
 
         foreach ($aExpectedMetricFields as $aPerMetricValues) {
             $aLabel = 4 == count($aPerMetricValues) ? $aPerMetricValues[3] : [];

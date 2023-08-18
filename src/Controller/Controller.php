@@ -16,6 +16,8 @@ class Controller extends BaseController {
     /** @var string */
     private $m_sAccessAuthorizedNetworkConfigParamId = null;
 
+	private bool $bAccessForbidden = false;
+
 	public function OperationStatus()
 	{
 		$aParams = [
@@ -27,6 +29,11 @@ class Controller extends BaseController {
 
 
 	public function OperationExposePrometheusMetrics() {
+		if ($this->bAccessForbidden) {
+			//headers already sent by network access check function
+			return;
+		}
+
         $sCollection = utils::ReadParam('collection', null);
 
         if (is_null($sCollection)) {
@@ -189,6 +196,7 @@ class Controller extends BaseController {
 
         $clientIp = $_SERVER['REMOTE_ADDR'];
         if (!IpUtils::checkIp($clientIp, $aNetworks)){
+			$this->bAccessForbidden = true;
             \IssueLog::Error("'$sExecModule' page is not authorized to '$clientIp' ip address.");
             http_response_code(500);
             $aResponse = array('sError' => "Exception : Unauthorized network ($clientIp)");
