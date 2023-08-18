@@ -195,7 +195,7 @@ class Controller extends BaseController {
         }
 
         $clientIp = $_SERVER['REMOTE_ADDR'];
-        if (!IpUtils::checkIp($clientIp, $aNetworks)){
+        if (! $this->CheckIpFunction($clientIp, $aNetworks)){
 			$this->bAccessForbidden = true;
             \IssueLog::Error("'$sExecModule' page is not authorized to '$clientIp' ip address.");
             http_response_code(500);

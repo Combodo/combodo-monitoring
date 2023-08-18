@@ -208,10 +208,11 @@ class CombodoMonitoringTest extends ItopDataTestCase
         @chmod($this->sConfigFile, 0444); // Read-only
 
         $aResp = $this->CallRestApi("$this->sUrl&access_token=toto123&collection=collection1");
-        $sErrorCode = $aResp[1];
-        $this->assertEquals($iHttpCode, $sErrorCode, "wrong http error code. $sErrorCode instead of $iHttpCode. ".$aResp[0]);
-        if (500 == $sErrorCode) {
-            $this->assertStringContainsString('Exception : Unauthorized network', $aResp[0]);
+	    var_dump($aResp);
+	    $sErrorCode = $aResp[1];
+	    $this->assertEquals($iHttpCode, $sErrorCode, "wrong http error code. $sErrorCode instead of $iHttpCode. ".$aResp[0]);
+	    if (500 == $sErrorCode) {
+	        $this->assertStringContainsString('Exception : Unauthorized network', $aResp[0]);
         }
     }
 
@@ -219,19 +220,31 @@ class CombodoMonitoringTest extends ItopDataTestCase
     {
         $sLocalIp = gethostbyname(gethostname());
         $aExploded = explode('.', $sLocalIp);
-        $sSubnet = sprintf('%s.%s.0.1', $aExploded[0], $aExploded[1]);
+		$iNetwork = $aExploded[2] + 1;
+		if ($iNetwork > 254){
+			$iNetwork = 1;
+		}
+        $sSubnet = sprintf('%s.%s.%s.1', $aExploded[0], $aExploded[1], $iNetwork);
 
         //$sLocalIp = gethostbyname(parse_url($this->sUrl, PHP_URL_HOST));
         return [
             'wrong conf' => ['aNetworkRegexps' => '', 'iHttpCode' => 500],
             'empty' => ['aNetworkRegexps' => [], 'iHttpCode' => 200],
             //"ok for IP $sLocalIp" => [ 'aNetworkRegexps' => [$sLocalIp], 'iHttpCode' => 200 ],
-            "ok for $sSubnet/24" => ['aNetworkRegexps' => [$sSubnet.'/24'], 'iHttpCode' => 200],
-            "ok with further authorized networks + $sSubnet/24" => ['aNetworkRegexps' => ['20.0.0.0/24', "$sSubnet/24"], 'iHttpCode' => 200],
+            "ok for $sSubnet/16" => ['aNetworkRegexps' => [$sSubnet.'/16'], 'iHttpCode' => 200],
+	        "http 500 for $sSubnet/24" => ['aNetworkRegexps' => [$sSubnet.'/24'], 'iHttpCode' => 500],
+            "ok with further authorized networks + $sSubnet/16" => ['aNetworkRegexps' => ['20.0.0.0/24', "$sSubnet/16"], 'iHttpCode' => 200],
             'wrong network' => ['aNetworkRegexps' => ['20.0.0.0/24'], 'iHttpCode' => 500],
             'wrong IP' => ['aNetworkRegexps' => ['20.0.0.0'], 'iHttpCode' => 500],
         ];
     }
+
+	public function testCheckIp(){
+		$oController = new Controller();
+		$this->assertEquals(true, $oController->CheckIpFunction("192.168.48.3", ['192.168.0.1/16']));
+		$this->assertEquals(false, $oController->CheckIpFunction("192.168.48.3", ['192.168.0.1/24']));
+	}
+
 
     public function testCollection()
     {
