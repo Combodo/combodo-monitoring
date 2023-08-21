@@ -439,4 +439,9 @@ class ControllerTest extends ItopDataTestCase
             ],
         ];
     }
+
+	public function testCheckIp(){
+		$this->monitoringController->assertEquals(true, $oController->CheckIpFunction("192.168.48.3", ['192.168.0.1/16']));
+		$this->monitoringController->assertEquals(false, $oController->CheckIpFunction("192.168.48.3", ['192.168.0.1/24']));
+	}
 }

@@ -239,13 +239,6 @@ class CombodoMonitoringTest extends ItopDataTestCase
         ];
     }
 
-	public function testCheckIp(){
-		$oController = new Controller();
-		$this->assertEquals(true, $oController->CheckIpFunction("192.168.48.3", ['192.168.0.1/16']));
-		$this->assertEquals(false, $oController->CheckIpFunction("192.168.48.3", ['192.168.0.1/24']));
-	}
-
-
     public function testCollection()
     {
         @chmod($this->sConfigFile, 0770);
