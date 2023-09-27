@@ -137,8 +137,9 @@ class Controller extends BaseController {
         $oMetricReaderFactory = new MetricReaderFactory();
 
         try {
+            \IssueLog::Info("Generate all metrics");
             foreach ($aMetricParams as $sMetricName => $aMetric) {
-
+                $iTimeStamp = microtime(true);
                 if (!isset($aMetric[Constants::METRIC_DESCRIPTION])) {
                     throw new \Exception("Metric $sMetricName has no description. Please provide it.");
                 }
@@ -148,13 +149,16 @@ class Controller extends BaseController {
                 }
 
                 $aMonitoringMetrics = $oReader->GetMetrics();
+                $iElapsedInMs = (microtime(true) - $iTimeStamp) * 1000;
 
+                \IssueLog::Info(sprintf("=== %s: %s metrics in %s ms", $sMetricName, sizeof($aMonitoringMetrics), $iElapsedInMs));
                 if (is_null($aMonitoringMetrics)) {
                     continue;
                 }
 
                 $aMetrics = array_merge($aMetrics, $aMonitoringMetrics);
             }
+            \IssueLog::Info("All metrics generated");
         }catch (\Exception $e){
             //fail and return nothing on purpose
             $aMetrics = [];

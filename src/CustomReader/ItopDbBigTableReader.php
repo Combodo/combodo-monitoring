@@ -18,7 +18,6 @@ namespace Combodo\iTop\Monitoring\CustomReader;
 use Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
-use Combodo\iTop\DBTools\Service\DBToolsUtils;
 
 class ItopDbBigTableReader implements CustomReaderInterface
 {
@@ -26,6 +25,7 @@ class ItopDbBigTableReader implements CustomReaderInterface
     CONST EXCESSIVE_DISKSPACE_THRESHOLD = 250; //mb
     CONST EXCESSIVE_OBJECTCOUNT_CONF_PARAM_NAME = 'objectcount_threshold';
     CONST EXCESSIVE_DISKSPACE_CONF_PARAM_NAME = 'diskspace_threshold';
+	CONST DB_ANALYZE_FREQUENCY = 'db_analyze_frequency_in_minutes';
 
     private $aMetricConf;
     private $sMetricName;
@@ -53,8 +53,10 @@ class ItopDbBigTableReader implements CustomReaderInterface
 
         $aMetrics=[];
 
-        //var_dump($this->oDbToolsService->GetDBTablesInfo());
-        foreach($this->oDbToolsService->GetDBTablesInfo() as $aTableInfo){
+		//by default every 6 hours
+	    $iDbAnalyzeFrequencyInMinutes = $this->aMetricConf[self::DB_ANALYZE_FREQUENCY] ?? 6 * 60;
+
+        foreach($this->oDbToolsService->GetDBTablesInfo($iDbAnalyzeFrequencyInMinutes) as $aTableInfo){
             $aCurrentLabels = [];
             $sTableName = $aTableInfo['table_name'] ?? null;
             $sObjectCount = $aTableInfo['table_rows'] ?? null;

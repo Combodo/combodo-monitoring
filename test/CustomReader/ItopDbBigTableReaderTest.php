@@ -181,6 +181,7 @@ class ItopDbBigTableReaderTest extends ItopDataTestCase
                 ],
                 'aExpectedMetrics' => [
                 ],
+	            'db_analyze_frequency_in_minutes' => 24 *60
             ],
         ];
     }
@@ -188,14 +189,19 @@ class ItopDbBigTableReaderTest extends ItopDataTestCase
     /**
      * @dataProvider GetMetricsProvider
      */
-    public function testGetMetrics($aOutput, $aExpectedMetrics)
+    public function testGetMetrics($aOutput, $aExpectedMetrics, $iDbAnalyzeFrequencyConf = -1)
     {
         $aLabels = ['toto' => 'titi'];
         $oDbToolsService = $this->createMock(DbToolsService::class);
-        $oItopDbBigTableReader = new ItopDbBigTableReader('', ['static_labels' => $aLabels], $oDbToolsService);
+	    $aMetricConf = ['static_labels' => $aLabels];
+		if ($iDbAnalyzeFrequencyConf !== -1){
+			$aMetricConf['db_analyze_frequency_in_minutes'] = $iDbAnalyzeFrequencyConf;
+		}
+	    $oItopDbBigTableReader = new ItopDbBigTableReader('', $aMetricConf, $oDbToolsService);
 
         $oDbToolsService->expects(self::exactly(1))
             ->method('GetDBTablesInfo')
+            ->with(($iDbAnalyzeFrequencyConf !== -1) ? $iDbAnalyzeFrequencyConf : 6*60)
             ->willReturn(
                 $aOutput
             );
