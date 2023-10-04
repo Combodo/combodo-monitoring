@@ -123,6 +123,16 @@ class Controller extends BaseController {
         return $aModuleSetting[$sCollection];
     }
 
+    public function EnableKpiLogging() : bool {
+        $aModuleSetting = \utils::GetConfig()->GetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS);
+
+        if (! array_key_exists('kpi_logging', $aModuleSetting)) {
+            return false;
+        }
+
+        return (bool) $aModuleSetting['kpi_logging'];
+    }
+
     /**
      * @param $aMetricParams
      * @return array
@@ -137,7 +147,10 @@ class Controller extends BaseController {
         $oMetricReaderFactory = new MetricReaderFactory();
 
         try {
-            \IssueLog::Info("Generate all metrics");
+            $bKpiLogging = $this->EnableKpiLogging();
+            if ($bKpiLogging){
+                \IssueLog::Info("combodo-monitoring: Compute metrics");
+            }
             foreach ($aMetricParams as $sMetricName => $aMetric) {
                 $iTimeStamp = microtime(true);
                 if (!isset($aMetric[Constants::METRIC_DESCRIPTION])) {
@@ -151,14 +164,19 @@ class Controller extends BaseController {
                 $aMonitoringMetrics = $oReader->GetMetrics();
                 $iElapsedInMs = (microtime(true) - $iTimeStamp) * 1000;
 
-                \IssueLog::Info(sprintf("=== %s: %s metrics in %s ms", $sMetricName, sizeof($aMonitoringMetrics), $iElapsedInMs));
+                if ($bKpiLogging) {
+                    \IssueLog::Info(sprintf("=== %s: %s metrics in %s ms", $sMetricName, sizeof($aMonitoringMetrics), $iElapsedInMs));
+                }
                 if (is_null($aMonitoringMetrics)) {
                     continue;
                 }
 
                 $aMetrics = array_merge($aMetrics, $aMonitoringMetrics);
             }
-            \IssueLog::Info("All metrics generated");
+
+            if ($bKpiLogging){
+                \IssueLog::Info("combodo-monitoring: metrics computed");
+            }
         }catch (\Exception $e){
             //fail and return nothing on purpose
             $aMetrics = [];
