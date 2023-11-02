@@ -37,34 +37,46 @@ class iTopSessionReader implements CustomReaderInterface
      */
     public function GetMetrics(): ?array
     {
-        $iCounter = $this->FetchCounter();
-
         $sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
 
-        return [ new MonitoringMetric($this->sMetricName, $sDesc, $iCounter)];
+		$aRes = [];
+	    foreach ($this->FetchCounter() as $sLoginMode => $iCounter){
+			$aRes[] = new MonitoringMetric($this->sMetricName, $sDesc, $iCounter, [ 'login_mode' => $sLoginMode ]);
+	    }
+
+	    return $aRes;
     }
 
     /**
-     * @return int
+     * @return array
      * @throws \Exception
      */
-    private function FetchCounter(): int
+    private function FetchCounter(): array
     {
 	    if (! class_exists('Combodo\iTop\Application\Helper\iTopSessionHandler')) {
-			\IssueLog::Error("iTopSessionHandler class does not exist. Metric iTopSessionReader is not working with current iTop version");
-			return 0;
+		    \IssueLog::Error("iTopSessionHandler class does not exist. Metric iTopSessionReader is not working with current iTop version");
+
+		    return ['no_auth' => 0];
 	    }
 
 		$oItopSessionHandler = new iTopSessionHandler();
         $aFiles = $oItopSessionHandler->ListSessionFiles();
 
-		$iCount = 0;
+		$aRes = [];
 		foreach ($aFiles as $sFile){
-			if (@filesize($sFile)){
-				//count logged in sessions
-				$iCount++;
-			}
+				$aData = json_decode(file_get_contents($sFile), true);
+				if (is_array($aData) && array_key_exists('login_mode', $aData)){
+					$sLoginMode = $aData['login_mode'];
+				} else {
+					$sLoginMode = 'no_auth';
+				}
+
+				$iCurrentCount = $aRes[$sLoginMode] ?? 0;
+				$iCurrentCount++;
+
+				$aRes[$sLoginMode] = $iCurrentCount;
 		}
-        return $iCount;
+
+        return $aRes;
     }
 }

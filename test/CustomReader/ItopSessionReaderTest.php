@@ -30,7 +30,9 @@ class ItopSessionReaderTest extends ItopDataTestCase
 
 		$oiTopSessionReader = new iTopSessionReader('itop_session_count', []);
 		$aMetrics = $oiTopSessionReader->GetMetrics();
-		$oMetric = array_pop($aMetrics);
-		$this->assertNotEquals("0", $oMetric->GetValue());
+		var_export($aMetrics, true);
+		foreach ($aMetrics as $oMetric){
+			$this->assertNotEquals("0", $oMetric->GetValue(), var_export($oMetric, true));
+		}
 	}
 }
