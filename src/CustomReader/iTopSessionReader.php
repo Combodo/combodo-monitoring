@@ -58,6 +58,13 @@ class iTopSessionReader implements CustomReaderInterface
 		$oItopSessionHandler = new iTopSessionHandler();
         $aFiles = $oItopSessionHandler->ListSessionFiles();
 
-        return sizeof($aFiles);
+		$iCount = 0;
+		foreach ($aFiles as $sFile){
+			if (@filesize($sFile)){
+				//count logged in sessions
+				$iCount++;
+			}
+		}
+        return $iCount;
     }
 }
