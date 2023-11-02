@@ -17,10 +17,11 @@ namespace Combodo\iTop\Monitoring\CustomReader;
 
 
 use Combodo\iTop\Application\Helper\iTopSessionHandler;
+use Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
-class iTopSessionReader implements \Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface
+class iTopSessionReader implements CustomReaderInterface
 {
     private $aMetricConf;
     private $sMetricName;
