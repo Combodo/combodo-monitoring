@@ -103,11 +103,11 @@ class iTopSessionReader implements CustomReaderInterface
 
 	    $aSessionElapsedMax = [];
 	    $aElapsedSum = [];
-	    $now = time();
+	    //$now = time();
 	    foreach ($aUnexpiredFiles as $sLoginMode => $aFilesPerContext){
 		    foreach ($aFilesPerContext as $sContext => $aFiles) {
 			    foreach ($aFiles as $sFile) {
-				    $iElapsedInSeconds = $now - filemtime($sFile);
+				    $iElapsedInSeconds = filemtime($sFile)($sFile) - filectime($sFile);
 				    if (!array_key_exists($sLoginMode, $aSessionElapsedMax)) {
 					    $aSessionElapsedMax[$sLoginMode] = [];
 					    $aElapsedSum[$sLoginMode] = [];
