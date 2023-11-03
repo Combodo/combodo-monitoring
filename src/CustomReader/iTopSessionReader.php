@@ -40,8 +40,10 @@ class iTopSessionReader implements CustomReaderInterface
         $sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
 
 		$aRes = [];
-	    foreach ($this->FetchCounter() as $sLoginMode => $iCounter){
-			$aRes[] = new MonitoringMetric($this->sMetricName, $sDesc, $iCounter, [ 'login_mode' => $sLoginMode ]);
+	    foreach ($this->FetchCounter() as $sLoginMode => $aLoginModeRes) {
+		    foreach ($aLoginModeRes as $sContext => $iCounter) {
+			    $aRes[] = new MonitoringMetric($this->sMetricName, $sDesc, $iCounter, ['login_mode' => $sLoginMode, 'context' => $sContext]);
+		    }
 	    }
 
 	    return $aRes;
@@ -71,10 +73,24 @@ class iTopSessionReader implements CustomReaderInterface
 					$sLoginMode = 'no_auth';
 				}
 
-				$iCurrentCount = $aRes[$sLoginMode] ?? 0;
-				$iCurrentCount++;
+				if (is_array($aData) && array_key_exists('context', $aData)){
+					$sContext = $aData['context'];
+				} else {
+					$sContext = '';
+				}
 
-				$aRes[$sLoginMode] = $iCurrentCount;
+				if (! array_key_exists($sLoginMode, $aRes)){
+					$aRes[$sLoginMode] = [];
+				}
+
+				if (array_key_exists($sContext, $aRes[$sLoginMode])){
+					$iCurrentCount = $aRes[$sLoginMode][$sContext];
+					$iCurrentCount++;
+				} else {
+					$iCurrentCount = 1;
+				}
+
+				$aRes[$sLoginMode][$sContext] = $iCurrentCount;
 		}
 
         return $aRes;
