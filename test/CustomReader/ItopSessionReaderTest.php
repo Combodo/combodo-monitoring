@@ -79,6 +79,7 @@ class ItopSessionReaderTest extends ItopDataTestCase
 					file_put_contents($sFile,
 						json_encode(
 							[
+								'creation_time' => time(),
 								'login_mode' => $sLoginMode,
 								'user_id' => $i,
 								'context' => $sContext

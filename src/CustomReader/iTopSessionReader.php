@@ -54,7 +54,8 @@ class iTopSessionReader implements CustomReaderInterface
 	public function FetchCounter(array $aSessionFiles): array
     {
 		$aCount = [];
-		$aUnexpiredFiles = [];
+		$aSessionElapsedMax = [];
+	    $aElapsedSum = [];
 		foreach ($aSessionFiles as $sFile){
 			if (! is_file($sFile)){
 				continue;
@@ -89,43 +90,27 @@ class iTopSessionReader implements CustomReaderInterface
 				continue;
 			}
 
-			if (! array_key_exists($sLoginMode, $aUnexpiredFiles)){
-				$aUnexpiredFiles[$sLoginMode] = [];
-			}
+			if (is_array($aData) && array_key_exists('creation_time', $aData)) {
+				$iCreationTime = $aData['creation_time'];
+				$iElapsedInSeconds = filemtime($sFile) - $iCreationTime;
 
-			if (array_key_exists($sContext, $aUnexpiredFiles[$sLoginMode])){
-				$aUnexpiredFiles[$sLoginMode][$sContext][] = $sFile;
-			} else {
-				$aUnexpiredFiles[$sLoginMode][$sContext] = [ $sFile ];
+				if (!array_key_exists($sLoginMode, $aSessionElapsedMax)) {
+					$aSessionElapsedMax[$sLoginMode] = [];
+					$aElapsedSum[$sLoginMode] = [];
+				}
+
+				if (array_key_exists($sContext, $aSessionElapsedMax[$sLoginMode])) {
+					$aElapsedSum[$sLoginMode][$sContext] = $aElapsedSum[$sLoginMode][$sContext] + $iElapsedInSeconds;
+
+					if ($iElapsedInSeconds > $aSessionElapsedMax[$sLoginMode][$sContext]) {
+						$aSessionElapsedMax[$sLoginMode][$sContext] = $iElapsedInSeconds;
+					}
+				} else {
+					$aElapsedSum[$sLoginMode][$sContext] = $iElapsedInSeconds;
+					$aSessionElapsedMax[$sLoginMode][$sContext] = $iElapsedInSeconds;
+				}
 			}
 		}
-
-
-	    $aSessionElapsedMax = [];
-	    $aElapsedSum = [];
-	    //$now = time();
-	    foreach ($aUnexpiredFiles as $sLoginMode => $aFilesPerContext){
-		    foreach ($aFilesPerContext as $sContext => $aFiles) {
-			    foreach ($aFiles as $sFile) {
-				    $iElapsedInSeconds = filemtime($sFile) - filectime($sFile);
-				    if (!array_key_exists($sLoginMode, $aSessionElapsedMax)) {
-					    $aSessionElapsedMax[$sLoginMode] = [];
-					    $aElapsedSum[$sLoginMode] = [];
-				    }
-
-				    if (array_key_exists($sContext, $aSessionElapsedMax[$sLoginMode])) {
-					    $aElapsedSum[$sLoginMode][$sContext] = $aElapsedSum[$sLoginMode][$sContext] + $iElapsedInSeconds;
-
-					    if ($iElapsedInSeconds > $aSessionElapsedMax[$sLoginMode][$sContext]) {
-						    $aSessionElapsedMax[$sLoginMode][$sContext] = $iElapsedInSeconds;
-					    }
-				    } else {
-					    $aElapsedSum[$sLoginMode][$sContext] = $iElapsedInSeconds;
-					    $aSessionElapsedMax[$sLoginMode][$sContext] = $iElapsedInSeconds;
-				    }
-			    }
-		    }
-	    }
 
 	    $aRes = [];
 	    foreach ($aCount as $sLoginMode => $aLoginModeRes) {
