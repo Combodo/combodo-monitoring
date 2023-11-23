@@ -15,12 +15,11 @@
 
 namespace Combodo\iTop\Monitoring\CustomReader;
 
-
-use Combodo\iTop\Application\Helper\iTopSessionHandler;
+use Combodo\iTop\SessionTracker\SessionHandler;
 use Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
-class iTopSessionReader implements CustomReaderInterface
+class ActiveSessionReader implements CustomReaderInterface
 {
     private $aMetricConf;
     private $sMetricName;
@@ -38,14 +37,14 @@ class iTopSessionReader implements CustomReaderInterface
     {
         //$sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
 
-	    if (! class_exists('Combodo\iTop\Application\Helper\iTopSessionHandler')) {
-		    \IssueLog::Error("iTopSessionHandler class does not exist. Metric iTopSessionReader is not working with current iTop version");
+	    if (! class_exists('Combodo\iTop\SessionTracker\SessionHandler')) {
+		    \IssueLog::Error("SessionHandler class does not exist. Metric ActiveSessionReader is not working with current iTop version");
 
 		    return [];
 	    }
 
-	    $oItopSessionHandler = new iTopSessionHandler();
-	    $aFiles = $oItopSessionHandler->ListSessionFiles();
+	    $oItopSessionHandler = new SessionHandler();
+	    $aFiles = $oItopSessionHandler->list_session_files();
 
 	    return $this->FetchCounter($aFiles);
     }

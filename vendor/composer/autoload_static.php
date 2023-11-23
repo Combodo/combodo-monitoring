@@ -27,6 +27,7 @@ class ComposerStaticInit6234adff7aad7893ba404b61d49eb912
 
     public static $classMap = array (
         'Combodo\\iTop\\Monitoring\\Controller\\Controller' => __DIR__ . '/../..' . '/src/Controller/Controller.php',
+        'Combodo\\iTop\\Monitoring\\CustomReader\\ActiveSessionReader' => __DIR__ . '/../..' . '/src/CustomReader/ActiveSessionReader.php',
         'Combodo\\iTop\\Monitoring\\CustomReader\\CountTextOccurrences' => __DIR__ . '/../..' . '/src/CustomReader/CountTextOccurrences.php',
         'Combodo\\iTop\\Monitoring\\CustomReader\\DbToolsService' => __DIR__ . '/../..' . '/src/CustomReader/DbToolsService.php',
         'Combodo\\iTop\\Monitoring\\CustomReader\\ItopBackupReader' => __DIR__ . '/../..' . '/src/CustomReader/ItopBackupReader.php',
@@ -38,7 +39,6 @@ class ComposerStaticInit6234adff7aad7893ba404b61d49eb912
         'Combodo\\iTop\\Monitoring\\CustomReader\\ItopSynchroLogReader' => __DIR__ . '/../..' . '/src/CustomReader/ItopSynchroLogReader.php',
         'Combodo\\iTop\\Monitoring\\CustomReader\\ItopVersionReader' => __DIR__ . '/../..' . '/src/CustomReader/ItopVersionReader.php',
         'Combodo\\iTop\\Monitoring\\CustomReader\\X509CertificateReader' => __DIR__ . '/../..' . '/src/CustomReader/X509CertificateReader.php',
-        'Combodo\\iTop\\Monitoring\\CustomReader\\iTopSessionReader' => __DIR__ . '/../..' . '/src/CustomReader/iTopSessionReader.php',
         'Combodo\\iTop\\Monitoring\\MetricReader\\ConfReader' => __DIR__ . '/../..' . '/src/MetricReader/ConfReader.php',
         'Combodo\\iTop\\Monitoring\\MetricReader\\CustomReader' => __DIR__ . '/../..' . '/src/MetricReader/CustomReader.php',
         'Combodo\\iTop\\Monitoring\\MetricReader\\CustomReaderInterface' => __DIR__ . '/../..' . '/src/MetricReader/CustomReaderInterface.php',
@@ -51,6 +51,7 @@ class ComposerStaticInit6234adff7aad7893ba404b61d49eb912
         'Combodo\\iTop\\Monitoring\\Model\\Constants' => __DIR__ . '/../..' . '/src/Model/Constants.php',
         'Combodo\\iTop\\Monitoring\\Model\\MonitoringMetric' => __DIR__ . '/../..' . '/src/Model/MonitoringMetric.php',
         'Combodo\\iTop\\Monitoring\\Test\\Controller\\ControllerTest' => __DIR__ . '/../..' . '/test/Controller/ControllerTest.php',
+        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ActiveSessionReaderTest' => __DIR__ . '/../..' . '/test/CustomReader/ActiveSessionReaderTest.php',
         'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\CountTextOccurrencesTest' => __DIR__ . '/../..' . '/test/CustomReader/CountTextOccurrencesTest.php',
         'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\DbToolsServiceTest' => __DIR__ . '/../..' . '/test/CustomReader/DbToolsServiceTest.php',
         'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ItopBackupReaderTest' => __DIR__ . '/../..' . '/test/CustomReader/ItopBackupReaderTest.php',

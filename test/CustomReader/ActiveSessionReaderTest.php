@@ -2,7 +2,7 @@
 
 namespace Combodo\iTop\Monitoring\Test\CustomReader;
 
-use Combodo\iTop\Monitoring\CustomReader\iTopSessionReader;
+use Combodo\iTop\Monitoring\CustomReader\ActiveSessionReader;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
@@ -11,16 +11,15 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
  * @preserveGlobalState disabled
  * @backupGlobals disabled
  */
-class ItopSessionReaderTest extends ItopDataTestCase
+class ActiveSessionReaderTest extends ItopDataTestCase
 {
 	private $sDir;
 
 	protected function setUp(): void
 	{
-		//@include_once '/home/combodo/workspace/iTop/approot.inc.php';
 		parent::setUp();
 
-		@require_once APPROOT.'env-production/combodo-monitoring/vendor/autoload.php';
+        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
 
 		$this->sDir = sys_get_temp_dir() . '/itop_session';
 		@mkdir($this->sDir);
@@ -37,7 +36,7 @@ class ItopSessionReaderTest extends ItopDataTestCase
 	}
 
 	public function testUnauthSessions() {
-		$oiTopSessionReader = new iTopSessionReader('itop_session', []);
+		$oiTopSessionReader = new ActiveSessionReader('itop_session', []);
 
 		$sFiles = [];
 		$sFiles[] = tempnam($this->sDir, 'sess_');
@@ -55,7 +54,7 @@ class ItopSessionReaderTest extends ItopDataTestCase
 	}
 
 	public function testAuthSessions() {
-		$oiTopSessionReader = new iTopSessionReader('itop_session', []);
+		$oiTopSessionReader = new ActiveSessionReader('itop_session', []);
 
 		$sFiles = [];
 
