@@ -18,13 +18,10 @@ class CombodoMonitoringTest extends ItopDataTestCase
 
     protected function setUp(): void
     {
-        //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
-        //@include_once '/home/combodo/workspace/iTop/approot.inc.php';
-
         parent::setUp();
 
-        require_once APPROOT.'core/config.class.inc.php';
-        require_once APPROOT.'application/utils.inc.php';
+        $this->RequireOnceItopFile('core/config.class.inc.php');
+        $this->RequireOnceItopFile('application/utils.inc.php');
 
         if (!defined('MODULESROOT')) {
             define('MODULESROOT', APPROOT.'env-production/');

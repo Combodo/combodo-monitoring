@@ -16,11 +16,11 @@ class ItopDbBigTableReaderTest extends ItopDataTestCase
 {
     protected function setUp(): void
     {
-        @include_once '/home/combodo/workspaceSaaS/iTopTeam/approot.inc.php';
+        $this->RequireOnceItopFile('approot.inc.php');
         parent::setUp();
 
-        @require_once APPROOT.'/env-production/combodo-monitoring/vendor/autoload.php';
-        require_once APPROOT.'/core/config.class.inc.php';
+        $this->RequireOnceItopFile('/env-production/combodo-monitoring/vendor/autoload.php');
+        $this->RequireOnceItopFile('/core/config.class.inc.php');
     }
 
     protected function tearDown(): void

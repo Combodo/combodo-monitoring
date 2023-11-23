@@ -29,11 +29,8 @@ class CountTextOccurrencesTest extends ItopTestCase
 {
     protected function setUp(): void
     {
-        //@include_once '/home/combodo/workspace/iTop/approot.inc.php';
-        //@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         parent::setUp();
-
-        @require_once(APPROOT . 'env-production/combodo-monitoring/vendor/autoload.php');
+        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
     }
 
     /**

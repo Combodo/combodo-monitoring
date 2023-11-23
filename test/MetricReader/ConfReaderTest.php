@@ -26,10 +26,9 @@ use ReflectionObject;
  */
 class ConfReaderTest extends ItopTestCase {
 	protected function setUp(): void {
-		//@include_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
 		parent::setUp();
 
-		@require_once(APPROOT.'env-production/combodo-monitoring/vendor/autoload.php');
+        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
 	}
 
 	/**

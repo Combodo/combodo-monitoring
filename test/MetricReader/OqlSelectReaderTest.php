@@ -29,11 +29,10 @@ class OqlSelectReaderTest extends ItopDataTestCase
 {
     protected function setUp(): void
     {
-        //require_once '/home/combodo/workspace/iTop/approot.inc.php';
         parent::setUp();
 
-        @require_once(APPROOT . 'env-production/combodo-monitoring/vendor/autoload.php');
-        require_once(APPROOT . 'core/config.class.inc.php');
+        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
+        $this->RequireOnceItopFile('core/config.class.inc.php');
 
     }
 
