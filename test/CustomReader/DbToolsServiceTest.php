@@ -17,7 +17,7 @@ class DbToolsServiceTest extends ItopDataTestCase
         $this->RequireOnceItopFile('approot.inc.php');
 		parent::setUp();
 
-        $this->RequireOnceItopFile(APPROOT.'/env-production/combodo-monitoring/vendor/autoload.php');
+        $this->RequireOnceItopFile('/env-production/combodo-monitoring/vendor/autoload.php');
         $this->RequireOnceItopFile('/core/config.class.inc.php');
 	}
 
