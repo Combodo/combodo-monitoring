@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Combodo\\iTop\\Monitoring\\Controller\\Controller' => $baseDir . '/src/Controller/Controller.php',
+    'Combodo\\iTop\\Monitoring\\CustomReader\\ActiveSessionReader' => $baseDir . '/src/CustomReader/ActiveSessionReader.php',
     'Combodo\\iTop\\Monitoring\\CustomReader\\CountTextOccurrences' => $baseDir . '/src/CustomReader/CountTextOccurrences.php',
     'Combodo\\iTop\\Monitoring\\CustomReader\\DbToolsService' => $baseDir . '/src/CustomReader/DbToolsService.php',
     'Combodo\\iTop\\Monitoring\\CustomReader\\ItopBackupReader' => $baseDir . '/src/CustomReader/ItopBackupReader.php',
@@ -31,6 +32,7 @@ return array(
     'Combodo\\iTop\\Monitoring\\Model\\Constants' => $baseDir . '/src/Model/Constants.php',
     'Combodo\\iTop\\Monitoring\\Model\\MonitoringMetric' => $baseDir . '/src/Model/MonitoringMetric.php',
     'Combodo\\iTop\\Monitoring\\Test\\Controller\\ControllerTest' => $baseDir . '/test/Controller/ControllerTest.php',
+    'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ActiveSessionReaderTest' => $baseDir . '/test/CustomReader/ActiveSessionReaderTest.php',
     'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\CountTextOccurrencesTest' => $baseDir . '/test/CustomReader/CountTextOccurrencesTest.php',
     'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\DbToolsServiceTest' => $baseDir . '/test/CustomReader/DbToolsServiceTest.php',
     'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ItopBackupReaderTest' => $baseDir . '/test/CustomReader/ItopBackupReaderTest.php',

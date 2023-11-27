@@ -19,7 +19,6 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
 
     protected function setUp(): void
     {
-        //@include_once '/home/combodo/workspaceSAAS/iTopSaasManager/approot.inc.php';
         parent::setUp();
 
         $this->CreateTestOrganization();

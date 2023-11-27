@@ -31,12 +31,11 @@ class ControllerTest extends ItopDataTestCase
 
     protected function setUp(): void
     {
-        //require_once '/home/nono/PhpstormProjects/iTop/approot.inc.php';
         parent::setUp();
 
-        require_once APPROOT.'core/config.class.inc.php';
-        require_once APPROOT.'env-production/combodo-monitoring/src/Controller/Controller.php';
-        require_once APPROOT.'env-production/combodo-monitoring/src/Model/MonitoringMetric.php';
+        $this->RequireOnceItopFile('core/config.class.inc.php');
+        $this->RequireOnceItopFile('env-production/combodo-monitoring/src/Controller/Controller.php');
+        $this->RequireOnceItopFile('env-production/combodo-monitoring/src/Model/MonitoringMetric.php');
 
         if (!defined('MODULESROOT')) {
             define('MODULESROOT', APPROOT.'env-production/');
