@@ -39,7 +39,6 @@ class ComposerStaticInit6234adff7aad7893ba404b61d49eb912
         'Combodo\\iTop\\Monitoring\\CustomReader\\ItopSynchroLogReader' => __DIR__ . '/../..' . '/src/CustomReader/ItopSynchroLogReader.php',
         'Combodo\\iTop\\Monitoring\\CustomReader\\ItopVersionReader' => __DIR__ . '/../..' . '/src/CustomReader/ItopVersionReader.php',
         'Combodo\\iTop\\Monitoring\\CustomReader\\X509CertificateReader' => __DIR__ . '/../..' . '/src/CustomReader/X509CertificateReader.php',
-        'Combodo\\iTop\\Monitoring\\CustomReader\\iTopSessionReader' => __DIR__ . '/../..' . '/src/CustomReader/iTopSessionReader.php',
         'Combodo\\iTop\\Monitoring\\MetricReader\\ConfReader' => __DIR__ . '/../..' . '/src/MetricReader/ConfReader.php',
         'Combodo\\iTop\\Monitoring\\MetricReader\\CustomReader' => __DIR__ . '/../..' . '/src/MetricReader/CustomReader.php',
         'Combodo\\iTop\\Monitoring\\MetricReader\\CustomReaderInterface' => __DIR__ . '/../..' . '/src/MetricReader/CustomReaderInterface.php',

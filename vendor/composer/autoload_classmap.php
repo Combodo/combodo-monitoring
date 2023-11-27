@@ -19,7 +19,6 @@ return array(
     'Combodo\\iTop\\Monitoring\\CustomReader\\ItopSynchroLogReader' => $baseDir . '/src/CustomReader/ItopSynchroLogReader.php',
     'Combodo\\iTop\\Monitoring\\CustomReader\\ItopVersionReader' => $baseDir . '/src/CustomReader/ItopVersionReader.php',
     'Combodo\\iTop\\Monitoring\\CustomReader\\X509CertificateReader' => $baseDir . '/src/CustomReader/X509CertificateReader.php',
-    'Combodo\\iTop\\Monitoring\\CustomReader\\iTopSessionReader' => $baseDir . '/src/CustomReader/iTopSessionReader.php',
     'Combodo\\iTop\\Monitoring\\MetricReader\\ConfReader' => $baseDir . '/src/MetricReader/ConfReader.php',
     'Combodo\\iTop\\Monitoring\\MetricReader\\CustomReader' => $baseDir . '/src/MetricReader/CustomReader.php',
     'Combodo\\iTop\\Monitoring\\MetricReader\\CustomReaderInterface' => $baseDir . '/src/MetricReader/CustomReaderInterface.php',
