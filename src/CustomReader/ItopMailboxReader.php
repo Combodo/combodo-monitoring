@@ -62,7 +62,7 @@ class ItopMailboxReader implements CustomReaderInterface
 				}
 				catch(Exception $e)
 				{
-					\IssueLog::Error("Mailbox connection issue", null, [ 'exception' => $e ]);
+					\IssueLog::Warning("Mailbox connection issue", null, [ 'exception' => $e ]);
 					$result++;
 				} finally {
 					ob_end_clean();
