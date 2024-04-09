@@ -117,7 +117,7 @@ class ItopBackupReaderTest extends ItopDataTestCase
             mkdir($sDirPath);
         }
         $sDate = date('c');
-        $sFilePath = "$sDirPath/${sDate}${sSuffix}";
+        $sFilePath = sprintf("%s/%s%s", $sDirPath, $sDate, $sSuffix);
         file_put_contents($sFilePath, $sDate);
 
         touch($sFilePath, strtotime($sTimeOffset));

@@ -27,9 +27,8 @@ class ItopSetupVersionReaderTest extends ItopDataTestCase {
 	public function testGetItopVersionId(string $sInitialValue, string $sExpectedReturnedValue){
     	$oItopSetupVersionReader = new ItopSetupVersionReader('', []);
 
-    	$oMetric = new MonitoringMetric('toto', '', $sInitialValue);
 		$this->assertEquals($sExpectedReturnedValue,
-			$oItopSetupVersionReader->GetItopShortVersionId($oMetric)
+			$oItopSetupVersionReader->GetItopShortVersionId($sInitialValue)
 		);
 	}
 
@@ -37,7 +36,26 @@ class ItopSetupVersionReaderTest extends ItopDataTestCase {
 		return [
 			'no version found' => ['3.0.0-dev-svn', '0' ],
 			'no version found bis' => ['LATEST', '0' ],
-			'version found' => [ '3.0.0-dev-6517', '6517']
+			'version found' => [ '3.0.0-dev-6517', '6517'],
 		];
+	}
+
+	public function testGetMetrics() {
+		$oItopSetupVersionReader = new ItopSetupVersionReader('', ['static_labels' => ['toto' => 'titi']]);
+		$aMetrics = $oItopSetupVersionReader->GetMetrics();
+		$this->assertEquals(1, count($aMetrics));
+		/** @var MonitoringMetric $oMetric */
+		$oMetric = $aMetrics[0];
+		if (defined('ITOP_REVISION')
+			&& filter_var(ITOP_REVISION, FILTER_VALIDATE_INT)) {
+			$sItopSetupVersion = ITOP_REVISION;
+		} else {
+			$sItopSetupVersion = 0;
+		}
+
+		$this->assertEquals('iTop after setup version (code + datamodel)', $oMetric->GetDescription());
+		$this->assertEquals('itop_setup_version', $oMetric->GetName());
+		$this->assertEquals($sItopSetupVersion, $oMetric->GetValue());
+		$this->assertEquals(['toto' => 'titi'], $oMetric->GetLabels());
 	}
 }

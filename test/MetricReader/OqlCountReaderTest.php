@@ -16,6 +16,7 @@
 namespace Combodo\iTop\Monitoring\Test\MetricReader;
 
 use Combodo\iTop\Monitoring\MetricReader\OqlCountReader;
+use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 
 /**
@@ -34,48 +35,31 @@ class OqlCountReaderTest extends ItopDataTestCase
 
     }
 
-    /**
-     * @dataProvider GetObjectSetProvider
-     */
-    public function testGetObjectSet(array $aMetric, $aExpectedResult)
-    {
-        $oOqlCountReader = new OqlCountReader('foo', $aMetric);
+	public function testGetMetrics()
+	{
+		$aMetric = [
+				'oql_count' => [
+					'select' => 'SELECT Person',
+				],
+				'description' => 'person metric',
+				'static_labels' => ['a' => 'b'],
+		];
+		$oOqlCountReader = new OqlCountReader('itop_person_count', $aMetric);
 
-        //call private method of the tested class
-        $reflector = new \ReflectionObject($oOqlCountReader);
-        $method = $reflector->getMethod('GetObjectSet');
-        $method->setAccessible(true);
-        /** @var \DBObjectSet $oSet */
-        $oSet = $method->invoke($oOqlCountReader);
 
-        //access the private DBSearch and uses it to make the SQL query
-        $reflector = new \ReflectionObject($oSet);
-        $secret = $reflector->getProperty('m_oFilter');
-        $secret->setAccessible(true);
-        /** @var \DBSearch $m_oFilter */
-        $m_oFilter =  $secret->getValue($oSet);
-        $sSQL = $m_oFilter->MakeSelectQuery([], [], null, null, 0, 0, true);
+		$aMetrics = $oOqlCountReader->GetMetrics();
+		$this->assertEquals(1, count($aMetrics));
 
-        $this->assertEquals($aExpectedResult, $sSQL);
-    }
+		/* @var \Combodo\iTop\Monitoring\Model\MonitoringMetric $oMetric */
+		$oMetric = $aMetrics[0];
 
-    public function GetObjectSetProvider(): array
-    {
-        return [
-            'oql_count' => [
-                'aMetric' => [
-                    'oql_count' => [
-                        'select' => 'SELECT User',
-                    ],
-                    'description' => 'ordered users',
-                ],
-                'aExpectedResult' => "SELECT COUNT(*) AS COUNT FROM (SELECT
- DISTINCT COALESCE(`User`.`id`, 0) AS idCount0 
- FROM 
-   `priv_user` AS `User`
- WHERE 1 ) AS _alderaan_ WHERE idCount0>0",
-            ],
+		$oSearch = \DBSearch::FromOQL('SELECT Person');
+		$oSet = new \DBObjectSet($oSearch);
+		$iCount = $oSet->Count();
 
-        ];
-    }
+		$this->assertEquals('itop_person_count', $oMetric->GetName());
+		$this->assertEquals($iCount, $oMetric->GetValue());
+		$this->assertEquals('person metric', $oMetric->GetDescription());
+		$this->assertEquals(['a' => 'b'], $oMetric->GetLabels());
+	}
 }

@@ -82,11 +82,9 @@ class ItopBackupReader implements CustomReaderInterface
      * List and order by date the backups in the given directory
      * Note: the algorithm is currently based on the file modification date... because there is no "creation date" in general.
      *
-     * @param string $sBackupDir
-     *
      * @return array
      */
-    public function ListFiles($sDir)
+    public function ListFiles(string $sDir)
     {
         $sBackupDir = (null == $sDir) ? APPROOT.'data/backups/' : $sDir;
         if (!is_dir($sBackupDir)) {

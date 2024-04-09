@@ -84,7 +84,7 @@ OQL;
             }
 
             $sAccountType = strtolower(get_class($oUser));
-            $sKey = "${sProfiles}_$sAccountType";
+            $sKey = sprintf("%s_%s", $sProfiles, $sAccountType);
             if (isset($aRes[$sKey])) {
                 $aRes[$sKey]['count'] = $aRes[$sKey]['count'] + 1;
             } else {

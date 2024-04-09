@@ -35,7 +35,7 @@ class ItopVersionReader implements CustomReaderInterface
      */
     public function GetMetrics(): ?array
     {
-	    $sValue = '0';
+	    $sValue = 0;
 	    if (defined('ITOP_REVISION')) {
 	    	$sValue = $this->GetVersionValue(ITOP_REVISION);
 	    }
@@ -52,10 +52,10 @@ class ItopVersionReader implements CustomReaderInterface
 	/**
 	 * function used in prod and for testing purpose as well to simulate different constant value
 	 */
-    public function GetVersionValue($sItopVersionConstant) : string {
+    public function GetVersionValue($sItopVersionConstant) : int {
 	    if (filter_var($sItopVersionConstant, FILTER_VALIDATE_INT)){
-		    return $sItopVersionConstant;
+		    return (int) $sItopVersionConstant;
 	    }
-	    return '0';
+	    return 0;
     }
 }

@@ -16,7 +16,7 @@ class Controller extends BaseController {
     /** @var string */
     private $m_sAccessAuthorizedNetworkConfigParamId = null;
 
-	private bool $bAccessForbidden = false;
+	private $bAccessForbidden = false;
 
 	public function OperationStatus()
 	{
@@ -108,11 +108,9 @@ class Controller extends BaseController {
     }
 
     /**
-     * @param null $sConfigFile
-     *
      * @throws \Exception
      */
-    public function ReadMetricConf($sCollection, ?\Config $config = null){
+    public function ReadMetricConf(string $sCollection, ?\Config $config = null){
         $config = $config ?: \utils::GetConfig();
         $aModuleSetting = $config->GetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS);
 
@@ -126,7 +124,7 @@ class Controller extends BaseController {
     public function EnableKpiLogging() : bool {
         $aModuleSetting = \utils::GetConfig()->GetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS);
 
-        if (! array_key_exists('kpi_logging', $aModuleSetting)) {
+        if (! is_array($aModuleSetting) || ! array_key_exists('kpi_logging', $aModuleSetting)) {
             return false;
         }
 
@@ -267,6 +265,6 @@ class Controller extends BaseController {
      */
     public function SetAccessAuthorizedNetworkConfigParamId(string $m_sAccessAuthorizedNetworkConfigParamId): void
     {
-        $this->m_sAccessAuthorizedNetworkConfigParamId = trim($m_sAccessAuthorizedNetworkConfigParamId) ?? "";
+        $this->m_sAccessAuthorizedNetworkConfigParamId = trim($m_sAccessAuthorizedNetworkConfigParamId);
     }
 }

@@ -20,7 +20,7 @@ class MonitoringMetric {
     private $sName;
     /** @var string $sDescription */
     private $sDescription;
-    /** @var string $sValue */
+    /** @var int $sValue */
     private $sValue;
     /** @var string[] $aLabels */
     private $aLabels;
@@ -29,10 +29,10 @@ class MonitoringMetric {
      * MonitoringMetric constructor.
      * @param string $sName
      * @param string $sDescription
-     * @param string $sValue
+     * @param int $sValue
      * @param string[] $aLabels
      */
-    public function __construct(string $sName, string $sDescription, string $sValue, $aLabels=[]) {
+    public function __construct(string $sName, string $sDescription, int $sValue, $aLabels=[]) {
         $this->sName = $sName;
         $this->sDescription = $sDescription;
         $this->sValue = $sValue;
@@ -51,11 +51,11 @@ class MonitoringMetric {
         $this->sDescription = $sDescription;
     }
 
-    public function GetValue() : string {
+    public function GetValue() : int {
         return $this->sValue;
     }
 
-	public function setValue(string $sValue): void {
+	public function setValue(int $sValue): void {
 		$this->sValue = $sValue;
 	}
 

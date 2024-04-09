@@ -21,12 +21,10 @@ use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 class ActiveSessionReader implements CustomReaderInterface
 {
-    private $aMetricConf;
     private $sMetricName;
 
     public function __construct($sMetricName, $aMetricConf)
     {
-        $this->aMetricConf = $aMetricConf;
         $this->sMetricName = $sMetricName;
     }
 

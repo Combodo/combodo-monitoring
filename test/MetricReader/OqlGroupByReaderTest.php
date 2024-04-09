@@ -34,37 +34,63 @@ class OqlGroupByReaderTest extends ItopDataTestCase
 
     }
 
-    /**
-     * @dataProvider GetMetricsProvider
-     */
-    public function testMakeSql(array $aMetric, $aExpectedResult)
-    {
-        $OqlGroupByReader = new OqlGroupByReader('foo', $aMetric);
 
-        $reflector = new \ReflectionObject($OqlGroupByReader);
-        $method = $reflector->getMethod('MakeSql');
-        $method->setAccessible(true);
-        /** @var \DBObjectSet $oSet */
-        $sSQL = $method->invoke($OqlGroupByReader);
+	public function GetMetricsProvider() {
+		return [
+			'SELECT User (1)' => [
+				'oql' => 'SELECT User',
+				'where_filter' => 'User.first_name'
+			],
+			'SELECT User (2)' => [
+				'oql' => 'SELECT User AS e',
+				'where_filter' => 'e.first_name'
+			],
+			/*'SELECT User (3)' => [
+				'oql' => 'SELECT User',
+				'where_filter' => 'first_name'
+			],*/
+		];
+	}
 
-        $this->assertEquals($aExpectedResult, $sSQL);
-    }
+	/**
+	 * @dataProvider GetMetricsProvider
+	 */
+	public function testGetMetrics($sOql, $sGroupByField)
+	{
+		$aMetric = [
+			'oql_groupby' => [
+				'select' => $sOql,
+				'groupby' => ['first_nameAlias' => $sGroupByField],
+			],
+			'description' => 'user metric',
+		];
+		$oOqlCountReader = new OqlGroupByReader('foo', $aMetric);
 
-    public function GetMetricsProvider(): array
-    {
-        return [
+		$aExpectedRes = [];
+		$oSearch = \DBSearch::FromOQL('SELECT User');
+		$oSet = new \DBObjectSet($oSearch);
+		while ($oUser = $oSet->Fetch()) {
+			$sKey = $oUser->Get('first_name');
+			if (! in_array($aExpectedRes, $aExpectedRes)){
+				$aExpectedRes[$sKey]= 1;
+			} else {
+				$aExpectedRes[$sKey]= $aExpectedRes[$sKey] + 1;
+			}
+		}
 
-            'group by' => [
-                'aConf' => [
-                    'description' => 'ordered users',
-                    'oql_groupby' => [
-                        'select' => 'SELECT User',
-                        'groupby' => ['first_name' => 'first_nameAlias'],
-                    ],
-                ],
-                'sExpectedSql' => "SELECT `first_nameAlias` AS `first_name`, COUNT(DISTINCT COALESCE(`User`.`id`, 0)) AS _itop_count_ FROM `priv_user` AS `User` WHERE 1 GROUP BY `first_nameAlias`  ",
-            ],
+		$aMetrics = $oOqlCountReader->GetMetrics();
+		$this->assertEquals(count($aExpectedRes), count($aMetrics));
 
-        ];
-    }
+		/* @var \Combodo\iTop\Monitoring\Model\MonitoringMetric $oMetric */
+		foreach ($aMetrics as $oMetric) {
+			$this->assertEquals('foo', $oMetric->GetName());
+			$this->assertEquals('user metric', $oMetric->GetDescription());
+
+			$aLabels = $oMetric->GetLabels();
+			$this->assertEquals(1, count($aLabels));
+			$this->assertEquals(['first_nameAlias'], array_keys($aLabels));
+			$sCurrentName = $aLabels['first_nameAlias'];
+			$this->assertEquals($aExpectedRes[$sCurrentName], $oMetric->GetValue());
+		}
+	}
 }

@@ -53,24 +53,18 @@ class ControllerTest extends ItopDataTestCase
      * @param array $aMetricConf
      * @param array $aExpectedMetrics
      */
-    public function testReadMetrics($aMetricConf, $aExpectedMetricFields)
+    public function testReadSingleMetrics(array $aMetricConf, int $iExpectedMetricCount, ?string $sExpectedName=null,
+	    ?string $sExpectedDesc=null, ?int $iExpectedValue=666, ?array $aExpectedLabels=null)
     {
-        $aExpectedMetric = null;
-
-        foreach ($aExpectedMetricFields as $aPerMetricValues) {
-            $aLabel = 4 == count($aPerMetricValues) ? $aPerMetricValues[3] : [];
-            $aExpectedMetric = new MonitoringMetric($aPerMetricValues[0], $aPerMetricValues[1], $aPerMetricValues[2], $aLabel);
-            break;
-        }
-
         $aMetrics = $this->monitoringController->ReadMetrics($aMetricConf);
 
-        if ($aExpectedMetric == null){
-            $this->assertEquals(0, sizeof($aMetrics), var_export($aMetrics, true));
-        } else{
-            $this->assertEquals(1, sizeof($aMetrics), var_export($aMetrics, true));
+	    $this->assertEquals($iExpectedMetricCount, count($aMetrics), var_export($aMetrics, true));
+	    if ($iExpectedMetricCount != 0){
+		    $oExpectedMetric = new MonitoringMetric($sExpectedName, $sExpectedDesc, $iExpectedValue, $aExpectedLabels);
+
+            $this->assertEquals(1, count($aMetrics), var_export($aMetrics, true));
             $this->assertEquals(
-                $aExpectedMetric,
+                $oExpectedMetric,
                 $aMetrics[0]
             );
         }
@@ -79,58 +73,59 @@ class ControllerTest extends ItopDataTestCase
     public function ReadMetricsProvider()
     {
         return [
-           'conf MySettings' => [
-                ['access_mode' => [
+           'metric from conf path in MySettings->access_mode' => [
+	           'aMetricConf' => [
+				   'access_mode' => [
                         'description' => 'access mode',
                         'conf' => ['MySettings', 'access_mode'],
                         'static_labels' => ['labelname1' => 'labelvalue1'],
                     ],
                 ],
-                [['access_mode', 'access mode', '3', ['labelname1' => 'labelvalue1']]],
+	           'iExpectedMetricCount' => 1,
+	           'sExpectedName' => 'access_mode',
+	           'sExpectedDesc' => 'access mode',
+	           'iExpectedValue' => 3,
+	           'aExpectedLabels' => ['labelname1' => 'labelvalue1'],
             ],
-            'conf MySettings not found' => [
-                ['access_message1' => [
+            'metric from conf path unfound MySettings->access_message2' => [
+	            'aMetricConf' => [
+					'access_message1' => [
                         'description' => 'access message',
                         'conf' => ['MySettings', 'access_message2'],
                     ],
                 ],
-                [],
+	            'iExpectedMetricCount' => 0,
             ],
-            'conf MyModuleSettings' => [
-                ['retention_count' => [
+            'conf MyModuleSettings MyModuleSetting->itop-backup->retention_count without static labels' => [
+	            'aMetricConf' => ['retention_count' => [
                         'description' => 'retention count',
                         'conf' => ['MyModuleSettings', 'itop-backup', 'retention_count'],
                     ],
                 ],
-                [['retention_count', 'retention count', '5']],
+	            'iExpectedMetricCount' => 1,
+	            'sExpectedName' => 'retention_count',
+	            'sExpectedDesc' => 'retention count',
+	            'iExpectedValue' => 5,
+	            'aExpectedLabels' => [],
             ],
-            'conf MyModuleSettings not found' => [
-                ['access_message2' => [
+            'conf MyModuleSettings not found MyModuleSettings->itop-backup2->retention_count' => [
+	            'aMetricConf' => ['access_message2' => [
                         'description' => 'retention count',
                         'conf' => ['MyModuleSettings', 'itop-backup2', 'retention_count'],
                     ],
                 ],
-                [],
+	            'iExpectedMetricCount' => 0,
             ],
-            'conf MyModuleSettings not found2' => [
-                ['access_message3' => [
+            'conf MyModuleSettings not found MyModuleSettings->itop-backup->retention_count2' => [
+	            'aMetricConf' => ['access_message3' => [
                         'description' => 'retention count',
                         'conf' => ['MyModuleSettings', 'itop-backup', 'retention_count2'],
                     ],
                 ],
-                [],
-            ],
-
-            'conf MyModuleSettings2' => [
-                ['itop_backup_weekdays_count' => [
-                        'description' => 'User authorized quota',
-                        'conf' => ['MyModuleSettings', 'itop-backup', 'week_days'],
-                    ],
-                ],
-                [['itop_backup_weekdays_count', 'User authorized quota', 'monday, tuesday, wednesday, thursday, friday']],
+	            'iExpectedMetricCount' => 0,
             ],
             'oql_count with 2 labels, 1 not trimmed' => [
-                ['itop_user_count' => [
+	            'aMetricConf' => ['itop_user_count' => [
                         'description' => 'Nb of users',
                         'oql_count' => [
                             'select' => 'SELECT User WHERE id=1',
@@ -138,33 +133,38 @@ class ControllerTest extends ItopDataTestCase
                         'static_labels' => ['labelname2' => 'labelvalue2', 'name with space at the end     ' => 'foo'],
                     ],
                 ],
-                [['itop_user_count', 'Nb of users', '1', ['labelname2' => 'labelvalue2', 'name with space at the end     ' => 'foo']]],
+	            'iExpectedMetricCount' => 1,
+	            'sExpectedName' => 'itop_user_count',
+	            'sExpectedDesc' => 'Nb of users',
+	            'iExpectedValue' => 1,
+	            'aExpectedLabels' => ['labelname2' => 'labelvalue2', 'name with space at the end     ' => 'foo']
             ],
             'no_description_in_oql_metric' => [
-                ['itop_user_nodescription_count' => [
+	            'aMetricConf' => ['itop_user_nodescription_count' => [
                         'oql_count' => [
                             'select' => 'SELECT User',
                         ],
                     ],
                 ],
-                [],
+	            'iExpectedMetricCount' => 0,
             ],
             'conf_without_description' => [
-                ['itop_user_quota_count' => [
+	            'aMetricConf' => ['itop_user_quota_count' => [
                         'conf' => 'ee.rrr',
                     ],
                 ],
-                [],
+	            'iExpectedMetricCount' => 0,
             ],
-            'no_metric' => [
-                ['xxx' => ['itop_user_count' => [
+            'no_metric returned' => [
+	            'aMetricConf' =>
+		            ['xxx' => ['itop_user_count' => [
                             'oql_count' => [
                                 'select' => 'SELECT User',
                             ],
                         ],
                     ],
                 ],
-                [],
+	            'iExpectedMetricCount' => 0,
             ],
         ];
     }
@@ -175,20 +175,18 @@ class ControllerTest extends ItopDataTestCase
      **/
     public function testReadMetrics_OqlGroupByWithDynamicLabels()
     {
-        $aUseCase = [
-            [
+        $aConf = [
                 'itop_user_count' => [
                     'description' => 'Nb of URP_UserProfile par type',
                     'oql_groupby' => [
                         'select' => 'SELECT URP_UserProfile JOIN URP_Profiles ON URP_UserProfile.profileid =URP_Profiles.id WHERE URP_Profiles.id=1',
                         'groupby' => ['profile' => 'URP_UserProfile.profile'],
                     ],
-                ],
-            ],
-            [['itop_user_count', 'Nb of URP_UserProfile par type', '1', ['profile' => 'Administrator']]],
-        ];
+                ]
+            ];
 
-        $this->testReadMetrics($aUseCase[0], $aUseCase[1]);
+        $this->testReadSingleMetrics($aConf, 1, 'itop_user_count',
+	        'Nb of URP_UserProfile par type', 1, ['profile' => 'Administrator']);
     }
 
     public function testConfSubArray()
@@ -198,17 +196,15 @@ class ControllerTest extends ItopDataTestCase
         if (false === strpos($sContent, 'authent-ldap')) {
             $this->markTestSkipped();
         } else {
-            //['conf authent-ldap sub array']
-            $useCase = [
-                ['itop_authent-ldap' => [
-                        'description' => 'ldap option 17',
-                        'conf' => ['MyModuleSettings', 'authent-ldap', 'options', '17'],
-                    ],
-                ],
-                [['itop_authent-ldap', 'ldap option 17', '3']],
-            ];
+	        $aConf = [
+				'itop_authent-ldap' => [
+			        'description' => 'ldap option 17',
+			        'conf' => ['MyModuleSettings', 'authent-ldap', 'options', '17'],
+	            ]
+	        ];
 
-            $this->testReadMetrics($useCase[0], $useCase[1]);
+			$this->testReadSingleMetrics($aConf, 1, 'itop_authent-ldap',
+		        'ldap option 17', 3, []);
         }
     }
 

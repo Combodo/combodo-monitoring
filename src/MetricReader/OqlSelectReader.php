@@ -49,7 +49,7 @@ class OqlSelectReader implements MetricReaderInterface
         $aMetrics = [];
         while ($aObjects = $oSet->FetchAssoc()) {
 	        $bExposeCurrentMetric = true;
-        	if (sizeof($aObjects) === 0){
+        	if (sizeof($aObjects) == 0){
         		continue;
 	        }
 

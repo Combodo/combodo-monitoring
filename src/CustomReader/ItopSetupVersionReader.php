@@ -16,27 +16,18 @@
 namespace Combodo\iTop\Monitoring\CustomReader;
 
 use Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface;
-use Combodo\iTop\Monitoring\MetricReader\OqlSelectReader;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
-class ItopSetupVersionReader extends OqlSelectReader implements CustomReaderInterface
+class ItopSetupVersionReader implements CustomReaderInterface
 {
+	protected $sMetricName;
+	protected $aMetric;
+
     public function __construct($sMetricName, $aMetricConf)
     {
-    	$sOql = sprintf("SELECT ModuleInstallation WHERE name = '%s'", ITOP_APPLICATION);
-        $aMetricConf = array_merge($aMetricConf,
-            [
-                Constants::METRIC_DESCRIPTION => 'iTop after setup version (code + datamodel)',
-                Constants::OQL_SELECT => [
-                    Constants::SELECT => $sOql,
-                    Constants::VALUE => 'version',
-	                Constants::ORDERBY => ['installed' => false],
-                    Constants::LIMIT_COUNT => '1',
-                ]
-            ]
-        );
-	    parent::__construct('itop_setup_version', $aMetricConf);
+	    $this->sMetricName = 'itop_setup_version';
+	    $this->aMetric = $aMetricConf;
     }
 
     /**
@@ -44,14 +35,26 @@ class ItopSetupVersionReader extends OqlSelectReader implements CustomReaderInte
      */
     public function GetMetrics(): ?array
     {
-        $aMetrics = parent::GetMetrics();
+	    $sDescription = 'iTop after setup version (code + datamodel)';
+	    $sValueColumn = 'version';
+	    $aStaticLabels = $this->aMetric[Constants::METRIC_LABEL] ?? [];
 
-	    if (sizeof($aMetrics) !== 0) {
-		    foreach ($aMetrics as $oMetric){
-			    /** @var MonitoringMetric $oMetric */
-			    $sNewValue = $this->GetItopShortVersionId($oMetric);
-			    $oMetric->SetValue($sNewValue);
-		    }
+	    $oSearch = \DBSearch::FromOQL(sprintf("SELECT ModuleInstallation WHERE name = '%s'", ITOP_APPLICATION));
+	    $oSet = new \DBObjectSet($oSearch);
+	    $oSet->SetOrderBy(['installed' => false]);
+	    $oSet->SetLimit(0, 1);
+		$oSet->OptimizeColumnLoad(['' => [$sValueColumn]]);
+
+	    $aMetrics = [];
+	    while ($oObject = $oSet->Fetch()) {
+			$sVersion = $oObject->Get($sValueColumn);
+		    $aMetrics[] = new MonitoringMetric(
+			    $this->sMetricName,
+			    $sDescription,
+			    $this->GetItopShortVersionId($sVersion),
+			    $aStaticLabels
+		    );
+			break;
 	    }
         return $aMetrics;
     }
@@ -60,12 +63,11 @@ class ItopSetupVersionReader extends OqlSelectReader implements CustomReaderInte
 	 * Return short itop version id. when not found returns 0.
 	 * Exemple: 3.0.0-dev-6517 will return 6517
 	 */
-    public function GetItopShortVersionId(MonitoringMetric $oMetric) : string {
-	    /** @var MonitoringMetric $oMetric */
-	    if (false === preg_match('/.*-(\d+)/', $oMetric->GetValue(), $aMatches) ||
+    public function GetItopShortVersionId(string $sVersion) : int {
+	    if (false === preg_match('/.*-(\d+)/', $sVersion, $aMatches) ||
 	        sizeof($aMatches) !== 2){
-	    	return '0';
+	    	return 0;
 	    }
-	    return $aMatches[1];
+	    return (int) $aMatches[1];
     }
 }

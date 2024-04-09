@@ -43,21 +43,25 @@ class DbToolsService {
 	public function IsAnalyzeRequired(int $iDbAnalyzeFrequencyInMinutes) : bool {
 		$sFile = $this->GetDbAnalyzeFrequencyFile();
 
-		if (is_file($sFile)){
-			$sPreviousAnalyzeTimestamp = file_get_contents($sFile);
-		} else {
-			$sPreviousAnalyzeTimestamp = false;
-		}
 		$iNow = strtotime('now');
-		if (false !== $sPreviousAnalyzeTimestamp){
-			$fLastBackupAgeInMinutes = ($iNow - $sPreviousAnalyzeTimestamp) / 60;
-			if ($iDbAnalyzeFrequencyInMinutes > $fLastBackupAgeInMinutes){
+		if (is_file($sFile)){
+			if (false == $iNow){
+				//issue with timestamp: no analysis until next retry
 				return false;
 			}
+
+			$sPreviousAnalyzeTimestamp = (int) file_get_contents($sFile);
+			if (false !== $sPreviousAnalyzeTimestamp){
+				$fLastBackupAgeInMinutes = ($iNow - $sPreviousAnalyzeTimestamp) / 60;
+				if ($iDbAnalyzeFrequencyInMinutes > $fLastBackupAgeInMinutes){
+					return false;
+				}
+			}
+
+			//schedule next analyze
+			@unlink($sFile);
 		}
 
-		//schedule next analyze
-		@unlink($sFile);
 		file_put_contents($sFile, $iNow);
 		return true;
 	}
