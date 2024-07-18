@@ -34,8 +34,7 @@ class ControllerTest extends ItopDataTestCase
         parent::setUp();
 
         $this->RequireOnceItopFile('core/config.class.inc.php');
-        $this->RequireOnceItopFile('env-production/combodo-monitoring/src/Controller/Controller.php');
-        $this->RequireOnceItopFile('env-production/combodo-monitoring/src/Model/MonitoringMetric.php');
+        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
 
         if (!defined('MODULESROOT')) {
             define('MODULESROOT', APPROOT.'env-production/');

@@ -6,10 +6,5 @@
     "psr-4": {
       "Combodo\\iTop\\Monitoring\\": "src/"
     }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Combodo\\iTop\\Monitoring\\Test\\": "test/"
-    }
   }
 }

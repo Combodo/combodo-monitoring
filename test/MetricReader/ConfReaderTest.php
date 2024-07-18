@@ -29,6 +29,7 @@ class ConfReaderTest extends ItopTestCase {
 		parent::setUp();
 
         $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
+        $this->RequireOnceUnitTestFile('./CustomReaders/CustomReaderImpl.php');
 	}
 
 	/**

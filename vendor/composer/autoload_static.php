@@ -9,16 +9,11 @@ class ComposerStaticInit6234adff7aad7893ba404b61d49eb912
     public static $prefixLengthsPsr4 = array (
         'C' => 
         array (
-            'Combodo\\iTop\\Monitoring\\Test\\' => 29,
             'Combodo\\iTop\\Monitoring\\' => 24,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Combodo\\iTop\\Monitoring\\Test\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/test',
-        ),
         'Combodo\\iTop\\Monitoring\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
@@ -50,23 +45,6 @@ class ComposerStaticInit6234adff7aad7893ba404b61d49eb912
         'Combodo\\iTop\\Monitoring\\MetricReader\\OqlSelectReader' => __DIR__ . '/../..' . '/src/MetricReader/OqlSelectReader.php',
         'Combodo\\iTop\\Monitoring\\Model\\Constants' => __DIR__ . '/../..' . '/src/Model/Constants.php',
         'Combodo\\iTop\\Monitoring\\Model\\MonitoringMetric' => __DIR__ . '/../..' . '/src/Model/MonitoringMetric.php',
-        'Combodo\\iTop\\Monitoring\\Test\\Controller\\ControllerTest' => __DIR__ . '/../..' . '/test/Controller/ControllerTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ActiveSessionReaderTest' => __DIR__ . '/../..' . '/test/CustomReader/ActiveSessionReaderTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\CountTextOccurrencesTest' => __DIR__ . '/../..' . '/test/CustomReader/CountTextOccurrencesTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\DbToolsServiceTest' => __DIR__ . '/../..' . '/test/CustomReader/DbToolsServiceTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ItopBackupReaderTest' => __DIR__ . '/../..' . '/test/CustomReader/ItopBackupReaderTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ItopDbBigTableReaderTest' => __DIR__ . '/../..' . '/test/CustomReader/ItopDbBigTableReaderTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ItopReadOnlyCustomReaderInterfaceTest' => __DIR__ . '/../..' . '/test/CustomReader/ItopReadOnlyCustomReaderInterfaceTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ItopSetupVersionReaderTest' => __DIR__ . '/../..' . '/test/CustomReader/ItopSetupVersionReaderTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\CustomReader\\ItopSynchroLogReaderTest' => __DIR__ . '/../..' . '/test/CustomReader/ItopSynchroLogReaderTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\ConfReaderTest' => __DIR__ . '/../..' . '/test/MetricReader/ConfReaderTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\CustomReaderTest' => __DIR__ . '/../..' . '/test/MetricReader/CustomReaderTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\CustomReaders\\CustomReaderImpl' => __DIR__ . '/../..' . '/test/MetricReader/CustomReaders/CustomReaderImpl.php',
-        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\MetricReaderFactoryTest' => __DIR__ . '/../..' . '/test/MetricReader/MetricReaderFactoryTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\OqlCountReaderTest' => __DIR__ . '/../..' . '/test/MetricReader/OqlCountReaderTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\OqlCountUniqueReaderTest' => __DIR__ . '/../..' . '/test/MetricReader/OqlCountUniqueReaderTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\OqlGroupByReaderTest' => __DIR__ . '/../..' . '/test/MetricReader/OqlGroupByReaderTest.php',
-        'Combodo\\iTop\\Monitoring\\Test\\MetricReader\\OqlSelectReaderTest' => __DIR__ . '/../..' . '/test/MetricReader/OqlSelectReaderTest.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 

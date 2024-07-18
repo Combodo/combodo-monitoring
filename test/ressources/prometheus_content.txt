@@ -10,9 +10,6 @@ itop_user_groupby_count{profile="Administrator"} 1
 # Retention count (conf)
 itop_backup_retention_count{shadok="gabuzomeu"} 5
 
-# custom class (custom)
-itop_custom{baz="iste"} 42
-
 # number of profiles
 itop_profile_unique_count{} XXX
 

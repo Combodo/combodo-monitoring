@@ -22,6 +22,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
 
         $this->RequireOnceItopFile('core/config.class.inc.php');
         $this->RequireOnceItopFile('application/utils.inc.php');
+        $this->RequireOnceUnitTestFile('./MetricReader/CustomReaders/CustomReaderImpl.php');
 
         if (!defined('MODULESROOT')) {
             define('MODULESROOT', APPROOT.'env-production/');
@@ -107,10 +108,6 @@ class CombodoMonitoringTest extends ItopDataTestCase
                     'conf' => ['MyModuleSettings', 'itop-backup', 'retention_count'],
                     'static_labels' => ['shadok' => 'gabuzomeu'],
                 ],
-                'itop_custom' => [
-                    'description' => 'custom class (custom)',
-                    'custom' => ['class' => '\Combodo\iTop\Monitoring\Test\MetricReader\CustomReaders\CustomReaderImpl'],
-                ],
                 'itop_profile_unique_count' => [
                     'description' => 'number of profiles',
                     'oql_count_unique' => [
@@ -195,7 +192,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
      * @throws ConfigException
      * @throws CoreException
      */
-    public function testAuthorizedNetwork($aNetworkRegexps, $iHttpCode)
+    public function testAuthorizedNetwork($aNetworkRegexps, $iHttpCode, $sExceptionMessageNeedle=null)
     {
         @chmod($this->sConfigFile, 0770);
         \utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
@@ -209,7 +206,11 @@ class CombodoMonitoringTest extends ItopDataTestCase
 	    $sErrorCode = $aResp[1];
 	    $this->assertEquals($iHttpCode, $sErrorCode, "wrong http error code. $sErrorCode instead of $iHttpCode. ".$aResp[0]);
 	    if (500 == $sErrorCode) {
-	        $this->assertStringContainsString('Exception : Unauthorized network', $aResp[0]);
+            if ( ! is_null($sExceptionMessageNeedle)){
+                $this->assertStringContainsString($sExceptionMessageNeedle, $aResp[0]);
+            } else {
+                $this->assertStringContainsString('Exception : Unauthorized network', $aResp[0]);
+            }
         }
     }
 
@@ -225,7 +226,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
 
         //$sLocalIp = gethostbyname(parse_url($this->sUrl, PHP_URL_HOST));
         return [
-            'wrong conf' => ['aNetworkRegexps' => '', 'iHttpCode' => 500],
+            'wrong conf' => ['aNetworkRegexps' => '', 'iHttpCode' => 500, 'Misconfigured network config'],
             'empty' => ['aNetworkRegexps' => [], 'iHttpCode' => 200],
             //"ok for IP $sLocalIp" => [ 'aNetworkRegexps' => [$sLocalIp], 'iHttpCode' => 200 ],
             "ok for $sSubnet/16" => ['aNetworkRegexps' => [$sSubnet.'/16'], 'iHttpCode' => 200],

@@ -198,25 +198,26 @@ class Controller extends BaseController {
         }
 
         $aReadAllowedNetworkRegexpPatterns = \MetaModel::GetConfig()->GetModuleSetting($sExecModule, $this->m_sAccessAuthorizedNetworkConfigParamId);
-        if (!is_array($aReadAllowedNetworkRegexpPatterns)){
-            \IssueLog::Error("'$sExecModule' wrongly configured. please check $this->m_sAccessAuthorizedNetworkConfigParamId config (not an array).");
+        if (! is_array($aReadAllowedNetworkRegexpPatterns)){
+            \IssueLog::Error("'$sExecModule' wrongly configured. please check $this->m_sAccessAuthorizedNetworkConfigParamId config (not an array).", null, ['m_sAccessAuthorizedNetworkConfigParamId' => $this->m_sAccessAuthorizedNetworkConfigParamId]);
             http_response_code(500);
             $aResponse = array('sError' => "Exception : Misconfigured network config (not an array).");
             echo json_encode($aResponse);
-        } else if (empty($aReadAllowedNetworkRegexpPatterns)){
+            return;
+        } else if (count($aReadAllowedNetworkRegexpPatterns)==0){
             //no rule
             return;
         }
 
         $aNetworks = [];
 
-        foreach ($aReadAllowedNetworkRegexpPatterns as $sAllowedNetworkRegexpPattern){
-            $aNetworks []= trim($sAllowedNetworkRegexpPattern);
+        foreach ($aReadAllowedNetworkRegexpPatterns as $sAllowedNetworkRegexpPattern) {
+            $aNetworks [] = trim($sAllowedNetworkRegexpPattern);
         }
 
         $clientIp = $_SERVER['REMOTE_ADDR'];
         if (! $this->CheckIpFunction($clientIp, $aNetworks)){
-			$this->bAccessForbidden = true;
+            $this->bAccessForbidden = true;
             \IssueLog::Error("'$sExecModule' page is not authorized to '$clientIp' ip address.");
             http_response_code(500);
             $aResponse = array('sError' => "Exception : Unauthorized network ($clientIp)");

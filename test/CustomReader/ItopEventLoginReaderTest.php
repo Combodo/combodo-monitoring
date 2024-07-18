@@ -20,6 +20,7 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
 
         $this->CreateTestOrganization();
         $this->readProfiles();
