@@ -84,7 +84,7 @@ class ItopSynchroLogReader implements CustomReaderInterface
 
 		    $sStartDate = $oSynchroLog->Get('start_date');
 		    $oStartDate = \DateTime::createFromFormat(\AttributeDateTime::GetSQLFormat(), $sStartDate);
-		    $iAgeInMinutes = (int) round((strtotime('now') - $oStartDate->getTimestamp()) / 60);
+		    $iAgeInMinutes = (int) ((strtotime('now') - $oStartDate->getTimestamp()) / 60);
 		    $aMetrics[] = new MonitoringMetric($this->sMetricName.'inminutes_age',
 			    'synchro log age in minutes.',
 			    $iAgeInMinutes,
