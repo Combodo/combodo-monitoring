@@ -9,12 +9,16 @@ class DbToolsService {
 
 	private $oProperty;
 
-    public function GetDBTablesInfo(int $iDbAnalyzeFrequencyInMinutes) {
+    public function GetDBTablesInfo(int $iDbAnalyzeFrequencyInMinutes, $bMockGetDBTablesInfoCall=false) {
 		if ($this->IsAnalyzeImplementedInITop()){
 			if (! $this->IsAnalyzeRequired($iDbAnalyzeFrequencyInMinutes)){
 				$this->DisableAnalyze();
 			}
 		}
+
+        if ($bMockGetDBTablesInfoCall){
+            \IssueLog::Warning("testing environment: not calling DBToolsUtils::GetDBTablesInfo");
+        }
 
         return DBToolsUtils::GetDBTablesInfo();
     }

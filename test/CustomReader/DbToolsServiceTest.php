@@ -23,18 +23,15 @@ class DbToolsServiceTest extends ItopDataTestCase
 
 	public function GetDBTablesInfoAnalyzeFrequencyProvider(){
 		return [
-			'nominal case when no analyze/ no previous file' => [
-				'bRunTestOnlyIfAnalyzeImplementedInITop' => true,
-				'sPreviousAnalyzeTimestamp' => null,
-				'bExpectedAnalysisTriggered' => true,
-			],
+            'never analyzed yet' => [
+                'sPreviousAnalyzeTimestamp' => null,
+                'bExpectedAnalysisTriggered' => true,
+            ],
 			'analyze implemented/ require analyze' => [
-				'bRunTestOnlyIfAnalyzeImplementedInITop' => false,
 				'sPreviousAnalyzeTimestamp' => 'now - 2 minutes',
 				'bExpectedAnalysisTriggered' => true,
 			],
 			'analyze implemented/ no analyze required' => [
-				'bRunTestOnlyIfAnalyzeImplementedInITop' => false,
 				'sPreviousAnalyzeTimestamp' => 'now - 30 seconds',
 				'bExpectedAnalysisTriggered' => false,
 			],
@@ -44,19 +41,11 @@ class DbToolsServiceTest extends ItopDataTestCase
 	/**
 	 * @dataProvider GetDBTablesInfoAnalyzeFrequencyProvider
 	 */
-	public function testGetDBTablesInfoAnalyzeFrequency(bool $bRunTestOnlyIfAnalyzeImplementedInITop, ?string $sPreviousAnalyzeTimestamp, bool $bExpectedAnalysisTriggered) {
+	public function testGetDBTablesInfoAnalyzeFrequency(?string $sPreviousAnalyzeTimestamp, bool $bExpectedAnalysisTriggered) {
 		$oDbToolsService = new DbToolsService();
-		$bAnalyzeImplementedInITop = $oDbToolsService->IsAnalyzeImplementedInITop();
-		if (! $bAnalyzeImplementedInITop && $bRunTestOnlyIfAnalyzeImplementedInITop){
+		if (! $oDbToolsService->IsAnalyzeImplementedInITop()){
 			$this->markTestSkipped('Analyze not implemented');
 		}
-
-        \IssueLog::Info("GetDBTablesInfoAnalyzeFrequency", null, ["ITOP_VERSION"=> ITOP_VERSION, 'skipped' => version_compare(ITOP_VERSION, '3.0', '<=')]);
-        if (version_compare(ITOP_VERSION, '3.0', '<=')) {
-
-            //avoid "Risky Test" in 3.0
-            $this->markTestSkipped('avoid "Risky Test" failure');
-        }
 
 		$sFile = $oDbToolsService->GetDbAnalyzeFrequencyFile();
 		if (is_null($sPreviousAnalyzeTimestamp)){
@@ -67,18 +56,17 @@ class DbToolsServiceTest extends ItopDataTestCase
 		}
 
 		$iNow = strtotime('now');
-		$oDbToolsService->GetDBTablesInfo(1);
-		if ($bAnalyzeImplementedInITop){
-			$sNextTimeStamp = file_get_contents($sFile);
-			if (is_null($sPreviousAnalyzeTimestamp)){
-				$this->assertTrue($sNextTimeStamp >= $iNow, "$sNextTimeStamp >= $iNow");
-			} else {
-				if ($bExpectedAnalysisTriggered) {
-					$this->assertTrue($sNextTimeStamp > $iPreviousTimeStamp, "$sNextTimeStamp > $iPreviousTimeStamp");
-				} else {
-					$this->assertEquals($iPreviousTimeStamp, $sNextTimeStamp);
-				}
-			}
-		}
+		$oDbToolsService->GetDBTablesInfo(1, true);
+
+        $sNextTimeStamp = file_get_contents($sFile);
+        if (is_null($sPreviousAnalyzeTimestamp)){
+            $this->assertTrue($sNextTimeStamp >= $iNow, "$sNextTimeStamp >= $iNow");
+        } else {
+            if ($bExpectedAnalysisTriggered) {
+                $this->assertTrue($sNextTimeStamp > $iPreviousTimeStamp, "Analysis triggered: $sNextTimeStamp > $iPreviousTimeStamp");
+            } else {
+                $this->assertEquals($iPreviousTimeStamp, $sNextTimeStamp);
+            }
+        }
 	}
 }
