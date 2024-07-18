@@ -20,9 +20,9 @@ class ItopDbBigTableReaderTest extends ItopDataTestCase
         parent::setUp();
 
         $this->RequireOnceItopFile('/env-production/combodo-monitoring/vendor/autoload.php');
-        $this->RequireOnceItopFile('/core/config.class.inc.php');
+        $this->RequireOnceItopFile('core/config.class.inc.php'); // source of the ITOP_VERSION constant
+        if (version_compare(ITOP_VERSION, '3.0', '<=')) {
 
-        if (version_compare(ITOP_DESIGN_LATEST_VERSION, '3.0', '<=')) {
             //avoid "Risky Test" in 3.0
             $this->markTestSkipped('avoid "Risky Test" failure');
         }
