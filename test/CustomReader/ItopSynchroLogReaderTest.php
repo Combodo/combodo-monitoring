@@ -122,13 +122,21 @@ OQL;
 		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
 		$this->assertEquals('synchro log age in minutes.', $oMonitoringMetric->GetDescription());
 		$this->assertEquals('itop_synchrolog_inminutes_age', $oMonitoringMetric->GetName());
-		$this->assertEquals($iExpectedAgeInMinutes, $oMonitoringMetric->GetValue());
+        $bDelayDuringiTopProvisioning=false;
+        if ($iExpectedAgeInMinutes != $oMonitoringMetric->GetValue()){
+            $bDelayDuringiTopProvisioning=true;
+            $this->assertEquals($iExpectedAgeInMinutes+1, $oMonitoringMetric->GetValue(), "kpi value should have same value +/- 1 minute due to CRUD perf with SynchroLog");
+        }
 
 		$oMonitoringMetric = $aMetrics[3];
 		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
 		$this->assertEquals('synchro log elapsed time in seconds.', $oMonitoringMetric->GetDescription());
 		$this->assertEquals('itop_synchrolog_inseconds_elapsed', $oMonitoringMetric->GetName());
-		$this->assertEquals($iExpectedElapsedInSeconds, $oMonitoringMetric->GetValue());
+        if ($sExpectedStatus==="running" && $bDelayDuringiTopProvisioning){
+            $this->assertEquals($iExpectedElapsedInSeconds+60, $oMonitoringMetric->GetValue(), "kpi value should have same value +/- 1 minute due to CRUD perf with SynchroLog");
+        } else {
+            $this->assertEquals($iExpectedElapsedInSeconds, $oMonitoringMetric->GetValue());
+        }
 	}
 
 	public function GetMetricNbErrorsProvider(){
