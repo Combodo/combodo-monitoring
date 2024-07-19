@@ -108,6 +108,7 @@ class ItopEventLoginReaderTest extends ItopDataTestCase
     }
 
     /**
+     * @group use-classical-profiles
      * @dataProvider GetMetricsProvider
      */
     public function testGetMetrics($aUsers, $aEventLogins, $aExpectedMetrics)
