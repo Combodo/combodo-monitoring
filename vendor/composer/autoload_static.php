@@ -22,6 +22,7 @@ class ComposerStaticInit6234adff7aad7893ba404b61d49eb912
 
     public static $classMap = array (
         'Combodo\\iTop\\Monitoring\\Controller\\Controller' => __DIR__ . '/../..' . '/src/Controller/Controller.php',
+        'Combodo\\iTop\\Monitoring\\CustomReader\\ActiveOrgIncludedSessionReader' => __DIR__ . '/../..' . '/src/CustomReader/ActiveOrgIncludedSessionReader.php',
         'Combodo\\iTop\\Monitoring\\CustomReader\\ActiveSessionReader' => __DIR__ . '/../..' . '/src/CustomReader/ActiveSessionReader.php',
         'Combodo\\iTop\\Monitoring\\CustomReader\\CountTextOccurrences' => __DIR__ . '/../..' . '/src/CustomReader/CountTextOccurrences.php',
         'Combodo\\iTop\\Monitoring\\CustomReader\\DbToolsService' => __DIR__ . '/../..' . '/src/CustomReader/DbToolsService.php',

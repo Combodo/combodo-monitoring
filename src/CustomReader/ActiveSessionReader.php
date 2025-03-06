@@ -59,16 +59,17 @@ class ActiveSessionReader implements CustomReaderInterface
 
 			$aData = json_decode(file_get_contents($sFile), true);
 
-			if (is_array($aData) && array_key_exists('login_mode', $aData)){
-				$sLoginMode = $aData['login_mode'];
-			} else {
-				$sLoginMode = 'no_auth';
-			}
+			if (is_array($aData)){
+				if (array_key_exists('login_mode', $aData)){
+					$sLoginMode = $aData['login_mode'];
+				}
 
-			if (is_array($aData) && array_key_exists('context', $aData)){
-				$sContext = $aData['context'];
+				if (array_key_exists('context', $aData)){
+					$sContext = $aData['context'];
+				}
 			} else {
 				$sContext = '';
+				$sLoginMode = 'no_auth';
 			}
 
 			if (! array_key_exists($sLoginMode, $aCount)){
