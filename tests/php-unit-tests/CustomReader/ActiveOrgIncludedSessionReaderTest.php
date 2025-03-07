@@ -189,7 +189,11 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 
 	public function testFetchOrgUid_ByContactlessUserId()
 	{
-		$oUser = $this->CreateContactlessUser("Monitoring".uniqid() . "NoOrgUser", ItopDataTestCase::$aURP_Profiles['Service Desk Agent'], "ABCdefg@12345#");
+		try{
+			$oUser = $this->CreateContactlessUser("Monitoring".uniqid() . "NoOrgUser", ItopDataTestCase::$aURP_Profiles['Service Desk Agent'], "ABCdefg@12345#");
+		} catch (\CoreException $e) {
+			$this->markTestSkipped("Cannot create user only");
+		}
 		$aData=['user_id' => $oUser->GetKey()];
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
 		$sRes = $this->InvokeNonPublicMethod(ActiveOrgIncludedSessionReader::class, "FetchOrgUid", $oiTopSessionReader, [$aData]);
@@ -198,78 +202,59 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 
 	public function testFetchOrgUid_ByUserIdContact()
 	{
-		$sName = "monitoring-org".uniqid();
-		$Org = $this->CreateOrganization($sName);
-		$sOrgId = $Org->GetKey();
-		$sLogin = "Monitoring".uniqid() . "UserWithOrg";
-		$oPerson = $this->CreatePerson("$sLogin", $sOrgId);
+		list($sUserId, $sOrgId, $sOrgName) = $this->CreateOrgContactUser();
 
-		$oProfileLinkSet = new \ormLinkSet(\User::class, 'profile_list', \DBObjectSet::FromScratch(\URP_UserProfile::class));
-		$oUserProfile = new \URP_UserProfile();
-		$oUserProfile->Set('profileid', ItopDataTestCase::$aURP_Profiles['Service Desk Agent']);
-		$oUserProfile->Set('reason', 'UNIT Tests');
-		$oProfileLinkSet->AddItem($oUserProfile);
-
-		$oUser = $this->createObject('UserLocal', [
-			'login' => $sLogin,
-			'password' => "ABCdefg@12345#",
-			'language' => 'EN US',
-			'profile_list' => $oProfileLinkSet,
-			'contactid' => $oPerson->GetKey()
-		]);
-
-		$aData=['user_id' => $oUser->GetKey()];
+		$aData=['user_id' => $sUserId];
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
 		$oiTopSessionReader->SetOrgUids(["1" => "gabuzomeu"]);
 		$sRes = $this->InvokeNonPublicMethod(ActiveOrgIncludedSessionReader::class, "FetchOrgUid", $oiTopSessionReader, [$aData]);
 
-		$this->assertEquals($sName, $sRes);
+		$this->assertEquals($sOrgName, $sRes);
 
 		$aCache = $this->GetNonPublicProperty($oiTopSessionReader, 'aOrgUids');
 		ksort($aCache);
 
 		$aExpected = [
 			"1" => "gabuzomeu",
-			$sOrgId => $sName,
+			$sOrgId => $sOrgName,
 		];
 		ksort($aExpected);
 		$this->assertEquals($aExpected, $aCache);
 	}
 
-	public function testFetchOrgUid_ByUserIdContact_ViaCache()
+	private function CreateOrgContactUser() : array
 	{
-		$sName = "monitoring-org".uniqid();
-		$Org = $this->CreateOrganization($sName);
+		$sOrgName = "monitoring-org".uniqid();
+		$Org = $this->CreateOrganization($sOrgName);
 		$sOrgId = $Org->GetKey();
 		$sLogin = "Monitoring".uniqid() . "UserWithOrg";
 		$oPerson = $this->CreatePerson("$sLogin", $sOrgId);
 
-		$oProfileLinkSet = new \ormLinkSet(\User::class, 'profile_list', \DBObjectSet::FromScratch(\URP_UserProfile::class));
-		$oUserProfile = new \URP_UserProfile();
-		$oUserProfile->Set('profileid', ItopDataTestCase::$aURP_Profiles['Service Desk Agent']);
-		$oUserProfile->Set('reason', 'UNIT Tests');
-		$oProfileLinkSet->AddItem($oUserProfile);
+		try{
+			$oUser = $this->CreateUser($sLogin, ItopDataTestCase::$aURP_Profiles['Service Desk Agent'], "ABCdefg@12345#", $oPerson->GetKey());
+		} catch (\CoreException $e) {
+			$this->markTestSkipped("Cannot create user only");
+		}
 
-		$oUser = $this->createObject('UserLocal', [
-			'login' => $sLogin,
-			'password' => "ABCdefg@12345#",
-			'language' => 'EN US',
-			'profile_list' => $oProfileLinkSet,
-			'contactid' => $oPerson->GetKey()
-		]);
+		return [ $oUser->GetKey(), $sOrgId, $sOrgName ];
+	}
 
-		$aData=['user_id' => $oUser->GetKey()];
+	public function testFetchOrgUid_ByUserIdContact_ViaCache()
+	{
+		list($sUserId, $sOrgId, $sOrgName) = $this->CreateOrgContactUser();
+
+		$aData=['user_id' => $sUserId];
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
-		$oiTopSessionReader->SetOrgUids([$sOrgId => $sName]);
+		$oiTopSessionReader->SetOrgUids([$sOrgId => $sOrgName]);
 		$sRes = $this->InvokeNonPublicMethod(ActiveOrgIncludedSessionReader::class, "FetchOrgUid", $oiTopSessionReader, [$aData]);
 
-		$this->assertEquals($sName, $sRes);
+		$this->assertEquals($sOrgName, $sRes);
 
 		$aCache = $this->GetNonPublicProperty($oiTopSessionReader, 'aOrgUids');
 		ksort($aCache);
 
 		$aExpected = [
-			$sOrgId => $sName,
+			$sOrgId => $sOrgName,
 		];
 		ksort($aExpected);
 		$this->assertEquals($aExpected, $aCache);
