@@ -26,12 +26,15 @@ class ActiveOrgIncludedSessionReader implements CustomReaderInterface
     private $sMetricName;
     private string $sOrgUidField;
 	private array $aOrgUids=[];
+	private array $aFieldInSessionByOtherMetricName=[];
 	public const NO_ORG_UID = 'no_uid';
 
     public function __construct($sMetricName, $aMetricConf)
     {
         $this->sMetricName = $sMetricName;
         $this->sOrgUidField = $aMetricConf['org_field'] ?? 'name';
+
+		$this->aFieldInSessionByOtherMetricName = $aMetricConf['other_session_metrics'] ?? [];
     }
 
 	/**
@@ -66,6 +69,13 @@ class ActiveOrgIncludedSessionReader implements CustomReaderInterface
     {
 		$aCountPerOrg = [];
 		$aUnexpiredFilesPerOrg = [];
+	    $aOtherFieldsInSession=array_unique(array_values($this->aFieldInSessionByOtherMetricName));
+		$aCountPerField = [];
+
+	    foreach ($aOtherFieldsInSession as $sField){
+		    $aCountPerField[$sField]=[];
+	    }
+
 		foreach ($aSessionFiles as $sFile){
 			if (! is_file($sFile)){
 				continue;
@@ -74,6 +84,15 @@ class ActiveOrgIncludedSessionReader implements CustomReaderInterface
 			$aData = json_decode(file_get_contents($sFile), true);
 
 			if (is_array($aData)){
+				foreach ($aOtherFieldsInSession as $sField){
+					$sVal = $aData[$sField] ?? null;
+					if (! is_null($sVal)){
+						$iCount = $aCountPerField[$sField][$sVal] ?? 0;
+						$iCount++;
+						$aCountPerField[$sField][$sVal] = $iCount;
+					}
+				}
+
 				if (array_key_exists('login_mode', $aData)){
 					$sLoginMode = $aData['login_mode'];
 				}
@@ -86,7 +105,7 @@ class ActiveOrgIncludedSessionReader implements CustomReaderInterface
 			} else {
 				$sContext = '';
 				$sLoginMode = 'no_auth';
-				$sOrgUid = $this->FetchOrgUid([]);
+				$sOrgUid = self::NO_ORG_UID;
 			}
 
 			$aCount = $aCountPerOrg[$sOrgUid] ?? [];
@@ -187,6 +206,16 @@ class ActiveOrgIncludedSessionReader implements CustomReaderInterface
 			    }
 		    }
 	    }
+
+		foreach ($this->aFieldInSessionByOtherMetricName as $sMetricName =>$sField){
+			$aCount = $aCountPerField[$sField];
+
+		    foreach ($aCount as $sVal => $iCount) {
+			    $aRes[] = new MonitoringMetric($sMetricName.'_count', "Active session $sField count", $iCount,
+				    [$sField => $sVal ]);
+		    }
+	    }
+
         return $aRes;
     }
 

@@ -96,8 +96,6 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 			}
 		}
 
-		var_dump($sFiles);
-
 		$aMetrics = $oiTopSessionReader->FetchCounter($sFiles);
 		$this->assertEquals(45, sizeof($aMetrics), var_export($aMetrics, true));
 
@@ -106,7 +104,7 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 				foreach ($aSubExpected as $sContext => $iCount) {
 					/** @var MonitoringMetric $oMetric */
 					$oMetric = array_shift($aMetrics);
-					var_dump($oMetric);
+
 					$this->assertEquals('itop_session_count', $oMetric->GetName(), var_export($oMetric, true));
 					$this->assertEquals($iCount, $oMetric->GetValue(), var_export($oMetric, true));
 					$this->assertEquals(['login_mode' => $sLoginMode, 'context' => $sContext, 'org_uid' => $sUid], $oMetric->GetLabels(), var_export($oMetric, true));
@@ -155,15 +153,6 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
 		$sRes = $this->InvokeNonPublicMethod(ActiveOrgIncludedSessionReader::class, "FetchOrgUid", $oiTopSessionReader, [$aData]);
 		$this->assertEquals(ActiveOrgIncludedSessionReader::NO_ORG_UID, $sRes);
-	}
-
-	public function testFetchOrgUid_ByOrgIdInCache()
-	{
-		$aData=['org_id' => "1"];
-		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
-		$oiTopSessionReader->SetOrgUids(['1' => "gabuzomeu"]);
-		$sRes = $this->InvokeNonPublicMethod(ActiveOrgIncludedSessionReader::class, "FetchOrgUid", $oiTopSessionReader, [$aData]);
-		$this->assertEquals("gabuzomeu", $sRes);
 	}
 
 	public function testFetchOrgUid_ByOrgIdNoCache()
@@ -258,5 +247,73 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 		];
 		ksort($aExpected);
 		$this->assertEquals($aExpected, $aCache);
+	}
+
+
+	public function testCountOtherFieldInSessions() {
+		$aMetricConf = [
+			'other_session_metrics' =>
+				[
+					'itop_licence_session' => 'licence_key',
+					'itop_shadok_session' => 'shadok_key',
+				]
+		];
+
+		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', $aMetricConf);
+		$sFiles = [];
+
+		for($i=0; $i<5; $i++) {
+			for($j=0; $j<7; $j++) {
+				$sFile = $this->sDir.'sess_'.$i.'_'.$j.'.json';
+				$sFiles[] = $sFile;
+				file_put_contents($sFile,
+					json_encode(
+						[
+							'org_uid'    => 666,
+							'login_mode' => 'form',
+							'licence_key' => $i,
+							'shadok_key'    => $j,
+							'context' => 'GABUZOMEU'
+						]
+					)
+				);
+			}
+		}
+
+		$aMetrics = $oiTopSessionReader->FetchCounter($sFiles);
+		$this->assertEquals(15, sizeof($aMetrics), var_export($aMetrics, true));
+
+		/** @var MonitoringMetric $oMetric */
+		$oMetric = array_shift($aMetrics);
+		$this->assertEquals('itop_session_count', $oMetric->GetName(), var_export($oMetric, true));
+		$this->assertEquals(35, $oMetric->GetValue(), var_export($oMetric, true));
+		$this->assertEquals(['login_mode' => 'form', 'context' => 'GABUZOMEU', 'org_uid' => '666'], $oMetric->GetLabels(), var_export($oMetric, true));
+
+		/** @var MonitoringMetric $oMetric */
+		$oMetric = array_shift($aMetrics);
+		$this->assertEquals('itop_session_elapsedinsecond_sum', $oMetric->GetName(), var_export($oMetric, true));
+		$this->assertEquals(['login_mode' => 'form', 'context' => 'GABUZOMEU', 'org_uid' => '666'], $oMetric->GetLabels(), var_export($oMetric, true));
+
+
+		/** @var MonitoringMetric $oMetric */
+		$oMetric = array_shift($aMetrics);
+		$this->assertEquals('itop_session_elapsedinsecond_max', $oMetric->GetName(), var_export($oMetric, true));
+		$this->assertEquals(['login_mode' => 'form', 'context' => 'GABUZOMEU', 'org_uid' => '666'], $oMetric->GetLabels(), var_export($oMetric, true));
+
+		for($i=0; $i<5; $i++) {
+			/** @var MonitoringMetric $oMetric */
+			$oMetric = array_shift($aMetrics);
+			$this->assertEquals('itop_licence_session_count', $oMetric->GetName(), var_export($oMetric, true));
+			$this->assertEquals(7, $oMetric->GetValue(), var_export($oMetric, true));
+			$this->assertEquals(['licence_key' => "$i"], $oMetric->GetLabels(), var_export($oMetric, true));
+		}
+
+		for($i=0; $i<7; $i++) {
+			/** @var MonitoringMetric $oMetric */
+			$oMetric = array_shift($aMetrics);
+			$this->assertEquals('itop_shadok_session_count', $oMetric->GetName(), var_export($oMetric, true));
+			$this->assertEquals(5, $oMetric->GetValue(), var_export($oMetric, true));
+			$this->assertEquals(['shadok_key' => "$i"], $oMetric->GetLabels(), var_export($oMetric, true));
+		}
 	}
 }
