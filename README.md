@@ -1,20 +1,22 @@
 # Combodo monitoring
 
-## Feature
 This extensions is designed to help administrators monitor their iTop(s) via http(s) endpoint(s) and oversee incidents coming in production.
 
 With it you can collect metrics, store your infrastructure history (time series) and compute alert rules to notify your SRE/Devops/Sysadmin teams.
 Features
 
-You can define your own monitoring endpoints and secure them through iTop configuration.
+## Features
 
-For each endpoint you can configure which set of KPIs will be returned.
+* You can define your own monitoring endpoints and secure them through iTop configuration.
 
-If you have specific requirement that are not covered by the existing metrics, you can also code your own metrics via PHP APIs.
+* For each endpoint you can configure which set of KPIs will be returned.
+
+* If you have specific requirement that are not covered by the existing metrics, you can also code your own metrics via PHP APIs.
 
 ## Documentation
 
 Follow below link to have up-to-date Official Combodo documentation:
+
 https://www.itophub.io/wiki/page?id=extensions:combodo-monitoring
 
 ## Usage
