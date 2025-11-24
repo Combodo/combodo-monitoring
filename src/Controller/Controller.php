@@ -16,23 +16,23 @@ class Controller extends BaseController {
     /** @var string */
     private $m_sAccessAuthorizedNetworkConfigParamId = null;
 
-	private $bAccessForbidden = false;
+    private $bAccessForbidden = false;
 
-	public function OperationStatus()
-	{
-		$aParams = [
-			'status' => 'OK',
-			'code' => 0,
-		];
-		$this->DisplayJSONPage($aParams);
-	}
+    public function OperationStatus()
+    {
+        $aParams = [
+            'status' => 'OK',
+            'code' => 0,
+        ];
+        $this->DisplayJSONPage($aParams);
+    }
 
 
-	public function OperationExposePrometheusMetrics() {
-		if ($this->bAccessForbidden) {
-			//headers already sent by network access check function
-			return;
-		}
+    public function OperationExposePrometheusMetrics() {
+        if ($this->bAccessForbidden) {
+            //headers already sent by network access check function
+            return;
+        }
 
         $sCollection = utils::ReadParam('collection', null);
 
@@ -44,10 +44,10 @@ class Controller extends BaseController {
 
         $aParams = array();
 
-        $aMetricsWithDuplicas = $this->ReadMetrics($aMetricParams);
+        $aMetricsWithDuplicas = $this->ReadMetrics($sCollection, $aMetricParams);
 
         //deduplicate metrics
-	    $aMetrics = $this->RemoveDuplicates($aMetricsWithDuplicas);
+        $aMetrics = $this->RemoveDuplicates($aMetricsWithDuplicas);
 
         $aTwigMetrics = [];
         if (is_array($aMetrics) && count($aMetrics) != 0){
@@ -84,27 +84,27 @@ class Controller extends BaseController {
 
     public function RemoveDuplicates(array $aDuplicateMetrics) : array
     {
-	    $aMetrics = [];
+        $aMetrics = [];
 
-	    if (sizeof($aDuplicateMetrics) === 0){
-	    	return $aMetrics;
-	    }
+        if (sizeof($aDuplicateMetrics) === 0){
+            return $aMetrics;
+        }
 
-	    foreach ($aDuplicateMetrics as $oMetric){
-		    /** @var MonitoringMetric $oMetric*/
-		    $sKey = sprintf("%s_%s",
-			    $oMetric->GetName(),
-			    implode("_", $oMetric->GetLabels())
-		    );
+        foreach ($aDuplicateMetrics as $oMetric){
+            /** @var MonitoringMetric $oMetric*/
+            $sKey = sprintf("%s_%s",
+                $oMetric->GetName(),
+                implode("_", $oMetric->GetLabels())
+            );
 
-		    if (array_key_exists($sKey, $aMetrics)){
-		    	continue;
-		    }
+            if (array_key_exists($sKey, $aMetrics)){
+                continue;
+            }
 
-		    $aMetrics[$sKey] = $oMetric;
-	    }
+            $aMetrics[$sKey] = $oMetric;
+        }
 
-	    return array_values($aMetrics);
+        return array_values($aMetrics);
     }
 
     /**
@@ -132,10 +132,10 @@ class Controller extends BaseController {
     }
 
     /**
-     * @param $aMetricParams
+     * @param $sCollection, $aMetricParams
      * @return array
      */
-    public function ReadMetrics($aMetricParams){
+    public function ReadMetrics($sCollection, $aMetricParams){
         /** @var array[MonitoringMetric] $aMetrics */
         $aMetrics = [];
         if (!is_array($aMetricParams) || empty($aMetricParams)){
@@ -149,27 +149,27 @@ class Controller extends BaseController {
             if ($bKpiLogging){
                 \IssueLog::Info("combodo-monitoring: Compute metrics");
             }
-            foreach ($aMetricParams as $sMetricName => $aMetric) {
-                $iTimeStamp = microtime(true);
-                if (!isset($aMetric[Constants::METRIC_DESCRIPTION])) {
-                    throw new \Exception("Metric $sMetricName has no description. Please provide it.");
-                }
-                $oReader = $oMetricReaderFactory->GetReader($sMetricName, $aMetric);
-                if (is_null($oReader)) {
-                    continue;
-                }
+            if (!isset($aMetricParams[Constants::METRIC_DESCRIPTION])) {
+                throw new \Exception("Metric $sCollection has no description. Please provide it.");
+            }
+            $oReader = $oMetricReaderFactory->GetReader($sCollection, $aMetricParams);
+            if (! is_null($oReader)) {
+            
+                foreach ($aMetricParams as $sMetricName => $aMetric) {
+                    $iTimeStamp = microtime(true);
 
-                $aMonitoringMetrics = $oReader->GetMetrics();
-                $iElapsedInMs = (microtime(true) - $iTimeStamp) * 1000;
+                    $aMonitoringMetrics = $oReader->GetMetrics();
+                    $iElapsedInMs = (microtime(true) - $iTimeStamp) * 1000;
 
-                if ($bKpiLogging) {
-                    \IssueLog::Info(sprintf("=== %s: %s metrics in %s ms", $sMetricName, sizeof($aMonitoringMetrics), $iElapsedInMs));
-                }
-                if (is_null($aMonitoringMetrics)) {
-                    continue;
-                }
+                    if ($bKpiLogging) {
+                        \IssueLog::Info(sprintf("=== %s: %s metrics in %s ms", $sMetricName, sizeof($aMonitoringMetrics), $iElapsedInMs));
+                    }
+                    if (is_null($aMonitoringMetrics)) {
+                        continue;
+                    }
 
-                $aMetrics = array_merge($aMetrics, $aMonitoringMetrics);
+                    $aMetrics = array_merge($aMetrics, $aMonitoringMetrics);
+                }
             }
 
             if ($bKpiLogging){
