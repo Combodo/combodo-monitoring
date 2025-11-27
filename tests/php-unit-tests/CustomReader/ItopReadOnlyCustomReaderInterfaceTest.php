@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -15,7 +16,6 @@
 
 namespace Combodo\iTop\Monitoring\Test\CustomReader;
 
-
 use Combodo\iTop\Monitoring\CustomReader\CountTextOccurrences;
 use Combodo\iTop\Monitoring\CustomReader\ItopReadOnlyCustomerReader;
 use Combodo\iTop\Monitoring\MetricReader\ConfReader;
@@ -29,47 +29,48 @@ use Combodo\iTop\Test\UnitTest\ItopTestCase;
  */
 class ItopReadOnlyCustomReaderInterfaceTest extends ItopTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
+	protected function setUp(): void
+	{
+		parent::setUp();
 
-        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
-    }
+		$this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
+	}
 
 	/**
 	 * @dataProvider ReadonlyProvider
 	 * @param $sMetricname
 	 * @param false $fileExists
 	 */
-    public function testNominal($sMetricname, $fileExists = false)
-    {
-        $itopReadOnlyCustomerReader = new ItopReadOnlyCustomerReader($sMetricname, []);
+	public function testNominal($sMetricname, $fileExists = false)
+	{
+		$itopReadOnlyCustomerReader = new ItopReadOnlyCustomerReader($sMetricname, []);
 
-        clearstatcache();
-	    $sreadOnlyFile = APPROOT.'data/.readonly';
-        if ($fileExists && ! is_file($sreadOnlyFile)){
-        	touch($sreadOnlyFile);
-        } else if (!$fileExists && is_file($sreadOnlyFile)){
-        	unlink($sreadOnlyFile);
-        }
+		clearstatcache();
+		$sreadOnlyFile = APPROOT.'data/.readonly';
+		if ($fileExists && ! is_file($sreadOnlyFile)) {
+			touch($sreadOnlyFile);
+		} elseif (!$fileExists && is_file($sreadOnlyFile)) {
+			unlink($sreadOnlyFile);
+		}
 
-        $aMetrics = $itopReadOnlyCustomerReader->GetMetrics();
-        $this->assertEquals(1, sizeof($aMetrics));
-        /** @var MonitoringMetric $oMetric */
-        $oMetric = $aMetrics[0];
+		$aMetrics = $itopReadOnlyCustomerReader->GetMetrics();
+		$this->assertEquals(1, sizeof($aMetrics));
+		/** @var MonitoringMetric $oMetric */
+		$oMetric = $aMetrics[0];
 
-        $this->assertEquals($sMetricname, $oMetric->GetName());
-        $this->assertEquals($fileExists ? 1 : 0, $oMetric->GetValue());
+		$this->assertEquals($sMetricname, $oMetric->GetName());
+		$this->assertEquals($fileExists ? 1 : 0, $oMetric->GetValue());
 
-	    if (is_file($sreadOnlyFile)){
-		    unlink($sreadOnlyFile);
-	    }
-    }
+		if (is_file($sreadOnlyFile)) {
+			unlink($sreadOnlyFile);
+		}
+	}
 
-	public function ReadonlyProvider() {
-    	return [
-    		'itop running' => [ 'itop-readonly-ok' ],
-    		'itop in readonly mode' => [ 'itop-readonly-setup', true ],
-	    ];
+	public function ReadonlyProvider()
+	{
+		return [
+			'itop running' => [ 'itop-readonly-ok' ],
+			'itop in readonly mode' => [ 'itop-readonly-setup', true ],
+		];
 	}
 }

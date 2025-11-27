@@ -19,30 +19,31 @@ class ActiveSessionReaderTest extends ItopDataTestCase
 	{
 		parent::setUp();
 
-        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
+		$this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
 
-		$this->sDir = sys_get_temp_dir() . '/itop_session';
+		$this->sDir = sys_get_temp_dir().'/itop_session';
 		@mkdir($this->sDir);
 	}
 
 	protected function tearDown(): void
 	{
 		parent::tearDown();
-		foreach (glob($this->sDir . '/**') as $sFile){
+		foreach (glob($this->sDir.'/**') as $sFile) {
 			@unlink($sFile);
 		}
 
 		@rmdir($this->sDir);
 	}
 
-	public function testUnauthSessions() {
+	public function testUnauthSessions()
+	{
 		$oiTopSessionReader = new ActiveSessionReader('itop_session', []);
 
 		$sFiles = [];
 		$sFiles[] = tempnam($this->sDir, 'sess_');
 		$sFiles[] = tempnam($this->sDir, 'sess_');
 		$sFiles[] = tempnam($this->sDir, 'sess_');
-		$sFiles[] = $this->sDir . '/fake';
+		$sFiles[] = $this->sDir.'/fake';
 
 		$aMetrics = $oiTopSessionReader->FetchCounter($sFiles);
 		$this->assertEquals(1, sizeof($aMetrics));
@@ -53,7 +54,8 @@ class ActiveSessionReaderTest extends ItopDataTestCase
 		$this->assertEquals(['login_mode' => 'no_auth', 'context' => ''], $oMetric->GetLabels());
 	}
 
-	public function testAuthSessions() {
+	public function testAuthSessions()
+	{
 		$oiTopSessionReader = new ActiveSessionReader('itop_session', []);
 
 		$sFiles = [];
@@ -62,7 +64,7 @@ class ActiveSessionReaderTest extends ItopDataTestCase
 			'form' => [
 				'TAG_PORTAL' => 1,
 				'TAG_CONSOLE' => 2,
-				'TAG_REST' => 3
+				'TAG_REST' => 3,
 			],
 			'token' => [
 				'TAG_SYNCHRO' => 4,
@@ -70,17 +72,18 @@ class ActiveSessionReaderTest extends ItopDataTestCase
 			],
 		];
 
-		foreach ($aExpected as $sLoginMode => $aSubExpected){
-			foreach ($aSubExpected as $sContext => $iCount){
-				for($i=0; $i<$iCount; $i++){
-					$sFile = $this->sDir . 'sess_'.$sLoginMode . '_' . $sContext . '_' . $i;
+		foreach ($aExpected as $sLoginMode => $aSubExpected) {
+			foreach ($aSubExpected as $sContext => $iCount) {
+				for ($i = 0; $i < $iCount; $i++) {
+					$sFile = $this->sDir.'sess_'.$sLoginMode.'_'.$sContext.'_'.$i;
 					$sFiles[] = $sFile;
-					file_put_contents($sFile,
+					file_put_contents(
+						$sFile,
 						json_encode(
 							[
 								'login_mode' => $sLoginMode,
 								'user_id' => $i,
-								'context' => $sContext
+								'context' => $sContext,
 							]
 						)
 					);
@@ -93,8 +96,8 @@ class ActiveSessionReaderTest extends ItopDataTestCase
 		$aMetrics = $oiTopSessionReader->FetchCounter($sFiles);
 		$this->assertEquals(15, sizeof($aMetrics), var_export($aMetrics, true));
 
-		foreach ($aExpected as $sLoginMode => $aSubExpected){
-			foreach ($aSubExpected as $sContext => $iCount){
+		foreach ($aExpected as $sLoginMode => $aSubExpected) {
+			foreach ($aSubExpected as $sContext => $iCount) {
 				/** @var MonitoringMetric $oMetric */
 				$oMetric =  array_shift($aMetrics);
 				var_dump($oMetric);
@@ -104,8 +107,8 @@ class ActiveSessionReaderTest extends ItopDataTestCase
 			}
 		}
 
-		foreach ($aExpected as $sLoginMode => $aSubExpected){
-			foreach ($aSubExpected as $sContext => $iCount){
+		foreach ($aExpected as $sLoginMode => $aSubExpected) {
+			foreach ($aSubExpected as $sContext => $iCount) {
 				/** @var MonitoringMetric $oMetric */
 				$oMetric =  array_shift($aMetrics);
 				var_dump($oMetric);
@@ -115,8 +118,8 @@ class ActiveSessionReaderTest extends ItopDataTestCase
 			}
 		}
 
-		foreach ($aExpected as $sLoginMode => $aSubExpected){
-			foreach ($aSubExpected as $sContext => $iCount){
+		foreach ($aExpected as $sLoginMode => $aSubExpected) {
+			foreach ($aSubExpected as $sContext => $iCount) {
 				/** @var MonitoringMetric $oMetric */
 				$oMetric =  array_shift($aMetrics);
 				var_dump($oMetric);

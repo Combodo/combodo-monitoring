@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (C) 2013-2020 Combodo SARL
  *
@@ -25,7 +26,7 @@
 SetupWebPage::AddModule(
 	__FILE__, // Path to the current file, all other file names are relative to the directory containing this file
 	'combodo-monitoring/1.0.10',
-	array(
+	[
 		// Identification
 		//
 		'label' => 'Combodo Monitoring',
@@ -33,19 +34,19 @@ SetupWebPage::AddModule(
 
 		// Setup
 		//
-		'dependencies' => array(),
+		'dependencies' => [],
 		'mandatory' => false,
 		'visible' => true,
 
 		// Components
 		//
-		'datamodel' => array(
-            //'model.combodo-monitoring.php',
+		'datamodel' => [
+			//'model.combodo-monitoring.php',
 			'vendor/autoload.php',
-		),
-		'webservice' => array(),
-		'data.struct' => array(),
-		'data.sample' => array(),
+		],
+		'webservice' => [],
+		'data.struct' => [],
+		'data.sample' => [],
 
 		// Documentation
 		//
@@ -54,8 +55,8 @@ SetupWebPage::AddModule(
 
 		// Default settings
 		//
-		'settings' => array(
-            // see the './datamodel.combodo-monitoring.xml' for the default settings!
-        ),
-	)
+		'settings' => [
+			// see the './datamodel.combodo-monitoring.xml' for the default settings!
+		],
+	]
 );

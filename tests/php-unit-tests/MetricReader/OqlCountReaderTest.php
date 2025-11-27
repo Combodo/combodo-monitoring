@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -26,14 +27,14 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
  */
 class OqlCountReaderTest extends ItopDataTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
+	protected function setUp(): void
+	{
+		parent::setUp();
 
-        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
-        $this->RequireOnceItopFile('core/config.class.inc.php');
+		$this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
+		$this->RequireOnceItopFile('core/config.class.inc.php');
 
-    }
+	}
 
 	public function testGetMetrics()
 	{
@@ -45,7 +46,6 @@ class OqlCountReaderTest extends ItopDataTestCase
 				'static_labels' => ['a' => 'b'],
 		];
 		$oOqlCountReader = new OqlCountReader('itop_person_count', $aMetric);
-
 
 		$aMetrics = $oOqlCountReader->GetMetrics();
 		$this->assertEquals(1, count($aMetrics));

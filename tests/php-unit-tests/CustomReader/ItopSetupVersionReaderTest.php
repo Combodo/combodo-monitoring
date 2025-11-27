@@ -11,28 +11,31 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
  * @preserveGlobalState disabled
  * @backupGlobals disabled
  */
-class ItopSetupVersionReaderTest extends ItopDataTestCase {
-
-    protected function setUp(): void
+class ItopSetupVersionReaderTest extends ItopDataTestCase
+{
+	protected function setUp(): void
 	{
 		parent::setUp();
 
-        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
-        $this->RequireOnceItopFile('core/config.class.inc.php');
+		$this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
+		$this->RequireOnceItopFile('core/config.class.inc.php');
 	}
 
 	/**
 	 * @dataProvider GetItopVersionIdProvider
 	 */
-	public function testGetItopVersionId(string $sInitialValue, string $sExpectedReturnedValue){
-    	$oItopSetupVersionReader = new ItopSetupVersionReader('', []);
+	public function testGetItopVersionId(string $sInitialValue, string $sExpectedReturnedValue)
+	{
+		$oItopSetupVersionReader = new ItopSetupVersionReader('', []);
 
-		$this->assertEquals($sExpectedReturnedValue,
+		$this->assertEquals(
+			$sExpectedReturnedValue,
 			$oItopSetupVersionReader->GetItopShortVersionId($sInitialValue)
 		);
 	}
 
-	public function GetItopVersionIdProvider(){
+	public function GetItopVersionIdProvider()
+	{
 		return [
 			'no version found' => ['3.0.0-dev-svn', '0' ],
 			'no version found bis' => ['LATEST', '0' ],
@@ -40,7 +43,8 @@ class ItopSetupVersionReaderTest extends ItopDataTestCase {
 		];
 	}
 
-	public function testGetMetrics() {
+	public function testGetMetrics()
+	{
 		$oItopSetupVersionReader = new ItopSetupVersionReader('', ['static_labels' => ['toto' => 'titi']]);
 		$aMetrics = $oItopSetupVersionReader->GetMetrics();
 		$this->assertEquals(1, count($aMetrics));

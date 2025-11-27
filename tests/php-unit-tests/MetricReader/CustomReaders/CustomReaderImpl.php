@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -21,20 +22,20 @@ use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 class CustomReaderImpl implements CustomReaderInterface
 {
-    private $aMetricConf;
-    private $sMetricName;
+	private $aMetricConf;
+	private $sMetricName;
 
-    public function __construct($sMetricName, $aMetricConf)
-    {
-        $this->aMetricConf = $aMetricConf;
-        $this->sMetricName = $sMetricName;
-    }
+	public function __construct($sMetricName, $aMetricConf)
+	{
+		$this->aMetricConf = $aMetricConf;
+		$this->sMetricName = $sMetricName;
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function GetMetrics(): ?array
-    {
-        return [ new MonitoringMetric($this->sMetricName, $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '', 42, ['baz' => 'iste'])];
-    }
+	/**
+	 * @inheritDoc
+	 */
+	public function GetMetrics(): ?array
+	{
+		return [ new MonitoringMetric($this->sMetricName, $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '', 42, ['baz' => 'iste'])];
+	}
 }

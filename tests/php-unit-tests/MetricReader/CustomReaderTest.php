@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -28,24 +29,24 @@ use Combodo\iTop\Test\UnitTest\ItopTestCase;
  */
 class CustomReaderTest extends ItopTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
+	protected function setUp(): void
+	{
+		parent::setUp();
 
-        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
-        $this->RequireOnceUnitTestFile('./CustomReaders/CustomReaderImpl.php');
-    }
+		$this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
+		$this->RequireOnceUnitTestFile('./CustomReaders/CustomReaderImpl.php');
+	}
 
-    public function testGetGetValue()
-    {
-	    $aMetric = [
-		    'custom' => ['class' => CustomReaderImpl::class],
-		    'description' => 'descriptionFromConf'
-	    ];
-        $oCustomReader = new CustomReader('foo', $aMetric);
-        $aResult = $oCustomReader->GetMetrics();
+	public function testGetGetValue()
+	{
+		$aMetric = [
+			'custom' => ['class' => CustomReaderImpl::class],
+			'description' => 'descriptionFromConf',
+		];
+		$oCustomReader = new CustomReader('foo', $aMetric);
+		$aResult = $oCustomReader->GetMetrics();
 
-	    $aExpectedResult = [ new MonitoringMetric('foo', 'descriptionFromConf', 42, ['baz' => 'iste'])];
-	    $this->assertEquals($aExpectedResult, $aResult);
-    }
+		$aExpectedResult = [ new MonitoringMetric('foo', 'descriptionFromConf', 42, ['baz' => 'iste'])];
+		$this->assertEquals($aExpectedResult, $aResult);
+	}
 }

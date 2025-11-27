@@ -14,19 +14,20 @@ class DbToolsServiceTest extends ItopDataTestCase
 {
 	protected function setUp(): void
 	{
-        $this->RequireOnceItopFile('approot.inc.php');
+		$this->RequireOnceItopFile('approot.inc.php');
 		parent::setUp();
 
-        $this->RequireOnceItopFile('/env-production/combodo-monitoring/vendor/autoload.php');
-        $this->RequireOnceItopFile('/core/config.class.inc.php');
+		$this->RequireOnceItopFile('/env-production/combodo-monitoring/vendor/autoload.php');
+		$this->RequireOnceItopFile('/core/config.class.inc.php');
 	}
 
-	public function GetDBTablesInfoAnalyzeFrequencyProvider(){
+	public function GetDBTablesInfoAnalyzeFrequencyProvider()
+	{
 		return [
-            'never analyzed yet' => [
-                'sPreviousAnalyzeTimestamp' => null,
-                'bExpectedAnalysisTriggered' => true,
-            ],
+			'never analyzed yet' => [
+				'sPreviousAnalyzeTimestamp' => null,
+				'bExpectedAnalysisTriggered' => true,
+			],
 			'analyze implemented/ require analyze' => [
 				'sPreviousAnalyzeTimestamp' => 'now - 2 minutes',
 				'bExpectedAnalysisTriggered' => true,
@@ -41,14 +42,15 @@ class DbToolsServiceTest extends ItopDataTestCase
 	/**
 	 * @dataProvider GetDBTablesInfoAnalyzeFrequencyProvider
 	 */
-	public function testGetDBTablesInfoAnalyzeFrequency(?string $sPreviousAnalyzeTimestamp, bool $bExpectedAnalysisTriggered) {
+	public function testGetDBTablesInfoAnalyzeFrequency(?string $sPreviousAnalyzeTimestamp, bool $bExpectedAnalysisTriggered)
+	{
 		$oDbToolsService = new DbToolsService();
-		if (! $oDbToolsService->IsAnalyzeImplementedInITop()){
+		if (! $oDbToolsService->IsAnalyzeImplementedInITop()) {
 			$this->markTestSkipped('Analyze not implemented');
 		}
 
 		$sFile = $oDbToolsService->GetDbAnalyzeFrequencyFile();
-		if (is_null($sPreviousAnalyzeTimestamp)){
+		if (is_null($sPreviousAnalyzeTimestamp)) {
 			@unlink($sFile);
 		} else {
 			$iPreviousTimeStamp = strtotime($sPreviousAnalyzeTimestamp);
@@ -58,15 +60,15 @@ class DbToolsServiceTest extends ItopDataTestCase
 		$iNow = strtotime('now');
 		$oDbToolsService->GetDBTablesInfo(1, true);
 
-        $sNextTimeStamp = file_get_contents($sFile);
-        if (is_null($sPreviousAnalyzeTimestamp)){
-            $this->assertTrue($sNextTimeStamp >= $iNow, "$sNextTimeStamp >= $iNow");
-        } else {
-            if ($bExpectedAnalysisTriggered) {
-                $this->assertTrue($sNextTimeStamp > $iPreviousTimeStamp, "Analysis triggered: $sNextTimeStamp > $iPreviousTimeStamp");
-            } else {
-                $this->assertEquals($iPreviousTimeStamp, $sNextTimeStamp);
-            }
-        }
+		$sNextTimeStamp = file_get_contents($sFile);
+		if (is_null($sPreviousAnalyzeTimestamp)) {
+			$this->assertTrue($sNextTimeStamp >= $iNow, "$sNextTimeStamp >= $iNow");
+		} else {
+			if ($bExpectedAnalysisTriggered) {
+				$this->assertTrue($sNextTimeStamp > $iPreviousTimeStamp, "Analysis triggered: $sNextTimeStamp > $iPreviousTimeStamp");
+			} else {
+				$this->assertEquals($iPreviousTimeStamp, $sNextTimeStamp);
+			}
+		}
 	}
 }

@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2022 Combodo SARL
  * This file is part of iTop.
@@ -40,8 +41,7 @@ class ItopMailboxReader implements CustomReaderInterface
 	{
 		$aMetrics = [];
 		$iFailedCnxCount = 0;
-		if (MetaModel::IsValidClass('MailInboxBase'))
-		{
+		if (MetaModel::IsValidClass('MailInboxBase')) {
 			$oSearch = new DBObjectSearch('MailInboxBase');
 			$oSearch->AddCondition('active', 'yes');
 			$oSet = new DBObjectSet($oSearch);
@@ -51,10 +51,8 @@ class ItopMailboxReader implements CustomReaderInterface
 			ob_start();
 
 			/** @var MailInboxBase $oInbox */
-			while($oInbox = $oSet->Fetch())
-			{
-				try
-				{
+			while ($oInbox = $oSet->Fetch()) {
+				try {
 					// When OVH is crashed, the opening/reading of the IMAP mailboxes can be very slow AND
 					// if the monitoring page does not reply within a few seconds, the monitoring considers the whole target as DOWN
 					// So let put some "relatively" short timeouts here
@@ -62,9 +60,7 @@ class ItopMailboxReader implements CustomReaderInterface
 					imap_timeout(IMAP_READTIMEOUT, 1);
 					/** var MailInboxBase $oInbox */
 					$oInbox->GetEmailSource(); // Will try to connect to the mailbox and throw an error in case of failure
-				}
-				catch(Exception $e)
-				{
+				} catch (Exception $e) {
 					\IssueLog::Warning("Mailbox connection issue", null, [ 'exception' => $e ]);
 					$iFailedCnxCount++;
 				}
@@ -80,7 +76,6 @@ class ItopMailboxReader implements CustomReaderInterface
 			$iFailedCnxCount,
 			[]
 		);
-
 
 		return $aMetrics;
 	}

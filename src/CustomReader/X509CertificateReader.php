@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -15,7 +16,6 @@
 
 namespace Combodo\iTop\Monitoring\CustomReader;
 
-
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 use Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface;
@@ -23,51 +23,44 @@ use IssueLog;
 
 class X509CertificateReader implements CustomReaderInterface
 {
-    private $aMetricConf;
-    private $sMetricName;
-    
-    public function __construct($sMetricName, $aMetricConf)
-    {
-        $this->aMetricConf = $aMetricConf ?? 'days_until_certificate_expiration';
-        $this->sMetricName = $sMetricName;
-    }
-    
-    /**
-     * @inheritDoc
-     */
-    public function GetMetrics(): ?array
-    {
-        $x509cert = $this->aMetricConf['certificate_file'];
-        $labels = $this->aMetricConf['labels'] ?? [];
-        if (!is_readable($x509cert))
-        {
-            IssueLog::Error("Combodo-monitoring - Error: failed to read certificate file '$x509cert'.");
-        }
-        $cert = openssl_x509_parse(file_get_contents($x509cert));
-        if (is_array($cert))
-        {
-            $iValidTo = (int)($cert['validTo_time_t'] ?? time());
-            $iValidFrom = (int)($cert['validFrom_time_t'] ?? (time() - 86400));
-            if ($iValidFrom > time())
-            {
-                // Certificate is not yet valid !! report a negative value and log a warning
-                IssueLog::Error("Combodo-monitoring - Warning: The certificate '$x509cert' is NOT YET valid. validFrom: '{$cert['validFrom']}'.");
-                $iRemainingDays = ceil((time() - $iValidFrom)/86400);
-            }
-            else
-            {
-                $iRemainingDays = floor(($iValidTo - time())/86400);
-            }
-            
-        }
-        else
-        {
-            IssueLog::Error("Combodo-monitoring - Error: failed to decode certificate file '$x509cert'.");
-            $iRemainingDays = -1;
-        }
-        
-        $sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? 'Number of days until certificate expiration';
-        
-        return [ new MonitoringMetric($this->sMetricName, $sDesc, $iRemainingDays, $labels) ];
-    }
+	private $aMetricConf;
+	private $sMetricName;
+
+	public function __construct($sMetricName, $aMetricConf)
+	{
+		$this->aMetricConf = $aMetricConf ?? 'days_until_certificate_expiration';
+		$this->sMetricName = $sMetricName;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function GetMetrics(): ?array
+	{
+		$x509cert = $this->aMetricConf['certificate_file'];
+		$labels = $this->aMetricConf['labels'] ?? [];
+		if (!is_readable($x509cert)) {
+			IssueLog::Error("Combodo-monitoring - Error: failed to read certificate file '$x509cert'.");
+		}
+		$cert = openssl_x509_parse(file_get_contents($x509cert));
+		if (is_array($cert)) {
+			$iValidTo = (int)($cert['validTo_time_t'] ?? time());
+			$iValidFrom = (int)($cert['validFrom_time_t'] ?? (time() - 86400));
+			if ($iValidFrom > time()) {
+				// Certificate is not yet valid !! report a negative value and log a warning
+				IssueLog::Error("Combodo-monitoring - Warning: The certificate '$x509cert' is NOT YET valid. validFrom: '{$cert['validFrom']}'.");
+				$iRemainingDays = ceil((time() - $iValidFrom) / 86400);
+			} else {
+				$iRemainingDays = floor(($iValidTo - time()) / 86400);
+			}
+
+		} else {
+			IssueLog::Error("Combodo-monitoring - Error: failed to decode certificate file '$x509cert'.");
+			$iRemainingDays = -1;
+		}
+
+		$sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? 'Number of days until certificate expiration';
+
+		return [ new MonitoringMetric($this->sMetricName, $sDesc, $iRemainingDays, $labels) ];
+	}
 }

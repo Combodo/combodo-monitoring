@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -15,24 +16,23 @@
 
 namespace Combodo\iTop\Monitoring\Model;
 
-
 class Constants
 {
-    const CUSTOM = 'custom';
-    const CONF = 'conf';
-    const EXEC_MODULE = 'combodo-monitoring';
-    const OQL_COUNT = 'oql_count';
-    const OQL_SELECT = 'oql_select';
-    const OQL_GROUPBY = 'oql_groupby';
-    const OQL_COUNT_UNIQUE = 'oql_count_unique';
-    const SELECT = 'select';
-    const LABELS = 'labels';
-    const VALUE = 'value';
-    const GROUPBY = 'groupby';
-    const ORDERBY = 'orderby';
-    const LIMIT_COUNT = 'limit_count';
-    const LIMIT_START = 'limit_start';
-    const METRIC_DESCRIPTION = 'description';
-    const METRIC_LABEL = 'static_labels';
-    const METRICS = 'metrics';
+	public const CUSTOM = 'custom';
+	public const CONF = 'conf';
+	public const EXEC_MODULE = 'combodo-monitoring';
+	public const OQL_COUNT = 'oql_count';
+	public const OQL_SELECT = 'oql_select';
+	public const OQL_GROUPBY = 'oql_groupby';
+	public const OQL_COUNT_UNIQUE = 'oql_count_unique';
+	public const SELECT = 'select';
+	public const LABELS = 'labels';
+	public const VALUE = 'value';
+	public const GROUPBY = 'groupby';
+	public const ORDERBY = 'orderby';
+	public const LIMIT_COUNT = 'limit_count';
+	public const LIMIT_START = 'limit_start';
+	public const METRIC_DESCRIPTION = 'description';
+	public const METRIC_LABEL = 'static_labels';
+	public const METRICS = 'metrics';
 }

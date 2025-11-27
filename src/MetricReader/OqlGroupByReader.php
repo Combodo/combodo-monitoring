@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -15,7 +16,6 @@
 
 namespace Combodo\iTop\Monitoring\MetricReader;
 
-
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
@@ -24,72 +24,72 @@ class OqlGroupByReader implements MetricReaderInterface
 	protected $sMetricName;
 	protected $aMetric;
 
-    public function __construct($sMetricName, $aMetric)
-    {
-        $this->sMetricName = $sMetricName;
-        $this->aMetric = $aMetric;
-    }
+	public function __construct($sMetricName, $aMetric)
+	{
+		$this->sMetricName = $sMetricName;
+		$this->aMetric = $aMetric;
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function GetMetrics(): ?array
-    {
-        $sSQL = $this->MakeSql();
-        return $this->FetchGroupByMetrics($sSQL);
+	/**
+	 * @inheritDoc
+	 */
+	public function GetMetrics(): ?array
+	{
+		$sSQL = $this->MakeSql();
+		return $this->FetchGroupByMetrics($sSQL);
 
-    }
-    /**
-     * @return string
-     * @throws \OQLException
-     */
-    private function MakeSql(): string
-    {
-        $oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_GROUPBY][Constants::SELECT]);
-        $aGroupBy = $this->aMetric[Constants::OQL_GROUPBY][Constants::GROUPBY];
+	}
+	/**
+	 * @return string
+	 * @throws \OQLException
+	 */
+	private function MakeSql(): string
+	{
+		$oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_GROUPBY][Constants::SELECT]);
+		$aGroupBy = $this->aMetric[Constants::OQL_GROUPBY][Constants::GROUPBY];
 
-        $aGroupByExp = [];
-        foreach ($aGroupBy as $sAlias => $sOQLField) {
-            $aGroupByExp[$sAlias] = \Expression::FromOQL($sOQLField);
-        }
+		$aGroupByExp = [];
+		foreach ($aGroupBy as $sAlias => $sOQLField) {
+			$aGroupByExp[$sAlias] = \Expression::FromOQL($sOQLField);
+		}
 
-        $sSQL = $oSearch->MakeGroupByQuery([], $aGroupByExp);
+		$sSQL = $oSearch->MakeGroupByQuery([], $aGroupByExp);
 
-        return $sSQL;
-    }
+		return $sSQL;
+	}
 
-    /**
-     * @return array|null
-     * @throws \CoreException
-     * @throws \MySQLException
-     * @throws \MySQLHasGoneAwayException
-     */
-    private function FetchGroupByMetrics($sSQL)
-    {
-        $aGroupBy = $this->aMetric[Constants::OQL_GROUPBY][Constants::GROUPBY];
+	/**
+	 * @return array|null
+	 * @throws \CoreException
+	 * @throws \MySQLException
+	 * @throws \MySQLHasGoneAwayException
+	 */
+	private function FetchGroupByMetrics($sSQL)
+	{
+		$aGroupBy = $this->aMetric[Constants::OQL_GROUPBY][Constants::GROUPBY];
 
-        $resQuery = \CMDBSource::Query($sSQL);
-        if (!$resQuery)  {
-            return null;
-        }
+		$resQuery = \CMDBSource::Query($sSQL);
+		if (!$resQuery) {
+			return null;
+		}
 
-        $sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
-        $aStaticLabels = $this->aMetric[Constants::OQL_GROUPBY][Constants::METRIC_LABEL] ?? [];
+		$sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
+		$aStaticLabels = $this->aMetric[Constants::OQL_GROUPBY][Constants::METRIC_LABEL] ?? [];
 
-        $aMonitoringMetrics = [];
-        while ($aRes = \CMDBSource::FetchArray($resQuery)) {
-            $sValue = $aRes['_itop_count_'];
+		$aMonitoringMetrics = [];
+		while ($aRes = \CMDBSource::FetchArray($resQuery)) {
+			$sValue = $aRes['_itop_count_'];
 
-            $aLabels = $aStaticLabels;
-            foreach (array_keys($aGroupBy) as $sLabelName) {
-                $aLabels[$sLabelName] = $aRes[$sLabelName];
-            }
+			$aLabels = $aStaticLabels;
+			foreach (array_keys($aGroupBy) as $sLabelName) {
+				$aLabels[$sLabelName] = $aRes[$sLabelName];
+			}
 
-            $aMonitoringMetrics[] = new MonitoringMetric($this->sMetricName, $sDescription, $sValue, $aLabels);
+			$aMonitoringMetrics[] = new MonitoringMetric($this->sMetricName, $sDescription, $sValue, $aLabels);
 
-            unset($aRes);
-        }
-        \CMDBSource::FreeResult($resQuery);
-        return $aMonitoringMetrics;
-    }
+			unset($aRes);
+		}
+		\CMDBSource::FreeResult($resQuery);
+		return $aMonitoringMetrics;
+	}
 }

@@ -19,30 +19,31 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 	{
 		parent::setUp();
 
-        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
+		$this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
 
-		$this->sDir = sys_get_temp_dir() . '/itop_session';
+		$this->sDir = sys_get_temp_dir().'/itop_session';
 		@mkdir($this->sDir);
 	}
 
 	protected function tearDown(): void
 	{
 		parent::tearDown();
-		foreach (glob($this->sDir . '/**') as $sFile){
+		foreach (glob($this->sDir.'/**') as $sFile) {
 			@unlink($sFile);
 		}
 
 		@rmdir($this->sDir);
 	}
 
-	public function testUnauthSessions() {
+	public function testUnauthSessions()
+	{
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
 
 		$sFiles = [];
 		$sFiles[] = tempnam($this->sDir, 'sess_');
 		$sFiles[] = tempnam($this->sDir, 'sess_');
 		$sFiles[] = tempnam($this->sDir, 'sess_');
-		$sFiles[] = $this->sDir . '/fake';
+		$sFiles[] = $this->sDir.'/fake';
 
 		$aMetrics = $oiTopSessionReader->FetchCounter($sFiles);
 		$this->assertEquals(1, sizeof($aMetrics));
@@ -53,7 +54,8 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 		$this->assertEquals(['login_mode' => 'no_auth', 'context' => '', 'org_uid' => 'no_uid'], $oMetric->GetLabels());
 	}
 
-	public function testAuthSessions() {
+	public function testAuthSessions()
+	{
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
 		$aMockOrgUids = [
 			"1" => "org_uid1",
@@ -81,7 +83,8 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 					for ($i = 0; $i < $iCount; $i++) {
 						$sFile = $this->sDir.'sess_'.$sLoginMode.'_'.$sContext.'_'.$sOrgId."_".$i;
 						$sFiles[] = $sFile;
-						file_put_contents($sFile,
+						file_put_contents(
+							$sFile,
 							json_encode(
 								[
 									'login_mode' => $sLoginMode,
@@ -141,7 +144,7 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 
 	public function testFetchOrgUid_UidProvided()
 	{
-		$aData=["org_uid" => "gabuzomeu"];
+		$aData = ["org_uid" => "gabuzomeu"];
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
 		$sRes = $this->InvokeNonPublicMethod(ActiveOrgIncludedSessionReader::class, "FetchOrgUid", $oiTopSessionReader, [$aData]);
 		$this->assertEquals("gabuzomeu", $sRes);
@@ -149,7 +152,7 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 
 	public function testFetchOrgUid_NoFieldAtAll()
 	{
-		$aData=[];
+		$aData = [];
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
 		$sRes = $this->InvokeNonPublicMethod(ActiveOrgIncludedSessionReader::class, "FetchOrgUid", $oiTopSessionReader, [$aData]);
 		$this->assertEquals(ActiveOrgIncludedSessionReader::NO_ORG_UID, $sRes);
@@ -160,7 +163,7 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 		$sName = "monitoring-org".uniqid();
 		$Org = $this->CreateOrganization($sName);
 		$sKey = $Org->GetKey();
-		$aData=['org_id' => $sKey];
+		$aData = ['org_id' => $sKey];
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
 		$oiTopSessionReader->SetOrgUids(["1" => "gabuzomeu"]);
 		$sRes = $this->InvokeNonPublicMethod(ActiveOrgIncludedSessionReader::class, "FetchOrgUid", $oiTopSessionReader, [$aData]);
@@ -178,12 +181,12 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 
 	public function testFetchOrgUid_ByContactlessUserId()
 	{
-		try{
-			$oUser = $this->CreateContactlessUser("Monitoring".uniqid() . "NoOrgUser", ItopDataTestCase::$aURP_Profiles['Service Desk Agent'], "ABCdefg@12345#");
+		try {
+			$oUser = $this->CreateContactlessUser("Monitoring".uniqid()."NoOrgUser", ItopDataTestCase::$aURP_Profiles['Service Desk Agent'], "ABCdefg@12345#");
 		} catch (\CoreException $e) {
 			$this->markTestSkipped("Cannot create user only");
 		}
-		$aData=['user_id' => $oUser->GetKey()];
+		$aData = ['user_id' => $oUser->GetKey()];
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
 		$sRes = $this->InvokeNonPublicMethod(ActiveOrgIncludedSessionReader::class, "FetchOrgUid", $oiTopSessionReader, [$aData]);
 		$this->assertEquals(ActiveOrgIncludedSessionReader::NO_ORG_UID, $sRes);
@@ -193,7 +196,7 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 	{
 		list($sUserId, $sOrgId, $sOrgName) = $this->CreateOrgContactUser();
 
-		$aData=['user_id' => $sUserId];
+		$aData = ['user_id' => $sUserId];
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
 		$oiTopSessionReader->SetOrgUids(["1" => "gabuzomeu"]);
 		$sRes = $this->InvokeNonPublicMethod(ActiveOrgIncludedSessionReader::class, "FetchOrgUid", $oiTopSessionReader, [$aData]);
@@ -211,15 +214,15 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 		$this->assertEquals($aExpected, $aCache);
 	}
 
-	private function CreateOrgContactUser() : array
+	private function CreateOrgContactUser(): array
 	{
 		$sOrgName = "monitoring-org".uniqid();
 		$Org = $this->CreateOrganization($sOrgName);
 		$sOrgId = $Org->GetKey();
-		$sLogin = "Monitoring".uniqid() . "UserWithOrg";
+		$sLogin = "Monitoring".uniqid()."UserWithOrg";
 		$oPerson = $this->CreatePerson("$sLogin", $sOrgId);
 
-		try{
+		try {
 			$oUser = $this->CreateUser($sLogin, ItopDataTestCase::$aURP_Profiles['Service Desk Agent'], "ABCdefg@12345#", $oPerson->GetKey());
 		} catch (\CoreException $e) {
 			$this->markTestSkipped("Cannot create user only");
@@ -232,7 +235,7 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 	{
 		list($sUserId, $sOrgId, $sOrgName) = $this->CreateOrgContactUser();
 
-		$aData=['user_id' => $sUserId];
+		$aData = ['user_id' => $sUserId];
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
 		$oiTopSessionReader->SetOrgUids([$sOrgId => $sOrgName]);
 		$sRes = $this->InvokeNonPublicMethod(ActiveOrgIncludedSessionReader::class, "FetchOrgUid", $oiTopSessionReader, [$aData]);
@@ -249,31 +252,32 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 		$this->assertEquals($aExpected, $aCache);
 	}
 
-
-	public function testCountOtherFieldInSessions() {
+	public function testCountOtherFieldInSessions()
+	{
 		$aMetricConf = [
 			'other_session_metrics' =>
 				[
 					'itop_licence_session' => 'licence_key',
 					'itop_shadok_session' => 'shadok_key',
-				]
+				],
 		];
 
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', $aMetricConf);
 		$sFiles = [];
 
-		for($i=0; $i<5; $i++) {
-			for($j=0; $j<7; $j++) {
+		for ($i = 0; $i < 5; $i++) {
+			for ($j = 0; $j < 7; $j++) {
 				$sFile = $this->sDir.'sess_'.$i.'_'.$j.'.json';
 				$sFiles[] = $sFile;
-				file_put_contents($sFile,
+				file_put_contents(
+					$sFile,
 					json_encode(
 						[
 							'org_uid'    => 666,
 							'login_mode' => 'form',
 							'licence_key' => $i,
 							'shadok_key'    => $j,
-							'context' => 'GABUZOMEU'
+							'context' => 'GABUZOMEU',
 						]
 					)
 				);
@@ -294,13 +298,12 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 		$this->assertEquals('itop_session_elapsedinsecond_sum', $oMetric->GetName(), var_export($oMetric, true));
 		$this->assertEquals(['login_mode' => 'form', 'context' => 'GABUZOMEU', 'org_uid' => '666'], $oMetric->GetLabels(), var_export($oMetric, true));
 
-
 		/** @var MonitoringMetric $oMetric */
 		$oMetric = array_shift($aMetrics);
 		$this->assertEquals('itop_session_elapsedinsecond_max', $oMetric->GetName(), var_export($oMetric, true));
 		$this->assertEquals(['login_mode' => 'form', 'context' => 'GABUZOMEU', 'org_uid' => '666'], $oMetric->GetLabels(), var_export($oMetric, true));
 
-		for($i=0; $i<5; $i++) {
+		for ($i = 0; $i < 5; $i++) {
 			/** @var MonitoringMetric $oMetric */
 			$oMetric = array_shift($aMetrics);
 			$this->assertEquals('itop_licence_session_count', $oMetric->GetName(), var_export($oMetric, true));
@@ -308,7 +311,7 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 			$this->assertEquals(['licence_key' => "$i"], $oMetric->GetLabels(), var_export($oMetric, true));
 		}
 
-		for($i=0; $i<7; $i++) {
+		for ($i = 0; $i < 7; $i++) {
 			/** @var MonitoringMetric $oMetric */
 			$oMetric = array_shift($aMetrics);
 			$this->assertEquals('itop_shadok_session_count', $oMetric->GetName(), var_export($oMetric, true));

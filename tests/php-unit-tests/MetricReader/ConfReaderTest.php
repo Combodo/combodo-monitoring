@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -24,18 +25,21 @@ use ReflectionObject;
  * @preserveGlobalState disabled
  * @backupGlobals disabled
  */
-class ConfReaderTest extends ItopTestCase {
-	protected function setUp(): void {
+class ConfReaderTest extends ItopTestCase
+{
+	protected function setUp(): void
+	{
 		parent::setUp();
 
-        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
-        $this->RequireOnceUnitTestFile('./CustomReaders/CustomReaderImpl.php');
+		$this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
+		$this->RequireOnceUnitTestFile('./CustomReaders/CustomReaderImpl.php');
 	}
 
 	/**
 	 * @dataProvider GetMetricsMySettingsProvider
 	 */
-	public function testGetGetValueMySettings(array $aMetric, $aMySetting, $aExpectedResult, ?string $sExpectedException) {
+	public function testGetGetValueMySettings(array $aMetric, $aMySetting, $aExpectedResult, ?string $sExpectedException)
+	{
 		if (is_array($aMySetting)) {
 			$reflector = new ReflectionObject(\utils::GetConfig());
 			$property = $reflector->getProperty('m_aSettings');
@@ -53,7 +57,7 @@ class ConfReaderTest extends ItopTestCase {
 		}
 
 		if (null != $sExpectedException) {
-			if (method_exists($this, 'expectExceptionMessageRegExp')){
+			if (method_exists($this, 'expectExceptionMessageRegExp')) {
 				$this->expectExceptionMessageRegExp($sExpectedException);
 			} else {
 				$this->expectExceptionMessageMatches($sExpectedException);
@@ -70,7 +74,8 @@ class ConfReaderTest extends ItopTestCase {
 		$this->assertEquals($aExpectedResult, $aResult, print_r($aResult));
 	}
 
-	public function GetMetricsMySettingsProvider() {
+	public function GetMetricsMySettingsProvider()
+	{
 		return [
 			'conf must be an array' => [
 				'aMetric' => ['conf' => 'Not an array which is forbidden'],
@@ -111,7 +116,8 @@ class ConfReaderTest extends ItopTestCase {
 		];
 	}
 
-	public function GetMetricsMyModuleProvider() {
+	public function GetMetricsMyModuleProvider()
+	{
 		return [
 			'MyModuleSettings nominal' => [
 				'aMetric' => ['conf' => ['MyModuleSettings', 'module-name', 'foo']],
@@ -121,7 +127,7 @@ class ConfReaderTest extends ItopTestCase {
 			],
 			'MyModuleSettings with depth' => [
 				'aMetric' => ['conf' => ['MyModuleSettings', 'module-name', 'foo', 'bar']],
-				'aMyModuleSetting' => ['foo'=> ['bar' => 'baz']],
+				'aMyModuleSetting' => ['foo' => ['bar' => 'baz']],
 				'aExpectedResult' => 'baz',
 				'sExpectedException' => null,
 			],
@@ -137,7 +143,8 @@ class ConfReaderTest extends ItopTestCase {
 	/**
 	 * @dataProvider GetMetricsMyModuleProvider
 	 */
-	public function testGetGetValueMyModuleSettings(array $aMetric, $aMyModuleSetting, $aExpectedResult, ?string $sExpectedException) {
+	public function testGetGetValueMyModuleSettings(array $aMetric, $aMyModuleSetting, $aExpectedResult, ?string $sExpectedException)
+	{
 		if (is_array($aMyModuleSetting)) {
 			foreach ($aMyModuleSetting as $key => $value) {
 				\utils::GetConfig()->SetModuleSetting('module-name', $key, $value);
@@ -145,7 +152,7 @@ class ConfReaderTest extends ItopTestCase {
 		}
 
 		if (null != $sExpectedException) {
-			if (method_exists($this, 'expectExceptionMessageRegExp')){
+			if (method_exists($this, 'expectExceptionMessageRegExp')) {
 				$this->expectExceptionMessageRegExp($sExpectedException);
 			} else {
 				$this->expectExceptionMessageMatches($sExpectedException);

@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -27,17 +28,17 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
  */
 class OqlSelectReaderTest extends ItopDataTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
+	protected function setUp(): void
+	{
+		parent::setUp();
 
-        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
-        $this->RequireOnceItopFile('core/config.class.inc.php');
+		$this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
+		$this->RequireOnceItopFile('core/config.class.inc.php');
 
-    }
+	}
 
-
-	public function GetMetricsProvider() {
+	public function GetMetricsProvider()
+	{
 		return [
 			'oql_columns with org_id (to optimize as well)' => [
 				'oql' => 'SELECT User',
@@ -92,7 +93,7 @@ class OqlSelectReaderTest extends ItopDataTestCase
 			$aFields = array_keys($aLabels);
 			$sFirst = $aFields[0];
 			$sSecond = $aFields[1];
-			$aExpectedRes[$sFirst][$sSecond]= $oUser->Get($searchAlias);
+			$aExpectedRes[$sFirst][$sSecond] = $oUser->Get($searchAlias);
 		}
 
 		$aMetrics = $oOqlCountReader->GetMetrics();

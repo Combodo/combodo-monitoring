@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -15,7 +16,6 @@
 
 namespace Combodo\iTop\Monitoring\MetricReader;
 
-
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
@@ -24,59 +24,59 @@ class OqlCountUniqueReader implements MetricReaderInterface
 	protected $sMetricName;
 	protected $aMetric;
 
-    public function __construct($sMetricName, $aMetric)
-    {
-        $this->sMetricName = $sMetricName;
-        $this->aMetric = $aMetric;
-    }
+	public function __construct($sMetricName, $aMetric)
+	{
+		$this->sMetricName = $sMetricName;
+		$this->aMetric = $aMetric;
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function GetMetrics(): ?array
-    {
-        $sSQL = $this->MakeSql();
-        return $this->FetchMetrics($sSQL);
+	/**
+	 * @inheritDoc
+	 */
+	public function GetMetrics(): ?array
+	{
+		$sSQL = $this->MakeSql();
+		return $this->FetchMetrics($sSQL);
 
-    }
-    /**
-     * @return string
-     * @throws \OQLException
-     */
-    private function MakeSql(): string
-    {
-        $oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_COUNT_UNIQUE][Constants::SELECT]);
-        $aGroupBy = $this->aMetric[Constants::OQL_COUNT_UNIQUE][Constants::GROUPBY];
+	}
+	/**
+	 * @return string
+	 * @throws \OQLException
+	 */
+	private function MakeSql(): string
+	{
+		$oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_COUNT_UNIQUE][Constants::SELECT]);
+		$aGroupBy = $this->aMetric[Constants::OQL_COUNT_UNIQUE][Constants::GROUPBY];
 
-        $aGroupByExp = [];
-        foreach ($aGroupBy as $sAlias => $sOQLField) {
-            $aGroupByExp[$sAlias] = \Expression::FromOQL($sOQLField);
-        }
+		$aGroupByExp = [];
+		foreach ($aGroupBy as $sAlias => $sOQLField) {
+			$aGroupByExp[$sAlias] = \Expression::FromOQL($sOQLField);
+		}
 
-        $sSQL = $oSearch->MakeGroupByQuery([], $aGroupByExp);
+		$sSQL = $oSearch->MakeGroupByQuery([], $aGroupByExp);
 
-        return $sSQL;
-    }
+		return $sSQL;
+	}
 
-    /**
-     * @return array|null
-     * @throws \CoreException
-     * @throws \MySQLException
-     * @throws \MySQLHasGoneAwayException
-     */
-    private function FetchMetrics($sSQL)
-    {
-        $resQuery = \CMDBSource::Query($sSQL);
-        if (!$resQuery)  {
-            return null;
-        }
+	/**
+	 * @return array|null
+	 * @throws \CoreException
+	 * @throws \MySQLException
+	 * @throws \MySQLHasGoneAwayException
+	 */
+	private function FetchMetrics($sSQL)
+	{
+		$resQuery = \CMDBSource::Query($sSQL);
+		if (!$resQuery) {
+			return null;
+		}
 
-        $sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
+		$sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
 
-        $iValue = $resQuery->num_rows;
+		$iValue = $resQuery->num_rows;
 
-        \CMDBSource::FreeResult($resQuery);
+		\CMDBSource::FreeResult($resQuery);
 
-        return [new MonitoringMetric($this->sMetricName, $sDescription, $iValue)];
-    }
+		return [new MonitoringMetric($this->sMetricName, $sDescription, $iValue)];
+	}
 }

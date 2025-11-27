@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -15,73 +16,85 @@
 
 namespace Combodo\iTop\Monitoring\Model;
 
-class MonitoringMetric {
-    /** @var string $sName */
-    private $sName;
-    /** @var string $sDescription */
-    private $sDescription;
-    /** @var int $sValue */
-    private $sValue;
-    /** @var string[] $aLabels */
-    private $aLabels;
+class MonitoringMetric
+{
+	/** @var string $sName */
+	private $sName;
+	/** @var string $sDescription */
+	private $sDescription;
+	/** @var int $sValue */
+	private $sValue;
+	/** @var string[] $aLabels */
+	private $aLabels;
 
-    /**
-     * MonitoringMetric constructor.
-     * @param string $sName
-     * @param string $sDescription
-     * @param int $sValue
-     * @param string[] $aLabels
-     */
-    public function __construct(string $sName, string $sDescription, int $sValue, $aLabels=[]) {
-        $this->sName = $sName;
-        $this->sDescription = $sDescription;
-        $this->sValue = $sValue;
-        $this->aLabels = $aLabels;
-    }
+	/**
+	 * MonitoringMetric constructor.
+	 * @param string $sName
+	 * @param string $sDescription
+	 * @param int $sValue
+	 * @param string[] $aLabels
+	 */
+	public function __construct(string $sName, string $sDescription, int $sValue, $aLabels = [])
+	{
+		$this->sName = $sName;
+		$this->sDescription = $sDescription;
+		$this->sValue = $sValue;
+		$this->aLabels = $aLabels;
+	}
 
-    public function GetName() : string {
-        return $this->sName;
-    }
+	public function GetName(): string
+	{
+		return $this->sName;
+	}
 
-    public function GetDescription() : string {
-        return $this->sDescription;
-    }
+	public function GetDescription(): string
+	{
+		return $this->sDescription;
+	}
 
-    public function SetDescription(string $sDescription): void {
-        $this->sDescription = $sDescription;
-    }
+	public function SetDescription(string $sDescription): void
+	{
+		$this->sDescription = $sDescription;
+	}
 
-    public function GetValue() : int {
-        return $this->sValue;
-    }
+	public function GetValue(): int
+	{
+		return $this->sValue;
+	}
 
-	public function setValue(int $sValue): void {
+	public function setValue(int $sValue): void
+	{
 		$this->sValue = $sValue;
 	}
 
-    /**
-     * @return string[]
-     */
-    public function GetLabels() {
-        return $this->aLabels;
-    }
+	/**
+	 * @return string[]
+	 */
+	public function GetLabels()
+	{
+		return $this->aLabels;
+	}
 
-    public function AddLabel($sKey, $sValue){
-        $this->aLabels[$sKey] = $sValue;
-    }
+	public function AddLabel($sKey, $sValue)
+	{
+		$this->aLabels[$sKey] = $sValue;
+	}
 
-    public function AddAllLabels($aNewLabels){
-        foreach ($aNewLabels as $sLabelName => $sLabelValue){
-            $this->aLabels[$sLabelName] = $sLabelValue;
-        }
-    }
+	public function AddAllLabels($aNewLabels)
+	{
+		foreach ($aNewLabels as $sLabelName => $sLabelValue) {
+			$this->aLabels[$sLabelName] = $sLabelValue;
+		}
+	}
 
-    public function __toString() {
-        return sprintf("name:%s\nvalue:%s\ndescription:%s\nlabels:%s\n",
-            $this->sName,
-            $this->sValue,
-            $this->sDescription,
-            var_export($this->aLabels, true)
-        );
-    }
+	public function __toString()
+	{
+		return sprintf(
+			"name:%s\nvalue:%s\ndescription:%s\nlabels:%s\n",
+			$this->sName,
+			$this->sValue,
+			$this->sDescription,
+			var_export($this->aLabels, true)
+		);
+	}
 }

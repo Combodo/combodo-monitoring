@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -21,41 +22,42 @@ use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 class ItopVersionReader implements CustomReaderInterface
 {
-    private $aMetricConf;
-    private $sMetricName;
+	private $aMetricConf;
+	private $sMetricName;
 
-    public function __construct($sMetricName, $aMetricConf)
-    {
-        $this->aMetricConf = $aMetricConf;
-        $this->sMetricName = 'itop_version';
-    }
+	public function __construct($sMetricName, $aMetricConf)
+	{
+		$this->aMetricConf = $aMetricConf;
+		$this->sMetricName = 'itop_version';
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function GetMetrics(): ?array
-    {
-	    $sValue = 0;
-	    if (defined('ITOP_REVISION')) {
-	    	$sValue = $this->GetVersionValue(ITOP_REVISION);
-	    }
+	/**
+	 * @inheritDoc
+	 */
+	public function GetMetrics(): ?array
+	{
+		$sValue = 0;
+		if (defined('ITOP_REVISION')) {
+			$sValue = $this->GetVersionValue(ITOP_REVISION);
+		}
 
-        $sDesc = 'iTop applicative version';
-	    if (array_key_exists(Constants::METRIC_LABEL, $this->aMetricConf)){
-            $aLabels = $this->aMetricConf[Constants::METRIC_LABEL];
-        } else {
-	        $aLabels = [];
-        }
-        return [ new MonitoringMetric($this->sMetricName, $sDesc, $sValue, $aLabels)];
-    }
+		$sDesc = 'iTop applicative version';
+		if (array_key_exists(Constants::METRIC_LABEL, $this->aMetricConf)) {
+			$aLabels = $this->aMetricConf[Constants::METRIC_LABEL];
+		} else {
+			$aLabels = [];
+		}
+		return [ new MonitoringMetric($this->sMetricName, $sDesc, $sValue, $aLabels)];
+	}
 
 	/**
 	 * function used in prod and for testing purpose as well to simulate different constant value
 	 */
-    public function GetVersionValue($sItopVersionConstant) : int {
-	    if (filter_var($sItopVersionConstant, FILTER_VALIDATE_INT)){
-		    return (int) $sItopVersionConstant;
-	    }
-	    return 0;
-    }
+	public function GetVersionValue($sItopVersionConstant): int
+	{
+		if (filter_var($sItopVersionConstant, FILTER_VALIDATE_INT)) {
+			return (int) $sItopVersionConstant;
+		}
+		return 0;
+	}
 }

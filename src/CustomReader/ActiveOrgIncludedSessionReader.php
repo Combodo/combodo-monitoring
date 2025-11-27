@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -23,81 +24,80 @@ use Organization;
 
 class ActiveOrgIncludedSessionReader implements CustomReaderInterface
 {
-    private $sMetricName;
-    private string $sOrgUidField;
-	private array $aOrgUids=[];
-	private array $aFieldInSessionByOtherMetricName=[];
+	private $sMetricName;
+	private string $sOrgUidField;
+	private array $aOrgUids = [];
+	private array $aFieldInSessionByOtherMetricName = [];
 	public const NO_ORG_UID = 'no_uid';
 
-    public function __construct($sMetricName, $aMetricConf)
-    {
-        $this->sMetricName = $sMetricName;
-        $this->sOrgUidField = $aMetricConf['org_field'] ?? 'name';
+	public function __construct($sMetricName, $aMetricConf)
+	{
+		$this->sMetricName = $sMetricName;
+		$this->sOrgUidField = $aMetricConf['org_field'] ?? 'name';
 
 		$this->aFieldInSessionByOtherMetricName = $aMetricConf['other_session_metrics'] ?? [];
-    }
+	}
 
 	/**
 	 * testing purpose only
 	 */
-	public function SetOrgUids(array $aOrgUids) : void
+	public function SetOrgUids(array $aOrgUids): void
 	{
 		$this->aOrgUids = $aOrgUids;
 	}
 
-    /**
-     * @inheritDoc
-     */
-    public function GetMetrics(): ?array
-    {
-        //$sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
+	/**
+	 * @inheritDoc
+	 */
+	public function GetMetrics(): ?array
+	{
+		//$sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
 
-	    if (! class_exists('Combodo\iTop\SessionTracker\SessionHandler')) {
-		    \IssueLog::Error("SessionHandler class does not exist. Metric ActiveSessionReader is not working with current iTop version");
+		if (! class_exists('Combodo\iTop\SessionTracker\SessionHandler')) {
+			\IssueLog::Error("SessionHandler class does not exist. Metric ActiveSessionReader is not working with current iTop version");
 
-		    return [];
-	    }
+			return [];
+		}
 
-	    $oItopSessionHandler = new SessionHandler();
-	    $aFiles = $oItopSessionHandler->list_session_files();
+		$oItopSessionHandler = new SessionHandler();
+		$aFiles = $oItopSessionHandler->list_session_files();
 
-	    return $this->FetchCounter($aFiles);
-    }
-
+		return $this->FetchCounter($aFiles);
+	}
 
 	public function FetchCounter(array $aSessionFiles): array
-    {
+	{
 		$aCountPerOrg = [];
 		$aUnexpiredFilesPerOrg = [];
-	    $aOtherFieldsInSession=array_unique(array_values($this->aFieldInSessionByOtherMetricName));
+		$aOtherFieldsInSession = array_unique(array_values($this->aFieldInSessionByOtherMetricName));
 		$aCountPerField = [];
 
-	    foreach ($aOtherFieldsInSession as $sField){
-		    $aCountPerField[$sField]=[];
-	    }
+		foreach ($aOtherFieldsInSession as $sField) {
+			$aCountPerField[$sField] = [];
+		}
 
-		foreach ($aSessionFiles as $sFile){
-			if (! is_file($sFile)){
+		foreach ($aSessionFiles as $sFile) {
+			if (! is_file($sFile)) {
 				continue;
 			}
 
 			$aData = json_decode(file_get_contents($sFile), true);
 
-			if (is_array($aData)){
-				foreach ($aOtherFieldsInSession as $sField){
+			if (is_array($aData)) {
+				foreach ($aOtherFieldsInSession as $sField) {
 					$sVal = $aData[$sField] ?? null;
-					if (! is_null($sVal)){
+					if (! is_null($sVal)) {
 						$iCount = $aCountPerField[$sField][$sVal] ?? 0;
 						$iCount++;
 						$aCountPerField[$sField][$sVal] = $iCount;
 					}
 				}
 
-				if (array_key_exists('login_mode', $aData)){
+				if (array_key_exists('login_mode', $aData)) {
 					$sLoginMode = $aData['login_mode'];
 				}
 
-				if (array_key_exists('context', $aData)){
+				if (array_key_exists('context', $aData)) {
 					$sContext = $aData['context'];
 				}
 
@@ -110,116 +110,131 @@ class ActiveOrgIncludedSessionReader implements CustomReaderInterface
 
 			$aCount = $aCountPerOrg[$sOrgUid] ?? [];
 
-			if (! array_key_exists($sLoginMode, $aCount)){
+			if (! array_key_exists($sLoginMode, $aCount)) {
 				$aCount[$sLoginMode] = [];
 			}
 
-			if (array_key_exists($sContext, $aCount[$sLoginMode])){
+			if (array_key_exists($sContext, $aCount[$sLoginMode])) {
 				$iCount = $aCount[$sLoginMode][$sContext] + 1;
 			} else {
 				$iCount = 1;
 			}
-			$aCount[$sLoginMode][$sContext]=$iCount;
+			$aCount[$sLoginMode][$sContext] = $iCount;
 			$aCountPerOrg[$sOrgUid] = $aCount;
 
-			if ($sLoginMode === 'no_auth'){
+			if ($sLoginMode === 'no_auth') {
 				continue;
 			}
 
-			if (! array_key_exists($sOrgUid, $aUnexpiredFilesPerOrg)){
-				$aUnexpiredFiles=[];
+			if (! array_key_exists($sOrgUid, $aUnexpiredFilesPerOrg)) {
+				$aUnexpiredFiles = [];
 				$aUnexpiredFilesPerOrg[$sOrgUid] = $aUnexpiredFiles;
 			} else {
 				$aUnexpiredFiles = $aUnexpiredFilesPerOrg[$sOrgUid];
 			}
 
-			if (! array_key_exists($sLoginMode, $aUnexpiredFiles)){
+			if (! array_key_exists($sLoginMode, $aUnexpiredFiles)) {
 				$aUnexpiredFiles[$sLoginMode] = [];
 			}
 
-			if (array_key_exists($sContext, $aUnexpiredFiles[$sLoginMode])){
+			if (array_key_exists($sContext, $aUnexpiredFiles[$sLoginMode])) {
 				$aUnexpiredFilesPerOrg[$sOrgUid][$sLoginMode][$sContext][] = $sFile;
 			} else {
 				$aUnexpiredFilesPerOrg[$sOrgUid][$sLoginMode][$sContext] = [ $sFile ];
 			}
 		}
 
-	    $aSessionElapsedMaxPerOrg = [];
-	    $aElapsedSumPerOrg = [];
-	    //$now = time();
+		$aSessionElapsedMaxPerOrg = [];
+		$aElapsedSumPerOrg = [];
+		//$now = time();
 
-	    foreach ($aUnexpiredFilesPerOrg as $sOrgUid => $aUnexpiredFiles) {
-		    $aSessionElapsedMax = [];
-		    $aElapsedSum = [];
-		    foreach ($aUnexpiredFiles as $sLoginMode => $aFilesPerContext) {
-			    foreach ($aFilesPerContext as $sContext => $aFiles) {
-				    foreach ($aFiles as $sFile) {
-					    $iElapsedInSeconds = filemtime($sFile) - filectime($sFile);
-					    if (!array_key_exists($sLoginMode, $aSessionElapsedMax)) {
-						    $aSessionElapsedMax[$sLoginMode] = [];
-						    $aElapsedSum[$sLoginMode] = [];
-					    }
+		foreach ($aUnexpiredFilesPerOrg as $sOrgUid => $aUnexpiredFiles) {
+			$aSessionElapsedMax = [];
+			$aElapsedSum = [];
+			foreach ($aUnexpiredFiles as $sLoginMode => $aFilesPerContext) {
+				foreach ($aFilesPerContext as $sContext => $aFiles) {
+					foreach ($aFiles as $sFile) {
+						$iElapsedInSeconds = filemtime($sFile) - filectime($sFile);
+						if (!array_key_exists($sLoginMode, $aSessionElapsedMax)) {
+							$aSessionElapsedMax[$sLoginMode] = [];
+							$aElapsedSum[$sLoginMode] = [];
+						}
 
-					    if (array_key_exists($sContext, $aSessionElapsedMax[$sLoginMode])) {
-						    $aElapsedSum[$sLoginMode][$sContext] = $aElapsedSum[$sLoginMode][$sContext] + $iElapsedInSeconds;
+						if (array_key_exists($sContext, $aSessionElapsedMax[$sLoginMode])) {
+							$aElapsedSum[$sLoginMode][$sContext] = $aElapsedSum[$sLoginMode][$sContext] + $iElapsedInSeconds;
 
-						    if ($iElapsedInSeconds > $aSessionElapsedMax[$sLoginMode][$sContext]) {
-							    $aSessionElapsedMax[$sLoginMode][$sContext] = $iElapsedInSeconds;
-						    }
-					    } else {
-						    $aElapsedSum[$sLoginMode][$sContext] = $iElapsedInSeconds;
-						    $aSessionElapsedMax[$sLoginMode][$sContext] = $iElapsedInSeconds;
-					    }
-				    }
-			    }
-		    }
-		    $aSessionElapsedMaxPerOrg[$sOrgUid]=$aSessionElapsedMax;
-		    $aElapsedSumPerOrg[$sOrgUid]=$aElapsedSum;
-	    }
+							if ($iElapsedInSeconds > $aSessionElapsedMax[$sLoginMode][$sContext]) {
+								$aSessionElapsedMax[$sLoginMode][$sContext] = $iElapsedInSeconds;
+							}
+						} else {
+							$aElapsedSum[$sLoginMode][$sContext] = $iElapsedInSeconds;
+							$aSessionElapsedMax[$sLoginMode][$sContext] = $iElapsedInSeconds;
+						}
+					}
+				}
+			}
+			$aSessionElapsedMaxPerOrg[$sOrgUid] = $aSessionElapsedMax;
+			$aElapsedSumPerOrg[$sOrgUid] = $aElapsedSum;
+		}
 
-	    $aRes = [];
-	    foreach ($aCountPerOrg as $sOrgUid => $aCount) {
-		    foreach ($aCount as $sLoginMode => $aLoginModeRes) {
-			    foreach ($aLoginModeRes as $sContext => $iCount) {
-				    $aRes[] = new MonitoringMetric($this->sMetricName.'_count', "Active session count", $iCount,
-					    ['login_mode' => $sLoginMode, 'context' => $sContext, 'org_uid' => $sOrgUid]);
-			    }
-		    }
-	    }
+		$aRes = [];
+		foreach ($aCountPerOrg as $sOrgUid => $aCount) {
+			foreach ($aCount as $sLoginMode => $aLoginModeRes) {
+				foreach ($aLoginModeRes as $sContext => $iCount) {
+					$aRes[] = new MonitoringMetric(
+						$this->sMetricName.'_count',
+						"Active session count",
+						$iCount,
+						['login_mode' => $sLoginMode, 'context' => $sContext, 'org_uid' => $sOrgUid]
+					);
+				}
+			}
+		}
 
-	    foreach ($aElapsedSumPerOrg as $sOrgUid => $aElapsedSum) {
-		    foreach ($aElapsedSum as $sLoginMode => $aLoginModeRes) {
-			    foreach ($aLoginModeRes as $sContext => $iCount) {
-				    $aRes[] = new MonitoringMetric($this->sMetricName.'_elapsedinsecond_sum',
-					    "Sum of active session elapsed time in seconds", $iCount,
-					    ['login_mode' => $sLoginMode, 'context' => $sContext, 'org_uid' => $sOrgUid]);
-			    }
-		    }
-	    }
+		foreach ($aElapsedSumPerOrg as $sOrgUid => $aElapsedSum) {
+			foreach ($aElapsedSum as $sLoginMode => $aLoginModeRes) {
+				foreach ($aLoginModeRes as $sContext => $iCount) {
+					$aRes[] = new MonitoringMetric(
+						$this->sMetricName.'_elapsedinsecond_sum',
+						"Sum of active session elapsed time in seconds",
+						$iCount,
+						['login_mode' => $sLoginMode, 'context' => $sContext, 'org_uid' => $sOrgUid]
+					);
+				}
+			}
+		}
 
-	    foreach ($aSessionElapsedMaxPerOrg as $sOrgUid => $aSessionElapsedMax) {
-		    foreach ($aSessionElapsedMax as $sLoginMode => $aLoginModeRes) {
-			    foreach ($aLoginModeRes as $sContext => $iCount) {
-				    $aRes[] = new MonitoringMetric($this->sMetricName.'_elapsedinsecond_max',
-					    "Max elapsed time in seconds amoung active sessions", $iCount,
-					    ['login_mode' => $sLoginMode, 'context' => $sContext, 'org_uid' => $sOrgUid]);
-			    }
-		    }
-	    }
+		foreach ($aSessionElapsedMaxPerOrg as $sOrgUid => $aSessionElapsedMax) {
+			foreach ($aSessionElapsedMax as $sLoginMode => $aLoginModeRes) {
+				foreach ($aLoginModeRes as $sContext => $iCount) {
+					$aRes[] = new MonitoringMetric(
+						$this->sMetricName.'_elapsedinsecond_max',
+						"Max elapsed time in seconds amoung active sessions",
+						$iCount,
+						['login_mode' => $sLoginMode, 'context' => $sContext, 'org_uid' => $sOrgUid]
+					);
+				}
+			}
+		}
 
-		foreach ($this->aFieldInSessionByOtherMetricName as $sMetricName =>$sField){
+		foreach ($this->aFieldInSessionByOtherMetricName as $sMetricName => $sField) {
 			$aCount = $aCountPerField[$sField];
 
-		    foreach ($aCount as $sVal => $iCount) {
-			    $aRes[] = new MonitoringMetric($sMetricName.'_count', "Active session $sField count", $iCount,
-				    [$sField => $sVal ]);
-		    }
-	    }
+			foreach ($aCount as $sVal => $iCount) {
+				$aRes[] = new MonitoringMetric(
+					$sMetricName.'_count',
+					"Active session $sField count",
+					$iCount,
+					[$sField => $sVal ]
+				);
+			}
+		}
 
-        return $aRes;
-    }
+		return $aRes;
+	}
 
-	private function FetchOrgUid(array $aData) : string {
+	private function FetchOrgUid(array $aData): string
+	{
 		$sOrgUid = $aData['org_uid'] ?? null;
 		if (! is_null($sOrgUid)) {
 			return $sOrgUid;
@@ -228,7 +243,7 @@ class ActiveOrgIncludedSessionReader implements CustomReaderInterface
 		$sOrgId = $aData['org_id'] ?? "0";
 		$sUserId = $aData['user_id'] ?? "0";
 
-		if ($sUserId === "0" && $sOrgId === "0"){
+		if ($sUserId === "0" && $sOrgId === "0") {
 			return self::NO_ORG_UID;
 		}
 
@@ -244,7 +259,7 @@ class ActiveOrgIncludedSessionReader implements CustomReaderInterface
 		}
 
 		if ($sOrgId !== "0") {
-			if (array_key_exists($sOrgId, $this->aOrgUids)){
+			if (array_key_exists($sOrgId, $this->aOrgUids)) {
 				return $this->aOrgUids[$sOrgId];
 			}
 
@@ -255,7 +270,7 @@ class ActiveOrgIncludedSessionReader implements CustomReaderInterface
 
 				return $sName;
 			} catch (\Exception $e) {
-				\IssueLog::Warning(__METHOD__ . ': per org_id', null, ['org_id' => $sOrgId, 'error' => $e->getMessage()]);
+				\IssueLog::Warning(__METHOD__.': per org_id', null, ['org_id' => $sOrgId, 'error' => $e->getMessage()]);
 				$this->aOrgUids[$sOrgId] = self::NO_ORG_UID;
 				return self::NO_ORG_UID;
 			}

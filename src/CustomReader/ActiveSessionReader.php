@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -21,50 +22,49 @@ use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 class ActiveSessionReader implements CustomReaderInterface
 {
-    private $sMetricName;
+	private $sMetricName;
 
-    public function __construct($sMetricName, $aMetricConf)
-    {
-        $this->sMetricName = $sMetricName;
-    }
+	public function __construct($sMetricName, $aMetricConf)
+	{
+		$this->sMetricName = $sMetricName;
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function GetMetrics(): ?array
-    {
-        //$sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
+	/**
+	 * @inheritDoc
+	 */
+	public function GetMetrics(): ?array
+	{
+		//$sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
 
-	    if (! class_exists('Combodo\iTop\SessionTracker\SessionHandler')) {
-		    \IssueLog::Error("SessionHandler class does not exist. Metric ActiveSessionReader is not working with current iTop version");
+		if (! class_exists('Combodo\iTop\SessionTracker\SessionHandler')) {
+			\IssueLog::Error("SessionHandler class does not exist. Metric ActiveSessionReader is not working with current iTop version");
 
-		    return [];
-	    }
+			return [];
+		}
 
-	    $oItopSessionHandler = new SessionHandler();
-	    $aFiles = $oItopSessionHandler->list_session_files();
+		$oItopSessionHandler = new SessionHandler();
+		$aFiles = $oItopSessionHandler->list_session_files();
 
-	    return $this->FetchCounter($aFiles);
-    }
-
+		return $this->FetchCounter($aFiles);
+	}
 
 	public function FetchCounter(array $aSessionFiles): array
-    {
+	{
 		$aCount = [];
 		$aUnexpiredFiles = [];
-		foreach ($aSessionFiles as $sFile){
-			if (! is_file($sFile)){
+		foreach ($aSessionFiles as $sFile) {
+			if (! is_file($sFile)) {
 				continue;
 			}
 
 			$aData = json_decode(file_get_contents($sFile), true);
 
-			if (is_array($aData)){
-				if (array_key_exists('login_mode', $aData)){
+			if (is_array($aData)) {
+				if (array_key_exists('login_mode', $aData)) {
 					$sLoginMode = $aData['login_mode'];
 				}
 
-				if (array_key_exists('context', $aData)){
+				if (array_key_exists('context', $aData)) {
 					$sContext = $aData['context'];
 				}
 			} else {
@@ -72,77 +72,76 @@ class ActiveSessionReader implements CustomReaderInterface
 				$sLoginMode = 'no_auth';
 			}
 
-			if (! array_key_exists($sLoginMode, $aCount)){
+			if (! array_key_exists($sLoginMode, $aCount)) {
 				$aCount[$sLoginMode] = [];
 			}
 
-			if (array_key_exists($sContext, $aCount[$sLoginMode])){
+			if (array_key_exists($sContext, $aCount[$sLoginMode])) {
 				$iCount = $aCount[$sLoginMode][$sContext] + 1;
 			} else {
 				$iCount = 1;
 			}
 			$aCount[$sLoginMode][$sContext] = $iCount;
 
-			if ($sLoginMode === 'no_auth'){
+			if ($sLoginMode === 'no_auth') {
 				continue;
 			}
 
-			if (! array_key_exists($sLoginMode, $aUnexpiredFiles)){
+			if (! array_key_exists($sLoginMode, $aUnexpiredFiles)) {
 				$aUnexpiredFiles[$sLoginMode] = [];
 			}
 
-			if (array_key_exists($sContext, $aUnexpiredFiles[$sLoginMode])){
+			if (array_key_exists($sContext, $aUnexpiredFiles[$sLoginMode])) {
 				$aUnexpiredFiles[$sLoginMode][$sContext][] = $sFile;
 			} else {
 				$aUnexpiredFiles[$sLoginMode][$sContext] = [ $sFile ];
 			}
 		}
 
+		$aSessionElapsedMax = [];
+		$aElapsedSum = [];
+		//$now = time();
+		foreach ($aUnexpiredFiles as $sLoginMode => $aFilesPerContext) {
+			foreach ($aFilesPerContext as $sContext => $aFiles) {
+				foreach ($aFiles as $sFile) {
+					$iElapsedInSeconds = filemtime($sFile) - filectime($sFile);
+					if (!array_key_exists($sLoginMode, $aSessionElapsedMax)) {
+						$aSessionElapsedMax[$sLoginMode] = [];
+						$aElapsedSum[$sLoginMode] = [];
+					}
 
-	    $aSessionElapsedMax = [];
-	    $aElapsedSum = [];
-	    //$now = time();
-	    foreach ($aUnexpiredFiles as $sLoginMode => $aFilesPerContext){
-		    foreach ($aFilesPerContext as $sContext => $aFiles) {
-			    foreach ($aFiles as $sFile) {
-				    $iElapsedInSeconds = filemtime($sFile) - filectime($sFile);
-				    if (!array_key_exists($sLoginMode, $aSessionElapsedMax)) {
-					    $aSessionElapsedMax[$sLoginMode] = [];
-					    $aElapsedSum[$sLoginMode] = [];
-				    }
+					if (array_key_exists($sContext, $aSessionElapsedMax[$sLoginMode])) {
+						$aElapsedSum[$sLoginMode][$sContext] = $aElapsedSum[$sLoginMode][$sContext] + $iElapsedInSeconds;
 
-				    if (array_key_exists($sContext, $aSessionElapsedMax[$sLoginMode])) {
-					    $aElapsedSum[$sLoginMode][$sContext] = $aElapsedSum[$sLoginMode][$sContext] + $iElapsedInSeconds;
+						if ($iElapsedInSeconds > $aSessionElapsedMax[$sLoginMode][$sContext]) {
+							$aSessionElapsedMax[$sLoginMode][$sContext] = $iElapsedInSeconds;
+						}
+					} else {
+						$aElapsedSum[$sLoginMode][$sContext] = $iElapsedInSeconds;
+						$aSessionElapsedMax[$sLoginMode][$sContext] = $iElapsedInSeconds;
+					}
+				}
+			}
+		}
 
-					    if ($iElapsedInSeconds > $aSessionElapsedMax[$sLoginMode][$sContext]) {
-						    $aSessionElapsedMax[$sLoginMode][$sContext] = $iElapsedInSeconds;
-					    }
-				    } else {
-					    $aElapsedSum[$sLoginMode][$sContext] = $iElapsedInSeconds;
-					    $aSessionElapsedMax[$sLoginMode][$sContext] = $iElapsedInSeconds;
-				    }
-			    }
-		    }
-	    }
+		$aRes = [];
+		foreach ($aCount as $sLoginMode => $aLoginModeRes) {
+			foreach ($aLoginModeRes as $sContext => $iCount) {
+				$aRes[] = new MonitoringMetric($this->sMetricName.'_count', "Active session count", $iCount, ['login_mode' => $sLoginMode, 'context' => $sContext]);
+			}
+		}
 
-	    $aRes = [];
-	    foreach ($aCount as $sLoginMode => $aLoginModeRes) {
-		    foreach ($aLoginModeRes as $sContext => $iCount) {
-			    $aRes[] = new MonitoringMetric($this->sMetricName . '_count', "Active session count", $iCount, ['login_mode' => $sLoginMode, 'context' => $sContext]);
-		    }
-	    }
+		foreach ($aElapsedSum as $sLoginMode => $aLoginModeRes) {
+			foreach ($aLoginModeRes as $sContext => $iCount) {
+				$aRes[] = new MonitoringMetric($this->sMetricName.'_elapsedinsecond_sum', "Sum of active session elapsed time in seconds", $iCount, ['login_mode' => $sLoginMode, 'context' => $sContext]);
+			}
+		}
 
-	    foreach ($aElapsedSum as $sLoginMode => $aLoginModeRes) {
-		    foreach ($aLoginModeRes as $sContext => $iCount) {
-			    $aRes[] = new MonitoringMetric($this->sMetricName . '_elapsedinsecond_sum', "Sum of active session elapsed time in seconds", $iCount, ['login_mode' => $sLoginMode, 'context' => $sContext]);
-		    }
-	    }
-
-	    foreach ($aSessionElapsedMax as $sLoginMode => $aLoginModeRes) {
-		    foreach ($aLoginModeRes as $sContext => $iCount) {
-			    $aRes[] = new MonitoringMetric($this->sMetricName . '_elapsedinsecond_max', "Max elapsed time in seconds amoung active sessions", $iCount, ['login_mode' => $sLoginMode, 'context' => $sContext]);
-		    }
-	    }
-        return $aRes;
-    }
+		foreach ($aSessionElapsedMax as $sLoginMode => $aLoginModeRes) {
+			foreach ($aLoginModeRes as $sContext => $iCount) {
+				$aRes[] = new MonitoringMetric($this->sMetricName.'_elapsedinsecond_max', "Max elapsed time in seconds amoung active sessions", $iCount, ['login_mode' => $sLoginMode, 'context' => $sContext]);
+			}
+		}
+		return $aRes;
+	}
 }

@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -25,25 +26,25 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
  */
 class OqlGroupByReaderTest extends ItopDataTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
+	protected function setUp(): void
+	{
+		parent::setUp();
 
-        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
-        $this->RequireOnceItopFile('core/config.class.inc.php');
+		$this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
+		$this->RequireOnceItopFile('core/config.class.inc.php');
 
-    }
+	}
 
-
-	public function GetMetricsProvider() {
+	public function GetMetricsProvider()
+	{
 		return [
 			'SELECT User (1)' => [
 				'oql' => 'SELECT User',
-				'where_filter' => 'User.first_name'
+				'where_filter' => 'User.first_name',
 			],
 			'SELECT User (2)' => [
 				'oql' => 'SELECT User AS e',
-				'where_filter' => 'e.first_name'
+				'where_filter' => 'e.first_name',
 			],
 			/*'SELECT User (3)' => [
 				'oql' => 'SELECT User',
@@ -71,10 +72,10 @@ class OqlGroupByReaderTest extends ItopDataTestCase
 		$oSet = new \DBObjectSet($oSearch);
 		while ($oUser = $oSet->Fetch()) {
 			$sKey = $oUser->Get('first_name');
-			if (! in_array($aExpectedRes, $aExpectedRes)){
-				$aExpectedRes[$sKey]= 1;
+			if (! in_array($aExpectedRes, $aExpectedRes)) {
+				$aExpectedRes[$sKey] = 1;
 			} else {
-				$aExpectedRes[$sKey]= $aExpectedRes[$sKey] + 1;
+				$aExpectedRes[$sKey] = $aExpectedRes[$sKey] + 1;
 			}
 		}
 

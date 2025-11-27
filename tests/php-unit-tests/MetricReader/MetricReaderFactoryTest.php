@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -31,90 +32,90 @@ use Combodo\iTop\Test\UnitTest\ItopTestCase;
  */
 class MetricReaderFactoryTest extends ItopTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
+	protected function setUp(): void
+	{
+		parent::setUp();
 
-        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
-    }
+		$this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
+	}
 
-    /**
-     * @dataProvider GetReaderProvider
-     */
-    public function testGetReader($aMetric, $sExpectedClass, $sExpectedException)
-    {
-        if (! is_null($sExpectedException)) {
-	        if (method_exists($this, 'expectExceptionMessageRegExp')){
-		        $this->expectExceptionMessageRegExp($sExpectedException);
-	        } else {
-		        $this->expectExceptionMessageMatches($sExpectedException);
-	        }
-        }
-        $oMetricReaderFactory = new MetricReaderFactory();
-        $result = $oMetricReaderFactory->GetReader('foo', $aMetric);
-        $this->assertInstanceOf($sExpectedClass, $result);
-    }
+	/**
+	 * @dataProvider GetReaderProvider
+	 */
+	public function testGetReader($aMetric, $sExpectedClass, $sExpectedException)
+	{
+		if (! is_null($sExpectedException)) {
+			if (method_exists($this, 'expectExceptionMessageRegExp')) {
+				$this->expectExceptionMessageRegExp($sExpectedException);
+			} else {
+				$this->expectExceptionMessageMatches($sExpectedException);
+			}
+		}
+		$oMetricReaderFactory = new MetricReaderFactory();
+		$result = $oMetricReaderFactory->GetReader('foo', $aMetric);
+		$this->assertInstanceOf($sExpectedClass, $result);
+	}
 
-    public function GetReaderProvider()
-    {
-        return [
-            'count' => [
-                'aMetric' => [
-                    'oql_count' => [ ],
-                ],
-                'sExpectedClass' => OqlCountReader::class,
-                'sExpectedException' => null,
-            ],
-            'select' => [
-                'aMetric' => [
-                    'oql_select' => [ ],
-                ],
-                'sExpectedClass' => OqlSelectReader::class,
-                'sExpectedException' => null,
-            ],
-            'group by' => [
-                'aMetric' => [
-                    'oql_groupby' => [ ],
-                ],
-                'sExpectedClass' => OqlGroupByReader::class,
-                'sExpectedException' => null,
-            ],
-            'custom' => [
-                'aMetric' => [
-                    'custom' => [ ],
-                ],
-                'sExpectedClass' => CustomReader::class,
-                'sExpectedException' => null,
-            ],
-            'conf' => [
-                'aMetric' => [
-                    'conf' => [ ],
-                ],
-                'sExpectedClass' => ConfReader::class,
-                'sExpectedException' => null,
-            ],
+	public function GetReaderProvider()
+	{
+		return [
+			'count' => [
+				'aMetric' => [
+					'oql_count' => [ ],
+				],
+				'sExpectedClass' => OqlCountReader::class,
+				'sExpectedException' => null,
+			],
+			'select' => [
+				'aMetric' => [
+					'oql_select' => [ ],
+				],
+				'sExpectedClass' => OqlSelectReader::class,
+				'sExpectedException' => null,
+			],
+			'group by' => [
+				'aMetric' => [
+					'oql_groupby' => [ ],
+				],
+				'sExpectedClass' => OqlGroupByReader::class,
+				'sExpectedException' => null,
+			],
+			'custom' => [
+				'aMetric' => [
+					'custom' => [ ],
+				],
+				'sExpectedClass' => CustomReader::class,
+				'sExpectedException' => null,
+			],
+			'conf' => [
+				'aMetric' => [
+					'conf' => [ ],
+				],
+				'sExpectedClass' => ConfReader::class,
+				'sExpectedException' => null,
+			],
 
-            'oql count unique' => [
-                'aMetric' => [
-                    'oql_count_unique' => [ ],
-                ],
-                'sExpectedClass' => OqlCountUniqueReader::class,
-                'sExpectedException' => null,
-            ],
-            'wrong parameter' => [
-                'aMetric' => [
-                ],
-                'sExpectedClass' => null,
-                'sExpectedException' => '/reader not found for metric/',
-            ],
-            'refuse two metrics' => [
-                'aMetric' => [
-                    'conf' => [ ],
-                    'oql_select' => [ ],
-                ],
-                'sExpectedClass' => null,
-                'sExpectedException' => '/only one metric at a time is authorized/',
-            ],
-        ];
-    }
+			'oql count unique' => [
+				'aMetric' => [
+					'oql_count_unique' => [ ],
+				],
+				'sExpectedClass' => OqlCountUniqueReader::class,
+				'sExpectedException' => null,
+			],
+			'wrong parameter' => [
+				'aMetric' => [
+				],
+				'sExpectedClass' => null,
+				'sExpectedException' => '/reader not found for metric/',
+			],
+			'refuse two metrics' => [
+				'aMetric' => [
+					'conf' => [ ],
+					'oql_select' => [ ],
+				],
+				'sExpectedClass' => null,
+				'sExpectedException' => '/only one metric at a time is authorized/',
+			],
+		];
+	}
 }

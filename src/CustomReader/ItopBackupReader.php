@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -21,108 +22,113 @@ use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 class ItopBackupReader implements CustomReaderInterface
 {
-    private $aMetricConf;
-    private $sMetricName;
+	private $aMetricConf;
+	private $sMetricName;
 
-    public function __construct($sMetricName, $aMetricConf)
-    {
-        $this->aMetricConf = $aMetricConf;
-        $this->sMetricName = 'itop_backup_';
-    }
+	public function __construct($sMetricName, $aMetricConf)
+	{
+		$this->aMetricConf = $aMetricConf;
+		$this->sMetricName = 'itop_backup_';
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public function GetMetrics($sDir = null): ?array
-    {
-        $sDesc = 'iTop backup ';
+	/**
+	 * {@inheritDoc}
+	 */
+	public function GetMetrics($sDir = null): ?array
+	{
+		$sDesc = 'iTop backup ';
 
-        $aFiles = $this->ListFiles($sDir);
+		$aFiles = $this->ListFiles($sDir);
 
-        if (array_key_exists(Constants::METRIC_LABEL, $this->aMetricConf)) {
-            $aLabels = $this->aMetricConf[Constants::METRIC_LABEL];
-        } else {
-            $aLabels = [];
-        }
+		if (array_key_exists(Constants::METRIC_LABEL, $this->aMetricConf)) {
+			$aLabels = $this->aMetricConf[Constants::METRIC_LABEL];
+		} else {
+			$aLabels = [];
+		}
 
-        $iSize = sizeof($aFiles);
-        $oCountBackupMetric = new MonitoringMetric($this->sMetricName.'count',
-            'count iTop backup files.',
-            $iSize,
-            $aLabels
-        );
+		$iSize = sizeof($aFiles);
+		$oCountBackupMetric = new MonitoringMetric(
+			$this->sMetricName.'count',
+			'count iTop backup files.',
+			$iSize,
+			$aLabels
+		);
 
-        clearstatcache();
-        $iLastBackupSizeInBytes = -1;
-        $iLastBackupAgeInDays = -1;
-        if (0 != $iSize) {
-            $sLastBackupPath = $aFiles[$iSize - 1];
-            $iLastBackupSizeInBytes = filesize($sLastBackupPath);
-            $fLastBackupAgeInDays = (strtotime('now') - filemtime($sLastBackupPath)) / 3600;
-            $iLastBackupAgeInDays = (int) $fLastBackupAgeInDays;
-        }
+		clearstatcache();
+		$iLastBackupSizeInBytes = -1;
+		$iLastBackupAgeInDays = -1;
+		if (0 != $iSize) {
+			$sLastBackupPath = $aFiles[$iSize - 1];
+			$iLastBackupSizeInBytes = filesize($sLastBackupPath);
+			$fLastBackupAgeInDays = (strtotime('now') - filemtime($sLastBackupPath)) / 3600;
+			$iLastBackupAgeInDays = (int) $fLastBackupAgeInDays;
+		}
 
-        $oLastBackupSizeMetric = new MonitoringMetric($this->sMetricName.'lastbackup_inbytes_size',
-            'last iTop backup file size in bytes.',
-            $iLastBackupSizeInBytes,
-            $aLabels
-        );
+		$oLastBackupSizeMetric = new MonitoringMetric(
+			$this->sMetricName.'lastbackup_inbytes_size',
+			'last iTop backup file size in bytes.',
+			$iLastBackupSizeInBytes,
+			$aLabels
+		);
 
-        $oLastBackupAgeMetric = new MonitoringMetric($this->sMetricName.'lastbackup_ageinhours_count',
-            'last iTop backup file age in hours.',
-            $iLastBackupAgeInDays,
-            $aLabels
-        );
-        $aMetrics = [$oCountBackupMetric, $oLastBackupSizeMetric, $oLastBackupAgeMetric];
+		$oLastBackupAgeMetric = new MonitoringMetric(
+			$this->sMetricName.'lastbackup_ageinhours_count',
+			'last iTop backup file age in hours.',
+			$iLastBackupAgeInDays,
+			$aLabels
+		);
+		$aMetrics = [$oCountBackupMetric, $oLastBackupSizeMetric, $oLastBackupAgeMetric];
 
-        return $aMetrics;
-    }
+		return $aMetrics;
+	}
 
-    /**
-     * List and order by date the backups in the given directory
-     * Note: the algorithm is currently based on the file modification date... because there is no "creation date" in general.
-     *
-     * @return array
-     */
-    public function ListFiles(string $sDir)
-    {
-        $sBackupDir = (null == $sDir) ? APPROOT.'data/backups/' : $sDir;
-        if (!is_dir($sBackupDir)) {
-            return [];
-        }
+	/**
+	 * List and order by date the backups in the given directory
+	 * Note: the algorithm is currently based on the file modification date... because there is no "creation date" in general.
+	 *
+	 * @return array
+	 */
+	public function ListFiles(string $sDir)
+	{
+		$sBackupDir = (null == $sDir) ? APPROOT.'data/backups/' : $sDir;
+		if (!is_dir($sBackupDir)) {
+			return [];
+		}
 
-        $aFiles = $this->glob_recursive($sBackupDir);
-        $aTimes = [];
-        // Legacy format -limited to 4 Gb
-        foreach ($aFiles as $sFilePath) {
-            $aTimes[] = filemtime($sFilePath); // unix time
-        }
-        array_multisort($aTimes, $aFiles);
+		$aFiles = $this->glob_recursive($sBackupDir);
+		$aTimes = [];
+		// Legacy format -limited to 4 Gb
+		foreach ($aFiles as $sFilePath) {
+			$aTimes[] = filemtime($sFilePath); // unix time
+		}
+		array_multisort($aTimes, $aFiles);
 
-        return $aFiles;
-    }
+		return $aFiles;
+	}
 
-    private function glob_recursive($sDirPath): array
-    {
-        $aFiles = [];
+	private function glob_recursive($sDirPath): array
+	{
+		$aFiles = [];
 
-        foreach (glob($sDirPath.'/*') as $sFilePath) {
-            if ($this->endsWith($sFilePath, '.zip')
-                || $this->endsWith($sFilePath, '.tar.gz')) {
-                if (is_file($sFilePath)) {
-                    $aFiles[] = $sFilePath;
-                }
-            } elseif (is_dir($sFilePath)) {
-                $aFiles = array_merge($aFiles,
-                    $this->glob_recursive($sFilePath));
-            }
-        }
+		foreach (glob($sDirPath.'/*') as $sFilePath) {
+			if ($this->endsWith($sFilePath, '.zip')
+				|| $this->endsWith($sFilePath, '.tar.gz')) {
+				if (is_file($sFilePath)) {
+					$aFiles[] = $sFilePath;
+				}
+			} elseif (is_dir($sFilePath)) {
+				$aFiles = array_merge(
+					$aFiles,
+					$this->glob_recursive($sFilePath)
+				);
+			}
+		}
 
-        return $aFiles;
-    }
+		return $aFiles;
+	}
 
-    private function endsWith($sHaystack, $sNeedle)
-    {
-        return substr($sHaystack, -strlen($sNeedle)) == $sNeedle;
-    }
+	private function endsWith($sHaystack, $sNeedle)
+	{
+		return substr($sHaystack, -strlen($sNeedle)) == $sNeedle;
+	}
 }

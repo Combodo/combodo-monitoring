@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -15,34 +16,33 @@
 
 namespace Combodo\iTop\Monitoring\CustomReader;
 
-
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 class ItopReadOnlyCustomerReader implements \Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface
 {
-    private $aMetricConf;
-    private $sMetricName;
+	private $aMetricConf;
+	private $sMetricName;
 
-    public function __construct($sMetricName, $aMetricConf)
-    {
-        $this->aMetricConf = $aMetricConf;
-        $this->sMetricName = $sMetricName;
-    }
+	public function __construct($sMetricName, $aMetricConf)
+	{
+		$this->aMetricConf = $aMetricConf;
+		$this->sMetricName = $sMetricName;
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function GetMetrics(): ?array
-    {
-        $iCounter = 0;
-        clearstatcache();
-        if (file_exists(APPROOT.'data/.readonly')){
-            $iCounter = 1;
-        }
+	/**
+	 * @inheritDoc
+	 */
+	public function GetMetrics(): ?array
+	{
+		$iCounter = 0;
+		clearstatcache();
+		if (file_exists(APPROOT.'data/.readonly')) {
+			$iCounter = 1;
+		}
 
-        $sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
+		$sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
 
-        return [ new MonitoringMetric($this->sMetricName, $sDesc, $iCounter)];
-    }
+		return [ new MonitoringMetric($this->sMetricName, $sDesc, $iCounter)];
+	}
 }

@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -15,15 +16,14 @@
 
 namespace Combodo\iTop\Monitoring\MetricReader;
 
-
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 interface MetricReaderInterface
 {
-    public function __construct($sMetricName, $aMetric);
+	public function __construct($sMetricName, $aMetric);
 
-    /**
-     * @return MonitoringMetric[]
-     */
-    public function GetMetrics(): ?array;
+	/**
+	 * @return MonitoringMetric[]
+	 */
+	public function GetMetrics(): ?array;
 }

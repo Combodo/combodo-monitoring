@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -85,8 +86,8 @@ class OqlCountUniqueReaderTest extends ItopDataTestCase
 		$oSet = new \DBObjectSet($oSearch);
 		while ($oUser = $oSet->Fetch()) {
 			$sKey = $oUser->Get('id');
-			if (! in_array($aExpectedRes, $aExpectedRes)){
-				$aExpectedRes[]= $sKey;
+			if (! in_array($aExpectedRes, $aExpectedRes)) {
+				$aExpectedRes[] = $sKey;
 			}
 		}
 

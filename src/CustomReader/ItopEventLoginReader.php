@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -21,83 +22,84 @@ use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 class ItopEventLoginReader implements CustomReaderInterface
 {
-    private $aMetricConf;
-    private $sMetricName;
+	private $aMetricConf;
+	private $sMetricName;
 
-    public function __construct($sMetricName, $aMetricConf)
-    {
-        $this->aMetricConf = $aMetricConf;
-        $this->sMetricName = 'itop_eventlogin';
-    }
+	public function __construct($sMetricName, $aMetricConf)
+	{
+		$this->aMetricConf = $aMetricConf;
+		$this->sMetricName = 'itop_eventlogin';
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public function GetMetrics($sDir = null): ?array
-    {
-        $aMetrics = [];
+	/**
+	 * {@inheritDoc}
+	 */
+	public function GetMetrics($sDir = null): ?array
+	{
+		$aMetrics = [];
 
-        if (array_key_exists(Constants::METRIC_LABEL, $this->aMetricConf)) {
-            $aLabels = $this->aMetricConf[Constants::METRIC_LABEL];
-        } else {
-            $aLabels = [];
-        }
+		if (array_key_exists(Constants::METRIC_LABEL, $this->aMetricConf)) {
+			$aLabels = $this->aMetricConf[Constants::METRIC_LABEL];
+		} else {
+			$aLabels = [];
+		}
 
-        foreach ($this->ListEventLogin() as $aEventLoginMetric) {
-            $aCurrentLabels = array_merge([], $aLabels);
-            $aCurrentLabels['profiles'] = $aEventLoginMetric['labels']['profiles'];
-            $aCurrentLabels['account_type'] = $aEventLoginMetric['labels']['account_type'];
+		foreach ($this->ListEventLogin() as $aEventLoginMetric) {
+			$aCurrentLabels = array_merge([], $aLabels);
+			$aCurrentLabels['profiles'] = $aEventLoginMetric['labels']['profiles'];
+			$aCurrentLabels['account_type'] = $aEventLoginMetric['labels']['account_type'];
 
-            $aMetrics[] = new MonitoringMetric($this->sMetricName,
-                'nb of connection in the last 1 hour.',
-                $aEventLoginMetric['count'],
-                $aCurrentLabels
-            );
-        }
+			$aMetrics[] = new MonitoringMetric(
+				$this->sMetricName,
+				'nb of connection in the last 1 hour.',
+				$aEventLoginMetric['count'],
+				$aCurrentLabels
+			);
+		}
 
-        return $aMetrics;
-    }
+		return $aMetrics;
+	}
 
-    public function ListEventLogin(): array
-    {
-        $currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-1 HOURS'));
+	public function ListEventLogin(): array
+	{
+		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-1 HOURS'));
 
-        $sOql = <<<OQL
+		$sOql = <<<OQL
 SELECT u,e FROM EventLoginUsage AS e JOIN User AS u ON e.user_id=u.id
 WHERE e.date> "$currentDate"
 OQL;
 
-        $oSearch = \DBObjectSearch::FromOQL($sOql);
-        $oSet = new \DBObjectSet($oSearch);
+		$oSearch = \DBObjectSearch::FromOQL($sOql);
+		$oSet = new \DBObjectSet($oSearch);
 
-        $aRes = [];
+		$aRes = [];
 
-        /* var DBObject $oObject  */
-        while ($aObjects = $oSet->FetchAssoc()) {
-            $sProfiles = null;
-            $oUser = $aObjects['u'];
+		/* var DBObject $oObject  */
+		while ($aObjects = $oSet->FetchAssoc()) {
+			$sProfiles = null;
+			$oUser = $aObjects['u'];
 
-            $oProfileSet = $oUser->Get('profile_list');
-            while ($oProfile = $oProfileSet->Fetch()) {
-                $sProfile = str_replace(" ","_",strtolower($oProfile->Get('profile')));
-                $sProfiles = (is_null($sProfiles)) ? $sProfile : "$sProfiles+$sProfile";
-            }
+			$oProfileSet = $oUser->Get('profile_list');
+			while ($oProfile = $oProfileSet->Fetch()) {
+				$sProfile = str_replace(" ", "_", strtolower($oProfile->Get('profile')));
+				$sProfiles = (is_null($sProfiles)) ? $sProfile : "$sProfiles+$sProfile";
+			}
 
-            $sAccountType = strtolower(get_class($oUser));
-            $sKey = sprintf("%s_%s", $sProfiles, $sAccountType);
-            if (isset($aRes[$sKey])) {
-                $aRes[$sKey]['count'] = $aRes[$sKey]['count'] + 1;
-            } else {
-                $aRes[$sKey] = [
-                    'count' => 1,
-                    'labels' => [
-                        'profiles' => $sProfiles,
-                        'account_type' => $sAccountType,
-                    ],
-                ];
-            }
-        }
+			$sAccountType = strtolower(get_class($oUser));
+			$sKey = sprintf("%s_%s", $sProfiles, $sAccountType);
+			if (isset($aRes[$sKey])) {
+				$aRes[$sKey]['count'] = $aRes[$sKey]['count'] + 1;
+			} else {
+				$aRes[$sKey] = [
+					'count' => 1,
+					'labels' => [
+						'profiles' => $sProfiles,
+						'account_type' => $sAccountType,
+					],
+				];
+			}
+		}
 
-        return $aRes;
-    }
+		return $aRes;
+	}
 }

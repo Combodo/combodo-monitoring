@@ -1,8 +1,10 @@
 <?php
+
 /**
  *  @copyright   Copyright (C) 2010-2019 Combodo SARL
  *  @license     http://opensource.org/licenses/AGPL-3.0
  */
+
 namespace Combodo\iTop\Monitoring\Controller;
 
 use Combodo\iTop\Monitoring\MetricReader\MetricReaderFactory;
@@ -12,9 +14,10 @@ use Combodo\iTop\Application\TwigBase\Controller\Controller as BaseController;
 use Symfony\Component\HttpFoundation\IpUtils;
 use utils;
 
-class Controller extends BaseController {
-    /** @var string */
-    private $m_sAccessAuthorizedNetworkConfigParamId = null;
+class Controller extends BaseController
+{
+	/** @var string */
+	private $m_sAccessAuthorizedNetworkConfigParamId = null;
 
 	private $bAccessForbidden = false;
 
@@ -27,245 +30,249 @@ class Controller extends BaseController {
 		$this->DisplayJSONPage($aParams);
 	}
 
-
-	public function OperationExposePrometheusMetrics() {
+	public function OperationExposePrometheusMetrics()
+	{
 		if ($this->bAccessForbidden) {
 			//headers already sent by network access check function
 			return;
 		}
 
-        $sCollection = utils::ReadParam('collection', null);
+		$sCollection = utils::ReadParam('collection', null);
 
-        if (is_null($sCollection)) {
-            throw new \Exception('Missing mandatory GET parameter collection');
-        }
+		if (is_null($sCollection)) {
+			throw new \Exception('Missing mandatory GET parameter collection');
+		}
 
-        $aMetricParams = $this->ReadMetricConf($sCollection);
+		$aMetricParams = $this->ReadMetricConf($sCollection);
 
-        $aParams = array();
+		$aParams = [];
 
-        $aMetricsWithDuplicas = $this->ReadMetrics($aMetricParams);
+		$aMetricsWithDuplicas = $this->ReadMetrics($aMetricParams);
 
-        //deduplicate metrics
-	    $aMetrics = $this->RemoveDuplicates($aMetricsWithDuplicas);
+		//deduplicate metrics
+		$aMetrics = $this->RemoveDuplicates($aMetricsWithDuplicas);
 
-        $aTwigMetrics = [];
-        if (is_array($aMetrics) && count($aMetrics) != 0){
-            foreach ($aMetrics as $oMetric){
-                /** @var MonitoringMetric $oMetric*/
-                $aTwigMetrics[] = $oMetric;
-            }
-        }
+		$aTwigMetrics = [];
+		if (is_array($aMetrics) && count($aMetrics) != 0) {
+			foreach ($aMetrics as $oMetric) {
+				/** @var MonitoringMetric $oMetric*/
+				$aTwigMetrics[] = $oMetric;
+			}
+		}
 
-        $aParams[Constants::METRICS] = $aTwigMetrics;
-        //$this->DisplayPage($aParams, null, Constants::ENUM_PAGE_TYPE_TXT);
+		$aParams[Constants::METRICS] = $aTwigMetrics;
+		//$this->DisplayPage($aParams, null, Constants::ENUM_PAGE_TYPE_TXT);
 
+		header('Content-Type: text/plain; charset=UTF-8');
+		$sOutput = "";
+		if (is_array($aMetrics) && sizeof($aMetrics) !== 0) {
+			foreach ($aMetrics as $oMetric) {
+				/** @var MonitoringMetric $oMetric*/
+				$sOutput .=  "# ".$oMetric->GetDescription()."\n";
+				$sLabels = "";
+				if (is_array($oMetric->GetLabels()) && sizeof($oMetric->GetLabels()) !== 0) {
+					foreach ($oMetric->GetLabels() as $sKey => $sValue) {
+						$sLabels .= empty($sLabels) ? "" : ",";
+						$sLabels .= "$sKey=\"$sValue\"";
+					}
+				}
+				$sOutput .= $oMetric->GetName()."{".$sLabels."} ".$oMetric->GetValue()."\n";
+				$sOutput .=  "\n";
+			}
+		}
 
-        header('Content-Type: text/plain; charset=UTF-8');
-        $sOutput = "";
-        if (is_array($aMetrics) && sizeof($aMetrics) !== 0) {
-            foreach ($aMetrics as $oMetric){
-                /** @var MonitoringMetric $oMetric*/
-                $sOutput .=  "# " . $oMetric->GetDescription() . "\n";
-                $sLabels = "";
-                if (is_array($oMetric->GetLabels()) && sizeof($oMetric->GetLabels()) !== 0) {
-                    foreach ($oMetric->GetLabels() as $sKey => $sValue) {
-                        $sLabels .= empty($sLabels) ? "" : ",";
-                        $sLabels .= "$sKey=\"$sValue\"";
-                    }
-                }
-                $sOutput .= $oMetric->GetName() . "{" . $sLabels . "} " . $oMetric->GetValue() . "\n";
-                $sOutput .=  "\n";
-            }
-        }
+		echo $sOutput;
+	}
 
-        echo $sOutput;
-    }
+	public function RemoveDuplicates(array $aDuplicateMetrics): array
+	{
+		$aMetrics = [];
 
-    public function RemoveDuplicates(array $aDuplicateMetrics) : array
-    {
-	    $aMetrics = [];
+		if (sizeof($aDuplicateMetrics) === 0) {
+			return $aMetrics;
+		}
 
-	    if (sizeof($aDuplicateMetrics) === 0){
-	    	return $aMetrics;
-	    }
+		foreach ($aDuplicateMetrics as $oMetric) {
+			/** @var MonitoringMetric $oMetric*/
+			$sKey = sprintf(
+				"%s_%s",
+				$oMetric->GetName(),
+				implode("_", $oMetric->GetLabels())
+			);
 
-	    foreach ($aDuplicateMetrics as $oMetric){
-		    /** @var MonitoringMetric $oMetric*/
-		    $sKey = sprintf("%s_%s",
-			    $oMetric->GetName(),
-			    implode("_", $oMetric->GetLabels())
-		    );
+			if (array_key_exists($sKey, $aMetrics)) {
+				continue;
+			}
 
-		    if (array_key_exists($sKey, $aMetrics)){
-		    	continue;
-		    }
+			$aMetrics[$sKey] = $oMetric;
+		}
 
-		    $aMetrics[$sKey] = $oMetric;
-	    }
+		return array_values($aMetrics);
+	}
 
-	    return array_values($aMetrics);
-    }
+	/**
+	 * @throws \Exception
+	 */
+	public function ReadMetricConf(string $sCollection, ?\Config $config = null)
+	{
+		$config = $config ?: \utils::GetConfig();
+		$aModuleSetting = $config->GetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS);
 
-    /**
-     * @throws \Exception
-     */
-    public function ReadMetricConf(string $sCollection, ?\Config $config = null){
-        $config = $config ?: \utils::GetConfig();
-        $aModuleSetting = $config->GetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS);
+		if (!array_key_exists($sCollection, $aModuleSetting)) {
+			throw new \Exception(sprintf('Collection "%s" not found (should be an index of $MyModuleSettings["%s"]["%s"])', $sCollection, Constants::EXEC_MODULE, Constants::METRICS));
+		}
 
-        if (!array_key_exists($sCollection, $aModuleSetting)) {
-            throw new \Exception(sprintf('Collection "%s" not found (should be an index of $MyModuleSettings["%s"]["%s"])', $sCollection, Constants::EXEC_MODULE, Constants::METRICS));
-        }
+		return $aModuleSetting[$sCollection];
+	}
 
-        return $aModuleSetting[$sCollection];
-    }
+	public function EnableKpiLogging(): bool
+	{
+		$aModuleSetting = \utils::GetConfig()->GetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS);
 
-    public function EnableKpiLogging() : bool {
-        $aModuleSetting = \utils::GetConfig()->GetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS);
+		if (! is_array($aModuleSetting) || ! array_key_exists('kpi_logging', $aModuleSetting)) {
+			return false;
+		}
 
-        if (! is_array($aModuleSetting) || ! array_key_exists('kpi_logging', $aModuleSetting)) {
-            return false;
-        }
+		return (bool) $aModuleSetting['kpi_logging'];
+	}
 
-        return (bool) $aModuleSetting['kpi_logging'];
-    }
+	/**
+	 * @param $aMetricParams
+	 * @return array
+	 */
+	public function ReadMetrics($aMetricParams)
+	{
+		/** @var array[MonitoringMetric] $aMetrics */
+		$aMetrics = [];
+		if (!is_array($aMetricParams) || empty($aMetricParams)) {
+			return $aMetrics;
+		}
 
-    /**
-     * @param $aMetricParams
-     * @return array
-     */
-    public function ReadMetrics($aMetricParams){
-        /** @var array[MonitoringMetric] $aMetrics */
-        $aMetrics = [];
-        if (!is_array($aMetricParams) || empty($aMetricParams)){
-            return $aMetrics;
-        }
+		$oMetricReaderFactory = new MetricReaderFactory();
 
-        $oMetricReaderFactory = new MetricReaderFactory();
+		try {
+			$bKpiLogging = $this->EnableKpiLogging();
+			if ($bKpiLogging) {
+				\IssueLog::Info("combodo-monitoring: Compute metrics");
+			}
+			foreach ($aMetricParams as $sMetricName => $aMetric) {
+				$iTimeStamp = microtime(true);
+				if (!isset($aMetric[Constants::METRIC_DESCRIPTION])) {
+					throw new \Exception("Metric $sMetricName has no description. Please provide it.");
+				}
+				$oReader = $oMetricReaderFactory->GetReader($sMetricName, $aMetric);
+				if (is_null($oReader)) {
+					continue;
+				}
 
-        try {
-            $bKpiLogging = $this->EnableKpiLogging();
-            if ($bKpiLogging){
-                \IssueLog::Info("combodo-monitoring: Compute metrics");
-            }
-            foreach ($aMetricParams as $sMetricName => $aMetric) {
-                $iTimeStamp = microtime(true);
-                if (!isset($aMetric[Constants::METRIC_DESCRIPTION])) {
-                    throw new \Exception("Metric $sMetricName has no description. Please provide it.");
-                }
-                $oReader = $oMetricReaderFactory->GetReader($sMetricName, $aMetric);
-                if (is_null($oReader)) {
-                    continue;
-                }
+				$aMonitoringMetrics = $oReader->GetMetrics();
+				$iElapsedInMs = (microtime(true) - $iTimeStamp) * 1000;
 
-                $aMonitoringMetrics = $oReader->GetMetrics();
-                $iElapsedInMs = (microtime(true) - $iTimeStamp) * 1000;
+				if ($bKpiLogging) {
+					\IssueLog::Info(sprintf("=== %s: %s metrics in %s ms", $sMetricName, sizeof($aMonitoringMetrics), $iElapsedInMs));
+				}
+				if (is_null($aMonitoringMetrics)) {
+					continue;
+				}
 
-                if ($bKpiLogging) {
-                    \IssueLog::Info(sprintf("=== %s: %s metrics in %s ms", $sMetricName, sizeof($aMonitoringMetrics), $iElapsedInMs));
-                }
-                if (is_null($aMonitoringMetrics)) {
-                    continue;
-                }
+				$aMetrics = array_merge($aMetrics, $aMonitoringMetrics);
+			}
 
-                $aMetrics = array_merge($aMetrics, $aMonitoringMetrics);
-            }
+			if ($bKpiLogging) {
+				\IssueLog::Info("combodo-monitoring: metrics computed");
+			}
+		} catch (\Exception $e) {
+			//fail and return nothing on purpose
+			$aMetrics = [];
+			\IssueLog::Error($e->getMessage());
+		}
 
-            if ($bKpiLogging){
-                \IssueLog::Info("combodo-monitoring: metrics computed");
-            }
-        }catch (\Exception $e){
-            //fail and return nothing on purpose
-            $aMetrics = [];
-            \IssueLog::Error($e->getMessage());
-        }
+		return $aMetrics;
+	}
 
-        return $aMetrics;
-    }
+	/**
+	 * Check if page access is allowed to remote network
+	 *
+	 * @throws \Exception
+	 */
+	public function CheckNetworkAccess()
+	{
+		$sExecModule = utils::ReadParam('exec_module', "");
 
-    /**
-     * Check if page access is allowed to remote network
-     *
-     * @throws \Exception
-     */
-    public function CheckNetworkAccess()
-    {
-        $sExecModule = utils::ReadParam('exec_module', "");
+		if (empty($sExecModule) || empty($this->m_sAccessAuthorizedNetworkConfigParamId)) {
+			return;
+		}
 
-        if (empty($sExecModule) || empty($this->m_sAccessAuthorizedNetworkConfigParamId)){
-            return;
-        }
+		$aReadAllowedNetworkRegexpPatterns = \MetaModel::GetConfig()->GetModuleSetting($sExecModule, $this->m_sAccessAuthorizedNetworkConfigParamId);
+		if (! is_array($aReadAllowedNetworkRegexpPatterns)) {
+			\IssueLog::Error("'$sExecModule' wrongly configured. please check $this->m_sAccessAuthorizedNetworkConfigParamId config (not an array).", null, ['m_sAccessAuthorizedNetworkConfigParamId' => $this->m_sAccessAuthorizedNetworkConfigParamId]);
+			http_response_code(500);
+			$aResponse = ['sError' => "Exception : Misconfigured network config (not an array)."];
+			echo json_encode($aResponse);
+			return;
+		} elseif (count($aReadAllowedNetworkRegexpPatterns) == 0) {
+			//no rule
+			return;
+		}
 
-        $aReadAllowedNetworkRegexpPatterns = \MetaModel::GetConfig()->GetModuleSetting($sExecModule, $this->m_sAccessAuthorizedNetworkConfigParamId);
-        if (! is_array($aReadAllowedNetworkRegexpPatterns)){
-            \IssueLog::Error("'$sExecModule' wrongly configured. please check $this->m_sAccessAuthorizedNetworkConfigParamId config (not an array).", null, ['m_sAccessAuthorizedNetworkConfigParamId' => $this->m_sAccessAuthorizedNetworkConfigParamId]);
-            http_response_code(500);
-            $aResponse = array('sError' => "Exception : Misconfigured network config (not an array).");
-            echo json_encode($aResponse);
-            return;
-        } else if (count($aReadAllowedNetworkRegexpPatterns)==0){
-            //no rule
-            return;
-        }
+		$aNetworks = [];
 
-        $aNetworks = [];
+		foreach ($aReadAllowedNetworkRegexpPatterns as $sAllowedNetworkRegexpPattern) {
+			$aNetworks [] = trim($sAllowedNetworkRegexpPattern);
+		}
 
-        foreach ($aReadAllowedNetworkRegexpPatterns as $sAllowedNetworkRegexpPattern) {
-            $aNetworks [] = trim($sAllowedNetworkRegexpPattern);
-        }
+		$clientIp = $_SERVER['REMOTE_ADDR'];
+		if (! $this->CheckIpFunction($clientIp, $aNetworks)) {
+			$this->bAccessForbidden = true;
+			\IssueLog::Error("'$sExecModule' page is not authorized to '$clientIp' ip address.");
+			http_response_code(500);
+			$aResponse = ['sError' => "Exception : Unauthorized network ($clientIp)"];
+			echo json_encode($aResponse);
+		}
+	}
 
-        $clientIp = $_SERVER['REMOTE_ADDR'];
-        if (! $this->CheckIpFunction($clientIp, $aNetworks)){
-            $this->bAccessForbidden = true;
-            \IssueLog::Error("'$sExecModule' page is not authorized to '$clientIp' ip address.");
-            http_response_code(500);
-            $aResponse = array('sError' => "Exception : Unauthorized network ($clientIp)");
-            echo json_encode($aResponse);
-        }
-    }
+	public function CheckIpFunction(string $clientIp, array $aNetworks)
+	{
+		return IpUtils::checkIp($clientIp, $aNetworks);
 
-    public function CheckIpFunction(string $clientIp, array $aNetworks){
-        return IpUtils::checkIp($clientIp, $aNetworks);
+		//if that logic is moved back to iTop core: use below logic with
+		//https://github.com/rlanvin/php-ip
+		//required: composer require rlanvin/php-ip
+		//
+		/*foreach ($aNetworks as $sNetwork){
+			try{
+				$block = IPBlock::create($sNetwork);
 
-        //if that logic is moved back to iTop core: use below logic with
-        //https://github.com/rlanvin/php-ip
-        //required: composer require rlanvin/php-ip
-        //
-        /*foreach ($aNetworks as $sNetwork){
-            try{
-                $block = IPBlock::create($sNetwork);
+				if ($block->contains($clientIp)){
+					return true;
+				}
+			} catch (\InvalidArgumentException $e){
+				//not a network: InvalidArgumentException : 127.0.0.2 does not appear to be an IPv4 or IPv6 block
+				//IP usecase
+				if ($sNetwork == $clientIp){
+					return true;
+				}
+			}
+		}
+		return false;*/
+	}
 
-                if ($block->contains($clientIp)){
-                    return true;
-                }
-            } catch (\InvalidArgumentException $e){
-                //not a network: InvalidArgumentException : 127.0.0.2 does not appear to be an IPv4 or IPv6 block
-                //IP usecase
-                if ($sNetwork == $clientIp){
-                    return true;
-                }
-            }
-        }
-        return false;*/
-    }
-
-    /**
-     * Used to ensure iTop security by serving HTTP page to a specific subset of remote networks (white list mode).
-     * This security mechanism is applied to current extension when :
-     *  - '$m_sAccessAuthorizedNetworkConfigParamId' is configured under $MyModuleSettings section.
-     *
-     * Extension page will be allowed as long as iTop '$m_sAccessAuthorizedNetworkConfigParamId' regexp configuration value matches $_SERVER['REMOTE_ADDR'] IP address.
-     *
-     * Example:
-     * Let's assume $m_sAccessAuthorizedNetworkConfigParamId='allowed_networks' with iTop $MyModuleSettings below configuration:
-     *      'combodo-shadok' => array ( 'allowed_networks' => ['10.0.0.0', '20.0.0.0/24'])
-     * 'combodo-shadok' extension main page is rendered only for HTTP client under 10.X.X.X networks.
-     * Otherwise an HTTP error code 500 will be returned.
-     *
-     */
-    public function SetAccessAuthorizedNetworkConfigParamId(string $m_sAccessAuthorizedNetworkConfigParamId): void
-    {
-        $this->m_sAccessAuthorizedNetworkConfigParamId = trim($m_sAccessAuthorizedNetworkConfigParamId);
-    }
+	/**
+	 * Used to ensure iTop security by serving HTTP page to a specific subset of remote networks (white list mode).
+	 * This security mechanism is applied to current extension when :
+	 *  - '$m_sAccessAuthorizedNetworkConfigParamId' is configured under $MyModuleSettings section.
+	 *
+	 * Extension page will be allowed as long as iTop '$m_sAccessAuthorizedNetworkConfigParamId' regexp configuration value matches $_SERVER['REMOTE_ADDR'] IP address.
+	 *
+	 * Example:
+	 * Let's assume $m_sAccessAuthorizedNetworkConfigParamId='allowed_networks' with iTop $MyModuleSettings below configuration:
+	 *      'combodo-shadok' => array ( 'allowed_networks' => ['10.0.0.0', '20.0.0.0/24'])
+	 * 'combodo-shadok' extension main page is rendered only for HTTP client under 10.X.X.X networks.
+	 * Otherwise an HTTP error code 500 will be returned.
+	 *
+	 */
+	public function SetAccessAuthorizedNetworkConfigParamId(string $m_sAccessAuthorizedNetworkConfigParamId): void
+	{
+		$this->m_sAccessAuthorizedNetworkConfigParamId = trim($m_sAccessAuthorizedNetworkConfigParamId);
+	}
 }

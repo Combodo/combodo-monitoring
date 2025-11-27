@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -20,64 +21,64 @@ use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 class ConfReader implements MetricReaderInterface
 {
-    const CONF = 'conf';
+	public const CONF = 'conf';
 
-    protected $sMetricName;
-    protected $aMetric;
+	protected $sMetricName;
+	protected $aMetric;
 
-    public function __construct($sMetricName, $aMetric)
-    {
-        $this->sMetricName = $sMetricName;
-        $this->aMetric = $aMetric;
-    }
+	public function __construct($sMetricName, $aMetric)
+	{
+		$this->sMetricName = $sMetricName;
+		$this->aMetric = $aMetric;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public function GetMetrics(): ?array
-    {
-        if (!is_array($this->aMetric) || !array_key_exists(self::CONF, $this->aMetric)) {
-            return null;
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	public function GetMetrics(): ?array
+	{
+		if (!is_array($this->aMetric) || !array_key_exists(self::CONF, $this->aMetric)) {
+			return null;
+		}
 
-        $sValue = $this->GetValue();
+		$sValue = $this->GetValue();
 
-        $sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
-        $aLabels = $this->aMetric[Constants::METRIC_LABEL] ?? [];
+		$sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
+		$aLabels = $this->aMetric[Constants::METRIC_LABEL] ?? [];
 
-        return [new MonitoringMetric($this->sMetricName, $sDescription, $sValue, $aLabels)];
-    }
+		return [new MonitoringMetric($this->sMetricName, $sDescription, $sValue, $aLabels)];
+	}
 
-    private function GetValue(?\Config $config = null)
-    {
-        $config = $config ?: \utils::GetConfig();
+	private function GetValue(?\Config $config = null)
+	{
+		$config = $config ?: \utils::GetConfig();
 
-        $aMetricConf = $this->aMetric[self::CONF] ?: [];
+		$aMetricConf = $this->aMetric[self::CONF] ?: [];
 
-        if (!is_array($aMetricConf)) {
-            throw new \Exception(sprintf('Metric %s is not configured with a proper array ("%s" given).', $this->sMetricName, $aMetricConf));
-        }
+		if (!is_array($aMetricConf)) {
+			throw new \Exception(sprintf('Metric %s is not configured with a proper array ("%s" given).', $this->sMetricName, $aMetricConf));
+		}
 
-        if ('MySettings' == $aMetricConf[0]) {
-            if (!$config->IsProperty($aMetricConf[1])) {
-                throw new \Exception("Metric $this->sMetricName was not found in configuration found.");
-            }
+		if ('MySettings' == $aMetricConf[0]) {
+			if (!$config->IsProperty($aMetricConf[1])) {
+				throw new \Exception("Metric $this->sMetricName was not found in configuration found.");
+			}
 
-            $sValue = $config->Get($aMetricConf[1]);
-            $aParamPath = array_slice($aMetricConf, 2);
-        } else {
-            $sValue = $config->GetModuleSetting($aMetricConf[1], $aMetricConf[2], null);
-            $aParamPath = array_slice($aMetricConf, 3);
-        }
+			$sValue = $config->Get($aMetricConf[1]);
+			$aParamPath = array_slice($aMetricConf, 2);
+		} else {
+			$sValue = $config->GetModuleSetting($aMetricConf[1], $aMetricConf[2], null);
+			$aParamPath = array_slice($aMetricConf, 3);
+		}
 
-        foreach ($aParamPath as $key) {
-            $sValue = $sValue[$key] ?? null;
-        }
+		foreach ($aParamPath as $key) {
+			$sValue = $sValue[$key] ?? null;
+		}
 
-        if (is_null($sValue)) {
-            throw new \Exception("Metric $this->sMetricName was not found in configuration found.");
-        }
+		if (is_null($sValue)) {
+			throw new \Exception("Metric $this->sMetricName was not found in configuration found.");
+		}
 
-        return $sValue;
-    }
+		return $sValue;
+	}
 }

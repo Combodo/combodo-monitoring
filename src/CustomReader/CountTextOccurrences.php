@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -15,59 +16,54 @@
 
 namespace Combodo\iTop\Monitoring\CustomReader;
 
-
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
 class CountTextOccurrences implements \Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface
 {
-    private $aMetricConf;
-    private $sMetricName;
+	private $aMetricConf;
+	private $sMetricName;
 
-    public function __construct($sMetricName, $aMetricConf)
-    {
-        $this->aMetricConf = $aMetricConf;
-        $this->sMetricName = $sMetricName;
-    }
+	public function __construct($sMetricName, $aMetricConf)
+	{
+		$this->aMetricConf = $aMetricConf;
+		$this->sMetricName = $sMetricName;
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function GetMetrics(): ?array
-    {
-        $iCounter = $this->FetchCounter();
+	/**
+	 * @inheritDoc
+	 */
+	public function GetMetrics(): ?array
+	{
+		$iCounter = $this->FetchCounter();
 
-        $sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
+		$sDesc = $this->aMetricConf[Constants::METRIC_DESCRIPTION] ?? '';
 
-        return [ new MonitoringMetric($this->sMetricName, $sDesc, $iCounter)];
-    }
+		return [ new MonitoringMetric($this->sMetricName, $sDesc, $iCounter)];
+	}
 
-    /**
-     * @return int
-     * @throws \Exception
-     */
-    private function FetchCounter(): int
-    {
-        $sDeadlockFilePath = $this->aMetricConf[Constants::CUSTOM]['file'] ?? APPROOT.'log/error.log';
-        if (!file_exists($sDeadlockFilePath))
-        {
-            $iCounter = 0;
-        }
-        else
-        {
-            if (!isset($this->aMetricConf[Constants::CUSTOM]['needle']))
-            {
-                throw new \Exception('key "needle" not found for metric with conf '.var_export($this->aMetricConf, true));
-            }
+	/**
+	 * @return int
+	 * @throws \Exception
+	 */
+	private function FetchCounter(): int
+	{
+		$sDeadlockFilePath = $this->aMetricConf[Constants::CUSTOM]['file'] ?? APPROOT.'log/error.log';
+		if (!file_exists($sDeadlockFilePath)) {
+			$iCounter = 0;
+		} else {
+			if (!isset($this->aMetricConf[Constants::CUSTOM]['needle'])) {
+				throw new \Exception('key "needle" not found for metric with conf '.var_export($this->aMetricConf, true));
+			}
 
-            $sNeedle = $this->aMetricConf[Constants::CUSTOM]['needle'];
+			$sNeedle = $this->aMetricConf[Constants::CUSTOM]['needle'];
 
-            $iCounter = mb_substr_count(
-                file_get_contents($sDeadlockFilePath),
-                $sNeedle
-            );
-        }
+			$iCounter = mb_substr_count(
+				file_get_contents($sDeadlockFilePath),
+				$sNeedle
+			);
+		}
 
-        return $iCounter;
-    }
+		return $iCounter;
+	}
 }

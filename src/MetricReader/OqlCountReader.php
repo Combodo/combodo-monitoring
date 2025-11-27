@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -15,7 +16,6 @@
 
 namespace Combodo\iTop\Monitoring\MetricReader;
 
-
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
 
@@ -24,38 +24,38 @@ class OqlCountReader implements MetricReaderInterface
 	protected $sMetricName;
 	protected $aMetric;
 
-    public function __construct($sMetricName, $aMetric)
-    {
-        $this->sMetricName = $sMetricName;
-        $this->aMetric = $aMetric;
-    }
+	public function __construct($sMetricName, $aMetric)
+	{
+		$this->sMetricName = $sMetricName;
+		$this->aMetric = $aMetric;
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function GetMetrics(): ?array
-    {
-        $oSet = $this->GetObjectSet();
+	/**
+	 * @inheritDoc
+	 */
+	public function GetMetrics(): ?array
+	{
+		$oSet = $this->GetObjectSet();
 
-        $sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
-        $aLabels = $this->aMetric[Constants::METRIC_LABEL] ?? [];
+		$sDescription = $this->aMetric[Constants::METRIC_DESCRIPTION];
+		$aLabels = $this->aMetric[Constants::METRIC_LABEL] ?? [];
 
-        return [ new MonitoringMetric($this->sMetricName, $sDescription,  $oSet->Count(), $aLabels)] ;
+		return [ new MonitoringMetric($this->sMetricName, $sDescription, $oSet->Count(), $aLabels)] ;
 
-    }
+	}
 
-    /**
-     * @return \DBObjectSet
-     * @throws \CoreException
-     * @throws \MySQLException
-     * @throws \OQLException
-     */
-    private function GetObjectSet(): \DBObjectSet
-    {
-        $oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_COUNT][Constants::SELECT]);
+	/**
+	 * @return \DBObjectSet
+	 * @throws \CoreException
+	 * @throws \MySQLException
+	 * @throws \OQLException
+	 */
+	private function GetObjectSet(): \DBObjectSet
+	{
+		$oSearch = \DBSearch::FromOQL($this->aMetric[Constants::OQL_COUNT][Constants::SELECT]);
 
-        $oSet = new \DBObjectSet($oSearch);
+		$oSet = new \DBObjectSet($oSearch);
 
-        return $oSet;
-    }
+		return $oSet;
+	}
 }

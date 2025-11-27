@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -15,7 +16,6 @@
 
 namespace Combodo\iTop\Monitoring\Test\CustomReader;
 
-
 use Combodo\iTop\Monitoring\CustomReader\CountTextOccurrences;
 use Combodo\iTop\Monitoring\MetricReader\ConfReader;
 use Combodo\iTop\Test\UnitTest\ItopTestCase;
@@ -27,68 +27,67 @@ use Combodo\iTop\Test\UnitTest\ItopTestCase;
  */
 class CountTextOccurrencesTest extends ItopTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
-    }
+	protected function setUp(): void
+	{
+		parent::setUp();
+		$this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
+	}
 
-    /**
-     * @dataProvider FetchCounterProvider
-     */
-    public function testFetchCounter($iExpectedCounter, $aMetricConf)
-    {
-        $oCountTextOccurrences = new CountTextOccurrences('fetch_counter', $aMetricConf);
+	/**
+	 * @dataProvider FetchCounterProvider
+	 */
+	public function testFetchCounter($iExpectedCounter, $aMetricConf)
+	{
+		$oCountTextOccurrences = new CountTextOccurrences('fetch_counter', $aMetricConf);
 
-        $reflector = new \ReflectionObject($oCountTextOccurrences);
-        $method = $reflector->getMethod('FetchCounter');
-        $method->setAccessible(true);
-        $iCounter = $method->invoke($oCountTextOccurrences);
+		$reflector = new \ReflectionObject($oCountTextOccurrences);
+		$method = $reflector->getMethod('FetchCounter');
+		$method->setAccessible(true);
+		$iCounter = $method->invoke($oCountTextOccurrences);
 
-        $this->assertEquals($iExpectedCounter, $iCounter);
-    }
+		$this->assertEquals($iExpectedCounter, $iCounter);
+	}
 
-    public function FetchCounterProvider()
-    {
-        return [
-            'nominal' => [
-                'iExpectedCounter' => 3,
-                'aMetricConf' => [
-                    'description' => 'custom class (custom)',
-                    'custom' => [
-                        'class' => '\Combodo\iTop\Monitoring\CustomReader\CountTextOccurrences',
-                        'file' => __DIR__.'/../ressources/CustomReader/3-occurences.log',
-                        'needle' => 'deadlock detected: user=',
-                    ],
-                ]
-            ],
+	public function FetchCounterProvider()
+	{
+		return [
+			'nominal' => [
+				'iExpectedCounter' => 3,
+				'aMetricConf' => [
+					'description' => 'custom class (custom)',
+					'custom' => [
+						'class' => '\Combodo\iTop\Monitoring\CustomReader\CountTextOccurrences',
+						'file' => __DIR__.'/../ressources/CustomReader/3-occurences.log',
+						'needle' => 'deadlock detected: user=',
+					],
+				],
+			],
 
-            'str not found' => [
-                'iExpectedCounter' => 0,
-                'aMetricConf' => [
-                    'description' => 'custom class (custom)',
-                    'custom' => [
-                        'class' => '\Combodo\iTop\Monitoring\CustomReader\CountTextOccurrences',
-                        'file' => __DIR__.'/../ressources/CustomReader/3-occurences.log',
-                        'needle' => 'I am not found',
-                    ],
-                ]
-            ],
+			'str not found' => [
+				'iExpectedCounter' => 0,
+				'aMetricConf' => [
+					'description' => 'custom class (custom)',
+					'custom' => [
+						'class' => '\Combodo\iTop\Monitoring\CustomReader\CountTextOccurrences',
+						'file' => __DIR__.'/../ressources/CustomReader/3-occurences.log',
+						'needle' => 'I am not found',
+					],
+				],
+			],
 
+			'non existent file' => [
+				'iExpectedCounter' => 0,
+				'aMetricConf' => [
+					'description' => 'custom class (custom)',
+					'custom' => [
+						'class' => '\Combodo\iTop\Monitoring\CustomReader\CountTextOccurrences',
+						'file' => __DIR__.'/../ressources/CustomReader/404.log',
+						'needle' => 'deadlock detected: user=',
+					],
+				],
+			],
 
-            'non existent file' => [
-                'iExpectedCounter' => 0,
-                'aMetricConf' => [
-                    'description' => 'custom class (custom)',
-                    'custom' => [
-                        'class' => '\Combodo\iTop\Monitoring\CustomReader\CountTextOccurrences',
-                        'file' => __DIR__.'/../ressources/CustomReader/404.log',
-                        'needle' => 'deadlock detected: user=',
-                    ],
-                ]
-            ],
-
-        ];
-    }
+		];
+	}
 
 }

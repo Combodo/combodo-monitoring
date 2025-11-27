@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2013-2021 Combodo SARL
  * This file is part of iTop.
@@ -15,7 +16,6 @@
 
 namespace Combodo\iTop\Monitoring\MetricReader;
 
-
 use Combodo\iTop\Monitoring\Model\Constants;
 
 class CustomReader implements MetricReaderInterface
@@ -23,24 +23,24 @@ class CustomReader implements MetricReaderInterface
 	protected $sMetricName;
 	protected $aMetric;
 
-    public function __construct($sMetricName, $aMetric)
-    {
-        $this->sMetricName = $sMetricName;
-        $this->aMetric = $aMetric;
-    }
+	public function __construct($sMetricName, $aMetric)
+	{
+		$this->sMetricName = $sMetricName;
+		$this->aMetric = $aMetric;
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function GetMetrics(): ?array
-    {
-        $sClassName = $this->aMetric[Constants::CUSTOM]['class'] ?? null;
+	/**
+	 * @inheritDoc
+	 */
+	public function GetMetrics(): ?array
+	{
+		$sClassName = $this->aMetric[Constants::CUSTOM]['class'] ?? null;
 
-        if (!is_a($sClassName, CustomReaderInterface::class, true)) {
-            throw new \Exception("Metric $this->sMetricName is not properly configured: '$sClassName' must implement ".CustomReaderInterface::class);
-        }
+		if (!is_a($sClassName, CustomReaderInterface::class, true)) {
+			throw new \Exception("Metric $this->sMetricName is not properly configured: '$sClassName' must implement ".CustomReaderInterface::class);
+		}
 
-        $oCustomReader = new $sClassName($this->sMetricName, $this->aMetric);
-        return $oCustomReader->GetMetrics() ;
-    }
+		$oCustomReader = new $sClassName($this->sMetricName, $this->aMetric);
+		return $oCustomReader->GetMetrics() ;
+	}
 }
