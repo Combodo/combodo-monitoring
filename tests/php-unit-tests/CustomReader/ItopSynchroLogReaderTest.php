@@ -41,8 +41,9 @@ OQL;
 		return [
 			'running'                     => [
 				'aFieldValues'              => [
-					'start_date' => strtotime('-2 HOURS'),
-					'status'     => 'running',
+					'stats_nb_replica_total' => '456',
+					'start_date'             => strtotime('-2 HOURS'),
+					'status'                 => 'running',
 				],
 				'sExpectedStatus'           => 'running',
 				'iExpectedAgeInMinutes'     => 120,
@@ -50,9 +51,10 @@ OQL;
 			],
 			'error'                       => [
 				'aFieldValues'              => [
-					'start_date' => strtotime('-2 HOURS'),
-					'end_date'   => strtotime('-1 HOURS'),
-					'status'     => 'error',
+					'stats_nb_replica_total' => '456',
+					'start_date'             => strtotime('-2 HOURS'),
+					'end_date'               => strtotime('-1 HOURS'),
+					'status'                 => 'error',
 				],
 				'sExpectedStatus'           => 'error',
 				'iExpectedAgeInMinutes'     => 120,
@@ -60,9 +62,10 @@ OQL;
 			],
 			'end date before start date?' => [
 				'aFieldValues'              => [
-					'start_date' => strtotime('-1 HOURS'),
-					'end_date'   => strtotime('-2 HOURS'),
-					'status'     => 'error',
+					'stats_nb_replica_total' => '456',
+					'start_date'             => strtotime('-1 HOURS'),
+					'end_date'               => strtotime('-2 HOURS'),
+					'status'                 => 'error',
 				],
 				'sExpectedStatus'           => 'error',
 				'iExpectedAgeInMinutes'     => 60,
@@ -70,9 +73,10 @@ OQL;
 			],
 			'completed'                   => [
 				'aFieldValues'              => [
-					'start_date' => strtotime('-2 HOURS'),
-					'end_date'   => strtotime('-1 HOURS'),
-					'status'     => 'completed',
+					'stats_nb_replica_total' => '456',
+					'start_date'             => strtotime('-2 HOURS'),
+					'end_date'               => strtotime('-1 HOURS'),
+					'status'                 => 'completed',
 				],
 				'sExpectedStatus'           => 'completed',
 				'iExpectedAgeInMinutes'     => 120,
@@ -86,16 +90,8 @@ OQL;
 	 */
 	public function testGetMetricElapsedAndAge($aFieldValues, $sExpectedStatus, $iExpectedAgeInMinutes, $iExpectedElapsedInSeconds)
 	{
-		$oSynchroSource = $this->CreateSynchroSource("synchro1");
 		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-1 HOURS'));
-		$oSynchroLog = $this->CreateSynchroObj($oSynchroSource->GetKey(), $currentDate);
-
-		foreach ($aFieldValues as $sAttr => $sValue) {
-			$oSynchroLog->Set($sAttr, $sValue);
-		}
-		$oSynchroLog->Set('stats_nb_replica_total', '456');
-		$oSynchroLog->DBUpdate();
-		$iExpectedMemoryPeak = $oSynchroLog->Get('memory_usage_peak');
+		$this->CreateSynchroObj("synchro1", $currentDate, $aFieldValues);
 
 		$oItopSynchroLogReader = new ItopSynchroLogReader('', [Constants::METRIC_LABEL => ['titi' => 'toto']]);
 		$aMetrics = $oItopSynchroLogReader->GetMetrics();
@@ -107,52 +103,96 @@ OQL;
 			'source' => "synchro1",
 		];
 
-		$oMonitoringMetric = $aMetrics[0];
-		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
-		$this->assertEquals('synchro log error count.', $oMonitoringMetric->GetDescription());
-		$this->assertEquals('itop_synchrolog_error_count', $oMonitoringMetric->GetName());
-		$this->assertEquals(0, $oMonitoringMetric->GetValue());
+		$oErrorMetric = $aMetrics[0];
+		$this->assertEquals($aExpectedLabels, $oErrorMetric->GetLabels());
+		$this->assertEquals('synchro log error count.', $oErrorMetric->GetDescription());
+		$this->assertEquals('itop_synchrolog_error_count', $oErrorMetric->GetName());
+		$this->assertEquals(0, $oErrorMetric->GetValue());
 
-		$oMonitoringMetric = $aMetrics[1];
-		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
-		$this->assertEquals('synchro log replica count.', $oMonitoringMetric->GetDescription());
-		$this->assertEquals('itop_synchrolog_replica_count', $oMonitoringMetric->GetName());
-		$this->assertEquals(456, $oMonitoringMetric->GetValue());
+		$oCountMetric = $aMetrics[1];
+		$this->assertEquals($aExpectedLabels, $oCountMetric->GetLabels());
+		$this->assertEquals('synchro log replica count.', $oCountMetric->GetDescription());
+		$this->assertEquals('itop_synchrolog_replica_count', $oCountMetric->GetName());
+		$this->assertEquals(456, $oCountMetric->GetValue());
 
-		$oMonitoringMetric = $aMetrics[2];
-		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
-		$this->assertEquals('synchro log age in minutes.', $oMonitoringMetric->GetDescription());
-		$this->assertEquals('itop_synchrolog_inminutes_age', $oMonitoringMetric->GetName());
-		$bDelayDuringiTopProvisioning = false;
-		if ($iExpectedAgeInMinutes != $oMonitoringMetric->GetValue()) {
-			$bDelayDuringiTopProvisioning = true;
-			$this->assertTrue($iExpectedAgeInMinutes + 1 <= $oMonitoringMetric->GetValue(), "kpi value should have same value +/- 2 minutes due to CRUD perf with SynchroLog");
-			$this->assertTrue($iExpectedAgeInMinutes + 2 >= $oMonitoringMetric->GetValue(), "kpi value should have same value +/- 2 minutes due to CRUD perf with SynchroLog");
-		}
+		$oAgeMetric = $aMetrics[2];
+		$this->assertEquals($aExpectedLabels, $oAgeMetric->GetLabels());
+		$this->assertEquals('synchro log age in minutes.', $oAgeMetric->GetDescription());
+		$this->assertEquals('itop_synchrolog_inminutes_age', $oAgeMetric->GetName());
+		$this->AssertEqualsWithMoreInfos($iExpectedAgeInMinutes, $oAgeMetric->GetValue(), 2, "kpi value should have same value +/- 2 minutes due to CRUD perf with SynchroLog");
 
-		$oMonitoringMetric = $aMetrics[3];
-		$this->assertEquals($aExpectedLabels, $oMonitoringMetric->GetLabels());
-		$this->assertEquals('synchro log elapsed time in seconds.', $oMonitoringMetric->GetDescription());
-		$this->assertEquals('itop_synchrolog_inseconds_elapsed', $oMonitoringMetric->GetName());
-		if ($sExpectedStatus === "running" && $bDelayDuringiTopProvisioning) {
-			$this->assertTrue($iExpectedElapsedInSeconds + 60 <= $oMonitoringMetric->GetValue(), "kpi value should have same value +/- 1 minute due to CRUD perf with SynchroLog");
-			$this->assertTrue($iExpectedElapsedInSeconds + 120 >= $oMonitoringMetric->GetValue(), "kpi value should have same value +/- 1 minute due to CRUD perf with SynchroLog");
+		$oElapsedMetric = $aMetrics[3];
+		$this->assertEquals($aExpectedLabels, $oElapsedMetric->GetLabels());
+		$this->assertEquals('synchro log elapsed time in seconds.', $oElapsedMetric->GetDescription());
+		$this->assertEquals('itop_synchrolog_inseconds_elapsed', $oElapsedMetric->GetName());
+		if ($sExpectedStatus === "running") {
+			$this->AssertEqualsWithMoreInfos($oAgeMetric->GetValue() * 60, $oElapsedMetric->GetValue(), "kpi value should have same value +/- 1 minute due to CRUD perf with SynchroLog");
 		} else {
-			$this->assertEquals($iExpectedElapsedInSeconds, $oMonitoringMetric->GetValue());
+			$this->AssertEqualsWithMoreInfos($iExpectedElapsedInSeconds, $oElapsedMetric->GetValue());
 		}
+	}
+
+	private function AssertEqualsWithMoreInfos($iExpected, $iActual, $iPrecision = 0, $sMessage = ""): void
+	{
+		$sMessage .= ". $iExpected equals $iActual (precision:$iPrecision)";
+		if ($iPrecision == 0 || $iExpected == 0) {
+			$this->AssertEquals($iExpected, $iActual, $sMessage);
+
+			return;
+		}
+
+		$iDiv = (int)round($iActual / $iExpected, 0);
+		$this->AssertEquals(1, $iDiv, $sMessage);
+		$this->AssertTrue($iActual % $iExpected <= $iPrecision, $sMessage);
 	}
 
 	public function GetMetricNbErrorsProvider()
 	{
 		return [
-			'no error'                           => ['aFieldValues' => [], 'iExpectedValue' => 0],
-			'stats_nb_obj_obsoleted_errors'      => ['aFieldValues' => ['stats_nb_obj_obsoleted_errors' => 1], 'iExpectedValue' => 1],
-			'stats_nb_obj_deleted_errors'        => ['aFieldValues' => ['stats_nb_obj_deleted_errors' => 2], 'iExpectedValue' => 2],
-			'stats_nb_obj_created_errors'        => ['aFieldValues' => ['stats_nb_obj_created_errors' => 3], 'iExpectedValue' => 3],
-			'stats_nb_obj_updated_errors'        => ['aFieldValues' => ['stats_nb_obj_updated_errors' => 4], 'iExpectedValue' => 4],
-			'stats_nb_replica_reconciled_errors' => ['aFieldValues' => ['stats_nb_replica_reconciled_errors' => 5], 'iExpectedValue' => 5],
+			'no error'                           => [
+				'aFieldValues'   => [
+					'stats_nb_replica_total' => '456',
+				],
+				'iExpectedValue' => 0,
+			],
+			'stats_nb_obj_obsoleted_errors'      => [
+				'aFieldValues'   => [
+					'stats_nb_replica_total'        => '456',
+					'stats_nb_obj_obsoleted_errors' => 1,
+				],
+				'iExpectedValue' => 1,
+			],
+			'stats_nb_obj_deleted_errors'        => [
+				'aFieldValues'   => [
+					'stats_nb_replica_total'      => '456',
+					'stats_nb_obj_deleted_errors' => 2,
+				],
+				'iExpectedValue' => 2,
+			],
+			'stats_nb_obj_created_errors'        => [
+				'aFieldValues'   => [
+					'stats_nb_replica_total'      => '456',
+					'stats_nb_obj_created_errors' => 3,
+				],
+				'iExpectedValue' => 3,
+			],
+			'stats_nb_obj_updated_errors'        => [
+				'aFieldValues'   => [
+					'stats_nb_replica_total'      => '456',
+					'stats_nb_obj_updated_errors' => 4,
+				],
+				'iExpectedValue' => 4,
+			],
+			'stats_nb_replica_reconciled_errors' => [
+				'aFieldValues'   => [
+					'stats_nb_replica_total'             => '456',
+					'stats_nb_replica_reconciled_errors' => 5,
+				],
+				'iExpectedValue' => 5,
+			],
 			'all'                                => [
 				'aFieldValues'   => [
+					'stats_nb_replica_total'             => '456',
 					'stats_nb_obj_obsoleted_errors'      => 1,
 					'stats_nb_obj_deleted_errors'        => 1,
 					'stats_nb_obj_created_errors'        => 1,
@@ -169,16 +209,8 @@ OQL;
 	 */
 	public function testGetMetricNbErrors($aFieldValues, $iExpectedValue)
 	{
-		$oSynchroSource = $this->CreateSynchroSource("synchro1");
 		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-1 HOURS'));
-		$oSynchroLog = $this->CreateSynchroObj($oSynchroSource->GetKey(), $currentDate);
-
-		foreach ($aFieldValues as $sAttr => $sValue) {
-			$oSynchroLog->Set($sAttr, $sValue);
-		}
-		$oSynchroLog->Set('stats_nb_replica_total', '456');
-		$oSynchroLog->DBUpdate();
-		$iExpectedMemoryPeak = $oSynchroLog->Get('memory_usage_peak');
+		$this->CreateSynchroObj("synchro1", $currentDate, $aFieldValues);
 
 		$oItopSynchroLogReader = new ItopSynchroLogReader('', [Constants::METRIC_LABEL => ['titi' => 'toto']]);
 		$aMetrics = $oItopSynchroLogReader->GetMetrics();
@@ -216,15 +248,12 @@ OQL;
 	public function testListSynchroLogObjects_OneSynchroLogPerSource()
 	{
 		$aSyncroLogIds = [];
-
-		$oSynchroSource = $this->CreateSynchroSource("synchro1");
 		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-12 HOURS'));
-		$oSynchroLog = $this->CreateSynchroObj($oSynchroSource->GetKey(), $currentDate);
+		$oSynchroLog = $this->CreateSynchroObj("synchro1", $currentDate);
 		$aSyncroLogIds[] = $oSynchroLog->GetKey();
 
-		$oSynchroSource = $this->CreateSynchroSource("synchro2");
 		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-12 HOURS'));
-		$oSynchroLog = $this->CreateSynchroObj($oSynchroSource->GetKey(), $currentDate);
+		$oSynchroLog = $this->CreateSynchroObj("synchro2", $currentDate);
 		$aSyncroLogIds[] = $oSynchroLog->GetKey();
 
 		$oItopSynchroLogReader = new ItopSynchroLogReader('', []);
@@ -241,40 +270,36 @@ OQL;
 
 	public function testListSynchroLogObjects_KeepOnlyMostRecentSynchroLogPerSource()
 	{
-		$aSyncroLogIds = [];
+		$aExpectedSyncroLogIds = [];
 
-		$oSynchroSource = $this->CreateSynchroSource("synchro1");
 		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-12 HOURS'));
-		$this->CreateSynchroObj($oSynchroSource->GetKey(), $currentDate);
+		$oSynchroLog = $this->CreateSynchroObj("synchro1", $currentDate);
 
 		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-6 HOURS'));
-		$this->CreateSynchroObj($oSynchroSource->GetKey(), $currentDate);
+		$oSynchroLog = $this->CreateSynchroObj(null, $currentDate, ['sync_source_id' => $oSynchroLog->Get('sync_source_id')]);
 
 		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-1 HOURS'));
-		$oSynchroLog = $this->CreateSynchroObj($oSynchroSource->GetKey(), $currentDate);
-		$aSyncroLogIds[] = $oSynchroLog->GetKey();
+		$oSynchroLog = $this->CreateSynchroObj(null, $currentDate, ['sync_source_id' => $oSynchroLog->Get('sync_source_id')]);
+		$aExpectedSyncroLogIds['synchro1'] = $oSynchroLog->GetKey();
 
-		$oSynchroSource = $this->CreateSynchroSource("synchro2");
 		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-12 HOURS'));
-		$this->CreateSynchroObj($oSynchroSource->GetKey(), $currentDate);
+		$oSynchroLog2 = $this->CreateSynchroObj("synchro2", $currentDate);
 
 		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-6 HOURS'));
-		$this->CreateSynchroObj($oSynchroSource->GetKey(), $currentDate);
+		$oSynchroLog2 = $this->CreateSynchroObj(null, $currentDate, ['sync_source_id' => $oSynchroLog2->Get('sync_source_id')]);
 
 		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-1 HOURS'));
-		$oSynchroLog = $this->CreateSynchroObj($oSynchroSource->GetKey(), $currentDate);
-		$aSyncroLogIds[] = $oSynchroLog->GetKey();
+		$oSynchroLog2 = $this->CreateSynchroObj(null, $currentDate, ['sync_source_id' => $oSynchroLog2->Get('sync_source_id')]);
+		$aExpectedSyncroLogIds['synchro2'] = $oSynchroLog2->GetKey();
 
 		$oItopSynchroLogReader = new ItopSynchroLogReader('', []);
 		$aRes = $oItopSynchroLogReader->ListSynchroLogObjects();
-		$this->assertEquals(2, sizeof($aRes));
-		$aKeys = array_keys($aRes);
-		sort($aKeys);
-		$this->assertEquals(["synchro1", "synchro2"], $aKeys);
 
-		foreach ($aRes as $oSynchroLog) {
-			$this->assertContains($oSynchroLog->GetKey(), $aSyncroLogIds);
+		$aSyncroLogIds = [];
+		foreach ($aRes as $sSynchroName => $oSynchroLog) {
+			$aSyncroLogIds[$sSynchroName] = $oSynchroLog->GetKey();
 		}
+		$this->assertEquals($aExpectedSyncroLogIds, $aSyncroLogIds);
 	}
 
 	public function SynchroTooOldProvider()
@@ -308,9 +333,8 @@ OQL;
 	 */
 	public function testListSynchroLogObjects_SynchroTooOld($sCreatedSynchroLogsStartDateStrToTime, $sMinStartDateConfValue, $bIsEmpty)
 	{
-		$oSynchroSource = $this->CreateSynchroSource("synchro1");
 		$sStartDate = date(\AttributeDateTime::GetSQLFormat(), strtotime($sCreatedSynchroLogsStartDateStrToTime));
-		$this->CreateSynchroObj($oSynchroSource->GetKey(), $sStartDate);
+		$this->CreateSynchroObj("synchro1", $sStartDate);
 
 		$aMetricConf = [];
 		if ($sMinStartDateConfValue !== null) {
@@ -320,14 +344,14 @@ OQL;
 		$this->assertEquals($bIsEmpty, empty($oItopSynchroLogReader->ListSynchroLogObjects()));
 	}
 
-	private function CreateSynchroSource($sName)
+	private function CreateSynchroObj(?string $sSynchroName, $sStartDate, $aAttributeValues = [])
 	{
-		return $this->createObject(\SynchroDataSource::class, ['name' => $sName]);
-	}
-
-	private function CreateSynchroObj($sSynchroSourceId, $sStartDate)
-	{
-		$oObj = $this->createObject(\SynchroLog::class, ['sync_source_id' => $sSynchroSourceId, 'start_date' => $sStartDate]);
+		$aParams = ['start_date' => $sStartDate];
+		if (!is_null($sSynchroName)) {
+			$sSynchroSourceId = $this->createObject(\SynchroDataSource::class, ['name' => $sSynchroName]);
+			$aParams['sync_source_id'] = $sSynchroSourceId;
+		}
+		$oObj = $this->createObject(\SynchroLog::class, array_merge($aParams, $aAttributeValues));
 		echo "SynchroLog:".$oObj->GetKey()."\n";
 
 		return $oObj;
