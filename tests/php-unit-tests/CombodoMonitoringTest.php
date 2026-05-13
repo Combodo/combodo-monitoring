@@ -67,7 +67,6 @@ class CombodoMonitoringTest extends ItopDataTestCase
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		$sContent = curl_exec($ch);
 		$iCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		curl_close($ch);
 
 		return [$sContent, $iCode];
 	}
