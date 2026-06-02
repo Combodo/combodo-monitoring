@@ -67,7 +67,9 @@ class CombodoMonitoringTest extends ItopDataTestCase
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		$sContent = curl_exec($ch);
 		$iCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		curl_close($ch);
+		if (PHP_VERSION_ID < 80000) {
+			curl_close($ch);
+		}
 
 		return [$sContent, $iCode];
 	}
@@ -123,7 +125,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
 					'description' => 'test itop setup version',
 					'custom' => ['class' => '\Combodo\iTop\Monitoring\CustomReader\ItopSetupVersionReader'],
 				],
-				'itop_mailbox_connection_failure' =>  [
+				'itop_mailbox_connection_failure' => [
 					'description' => 'Failures to connect to polled mailboxes',
 					'custom' => ['class' => '\Combodo\iTop\Monitoring\CustomReader\ItopMailboxReader'],
 				],
@@ -206,7 +208,7 @@ class CombodoMonitoringTest extends ItopDataTestCase
 		$sErrorCode = $aResp[1];
 		$this->assertEquals($iHttpCode, $sErrorCode, "wrong http error code. $sErrorCode instead of $iHttpCode. ".$aResp[0]);
 		if (500 == $sErrorCode) {
-			if (! is_null($sExceptionMessageNeedle)) {
+			if (!is_null($sExceptionMessageNeedle)) {
 				$this->assertStringContainsString($sExceptionMessageNeedle, $aResp[0]);
 			} else {
 				$this->assertStringContainsString('Exception : Unauthorized network', $aResp[0]);
@@ -266,14 +268,14 @@ class CombodoMonitoringTest extends ItopDataTestCase
 	public function CheckIpProvider()
 	{
 		return [
-		  'IP match' => ['127.0.0.1', ['127.0.0.1'], true],
-		  'IP no match' => ['127.0.0.1', ['127.0.0.2'], false],
-		  'network match' => ['127.0.0.1', ['127.0.0.2/8'], true],
-		  'network match2' => ['127.0.1.1', ['127.0.0.1/16'], true],
-		  'network match3' => ['127.0.0.1', ['127.0.1.1/16'], true],
-		  'network match4' => ['127.0.0.1', ['127.0.0.1/24'], true],
-		  'network match5' => ['127.0.1.1', ['127.0.1.2/8'], true],
-		  'network match6' => ['127.0.1.1', ['127.0.1.2/24'], true],
+			'IP match' => ['127.0.0.1', ['127.0.0.1'], true],
+			'IP no match' => ['127.0.0.1', ['127.0.0.2'], false],
+			'network match' => ['127.0.0.1', ['127.0.0.2/8'], true],
+			'network match2' => ['127.0.1.1', ['127.0.0.1/16'], true],
+			'network match3' => ['127.0.0.1', ['127.0.1.1/16'], true],
+			'network match4' => ['127.0.0.1', ['127.0.0.1/24'], true],
+			'network match5' => ['127.0.1.1', ['127.0.1.2/8'], true],
+			'network match6' => ['127.0.1.1', ['127.0.1.2/24'], true],
 		];
 	}
 }
