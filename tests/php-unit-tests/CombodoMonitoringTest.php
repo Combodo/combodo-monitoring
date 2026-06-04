@@ -13,8 +13,6 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
 class CombodoMonitoringTest extends ItopDataTestCase
 {
 	private $sUrl;
-	private $sConfigFile;
-	private $sConfBackupPath;
 
 	protected function setUp(): void
 	{
@@ -22,56 +20,22 @@ class CombodoMonitoringTest extends ItopDataTestCase
 
 		$this->RequireOnceItopFile('core/config.class.inc.php');
 		$this->RequireOnceItopFile('application/utils.inc.php');
-		$this->RequireOnceUnitTestFile('./MetricReader/CustomReaders/CustomReaderImpl.php');
+		$this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
 
 		if (!defined('MODULESROOT')) {
 			define('MODULESROOT', APPROOT.'env-production/');
 		}
 
-		$this->sConfigFile = \utils::GetConfig()->GetLoadedFile();
-		@chmod($this->sConfigFile, 0770);
+		$this->BackupConfiguration();
 		$this->sUrl = \MetaModel::GetConfig()->Get('app_root_url').'/pages/exec.php?exec_module=combodo-monitoring&exec_page=index.php&exec_env=production';
-		@chmod($this->sConfigFile, 0444); // Read-only
-
-		$this->sConfBackupPath = tempnam(sys_get_temp_dir(), 'conf.php');
-		copy($this->sConfigFile, $this->sConfBackupPath);
-
-		//create fake mailbox
-		/*$this->createObject('MailInboxStandard',
-			[
-				"server" => "monserver.net",
-				"login" => "monlogin",
-				"password" => "monpassword",
-				"protocol" => "imap",
-				"port" => "993",
-				"mailbox" => "",
-				"active" => "yes",
-				"title_pattern" => "/R-([0-9]+)/",
-				"unknown_caller_behavior" => "reject_email",
-			]
-		);*/
-	}
-
-	protected function tearDown(): void
-	{
-		@chmod($this->sConfigFile, 0770);
-		copy($this->sConfBackupPath, $this->sConfigFile);
-		@chmod($this->sConfigFile, 0444); // Read-only
 	}
 
 	private function CallRestApi($sUrl)
 	{
-		$ch = curl_init();
+		$sContent = $this->CallUrl($sUrl);
+		$iHttpCode = $this->aLastCurlGetInfo['http_code'] ?? -1;
 
-		curl_setopt($ch, CURLOPT_URL, "$sUrl");
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		$sContent = curl_exec($ch);
-		$iCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		if (PHP_VERSION_ID < 80000) {
-			curl_close($ch);
-		}
-
-		return [$sContent, $iCode];
+		return [$sContent, $iHttpCode];
 	}
 
 	/**
@@ -137,12 +101,10 @@ class CombodoMonitoringTest extends ItopDataTestCase
 		$oMetric = $oOqlCountUniqueReader->GetMetrics()[0];
 		$iTopProfileUniqueCount = $oMetric->GetValue();
 
-		@chmod($this->sConfigFile, 0770);
-		\utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
-		\utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
-		\utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, $aMetricConf);
-		\utils::GetConfig()->WriteToFile();
-		@chmod($this->sConfigFile, 0444); // Read-only
+		$this->oiTopConfig->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
+		$this->oiTopConfig->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
+		$this->oiTopConfig->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, $aMetricConf);
+		$this->SaveItopConfFile();
 
 		$aResp = $this->CallRestApi("$this->sUrl&access_token=toto123&collection=collection1");
 
@@ -162,24 +124,15 @@ class CombodoMonitoringTest extends ItopDataTestCase
 		$sContent = str_replace('ITOP_SETUP_VERSION', $sItopSetupVersion, $sContent);
 		$sContent = str_replace('ITOP_VERSION', $sItopApplicativeVersion, $sContent);
 
-		/*$oSearch = new DBObjectSearch('MailInboxBase');
-		$oSearch->AddCondition('active', 'yes');
-		$oSet = new DBObjectSet($oSearch);
-		var_dump($oSet->Count());
-		while($oInbox = $oSet->Fetch()) {
-			$oInbox->GetEmailSource();
-		}*/
 		$this->assertEquals($sContent, $aResp[0]);
 	}
 
 	public function testTokenConf()
 	{
-		@chmod($this->sConfigFile, 0770);
-		\utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
-		\utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
-		\utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, ['collection1' => []]);
-		\utils::GetConfig()->WriteToFile();
-		@chmod($this->sConfigFile, 0444); // Read-only
+		$this->oiTopConfig->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
+		$this->oiTopConfig->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
+		$this->oiTopConfig->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, ['collection1' => []]);
+		$this->SaveItopConfFile();
 
 		$aResp = $this->CallRestApi("$this->sUrl&access_token=toto123&collection=collection1");
 		$this->assertEquals(200, $aResp[1], "wrong http error code. $aResp[1] instead of 200");
@@ -196,12 +149,10 @@ class CombodoMonitoringTest extends ItopDataTestCase
 	 */
 	public function testAuthorizedNetwork($aNetworkRegexps, $iHttpCode, $sExceptionMessageNeedle = null)
 	{
-		@chmod($this->sConfigFile, 0770);
-		\utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
-		\utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', $aNetworkRegexps);
-		\utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, ['collection1' => []]);
-		\utils::GetConfig()->WriteToFile();
-		@chmod($this->sConfigFile, 0444); // Read-only
+		$this->oiTopConfig->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
+		$this->oiTopConfig->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', $aNetworkRegexps);
+		$this->oiTopConfig->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, ['collection1' => []]);
+		$this->SaveItopConfFile();
 
 		$aResp = $this->CallRestApi("$this->sUrl&access_token=toto123&collection=collection1");
 		var_dump($aResp);
@@ -241,12 +192,10 @@ class CombodoMonitoringTest extends ItopDataTestCase
 
 	public function testCollection()
 	{
-		@chmod($this->sConfigFile, 0770);
-		\utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
-		\utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
-		\utils::GetConfig()->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, ['collection1' => []]);
-		\utils::GetConfig()->WriteToFile();
-		@chmod($this->sConfigFile, 0444); // Read-only
+		$this->oiTopConfig->SetModuleSetting(Constants::EXEC_MODULE, 'access_token', 'toto123');
+		$this->oiTopConfig->SetModuleSetting(Constants::EXEC_MODULE, 'authorized_network', []);
+		$this->oiTopConfig->SetModuleSetting(Constants::EXEC_MODULE, Constants::METRICS, ['collection1' => []]);
+		$this->SaveItopConfFile();
 
 		$aResp = $this->CallRestApi("$this->sUrl&access_token=toto123&collection=collection1");
 		$this->assertEquals(200, $aResp[1], "wrong http error code. $aResp[1] instead of 200");

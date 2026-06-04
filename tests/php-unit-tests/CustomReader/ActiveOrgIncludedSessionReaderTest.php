@@ -13,26 +13,11 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
  */
 class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 {
-	private $sDir;
-
 	protected function setUp(): void
 	{
 		parent::setUp();
 
 		$this->RequireOnceItopFile('env-production/combodo-monitoring/vendor/autoload.php');
-
-		$this->sDir = sys_get_temp_dir().'/itop_session';
-		@mkdir($this->sDir);
-	}
-
-	protected function tearDown(): void
-	{
-		parent::tearDown();
-		foreach (glob($this->sDir.'/**') as $sFile) {
-			@unlink($sFile);
-		}
-
-		@rmdir($this->sDir);
 	}
 
 	public function testUnauthSessions()
@@ -40,10 +25,10 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 		$oiTopSessionReader = new ActiveOrgIncludedSessionReader('itop_session', []);
 
 		$sFiles = [];
-		$sFiles[] = tempnam($this->sDir, 'sess_');
-		$sFiles[] = tempnam($this->sDir, 'sess_');
-		$sFiles[] = tempnam($this->sDir, 'sess_');
-		$sFiles[] = $this->sDir.'/fake';
+		$sFiles[] = $this->GetTemporaryFilePath();
+		$sFiles[] = $this->GetTemporaryFilePath();
+		$sFiles[] = $this->GetTemporaryFilePath();
+		$sFiles[] = sys_get_temp_dir().'/fake';
 
 		$aMetrics = $oiTopSessionReader->FetchCounter($sFiles);
 		$this->assertEquals(1, sizeof($aMetrics));
@@ -81,7 +66,7 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 			foreach ($aExpected as $sLoginMode => $aSubExpected) {
 				foreach ($aSubExpected as $sContext => $iCount) {
 					for ($i = 0; $i < $iCount; $i++) {
-						$sFile = $this->sDir.'sess_'.$sLoginMode.'_'.$sContext.'_'.$sOrgId."_".$i;
+						$sFile = $this->GetTemporaryFilePath();
 						$sFiles[] = $sFile;
 						file_put_contents(
 							$sFile,
@@ -267,7 +252,7 @@ class ActiveOrgIncludedSessionReaderTest extends ItopDataTestCase
 
 		for ($i = 0; $i < 5; $i++) {
 			for ($j = 0; $j < 7; $j++) {
-				$sFile = $this->sDir.'sess_'.$i.'_'.$j.'.json';
+				$sFile = $this->GetTemporaryFilePath();
 				$sFiles[] = $sFile;
 				file_put_contents(
 					$sFile,
