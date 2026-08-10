@@ -144,7 +144,6 @@ class OqlSelectReader implements MetricReaderInterface
 		}
 
 		$aOptimizeColumnsLoad = $this->CompleteColumnsLoadForOptimization($aOptimizeColumnsLoad, $sValueColumn);
-
 		if (!empty($aOptimizeColumnsLoad)) {
 			$oSet->OptimizeColumnLoad($aOptimizeColumnsLoad);
 		}
@@ -154,18 +153,18 @@ class OqlSelectReader implements MetricReaderInterface
 
 	private function CompleteColumnsLoadForOptimization(array $aOptimizeColumnsLoad, string $sColumn): array
 	{
-		if ($sColumn === 'id') {
-			//id not an attribute def. cannot optimize it...
-			return $aOptimizeColumnsLoad;
-		}
-
 		if (strpos($sColumn, ".") === false) {
-			$aOptimizeColumnsLoad[$this->sDefaultAlias][] = $sColumn;
+			$sAlias = $this->sDefaultAlias;
 		} else {
 			$aFields = explode(".", $sColumn);
 			if (sizeof($aFields) === 2) {
-				$aOptimizeColumnsLoad[$aFields[0]][] = $aFields[1];
+				$sAlias = $aFields[0];
+				$sColumn = $aFields[1];
 			}
+		}
+
+		if ($sColumn !== 'id') {
+			$aOptimizeColumnsLoad[$sAlias][] = $sColumn;
 		}
 
 		return $aOptimizeColumnsLoad;
