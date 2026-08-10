@@ -56,15 +56,6 @@ class OqlSelectReaderTest extends ItopDataTestCase
 				'oql' => 'SELECT User',
 				'labels' => ['firstname' => 'first_name', 'lastname' => 'last_name'],
 				'value' => 'id',
-				'searchAlias' => 'org_id',
-			],
-			'jointure using fields on both sides with FROM syntax' => [
-				'oql' => 'SELECT up, p FROM URP_UserProfile AS up JOIN URP_Profiles AS p ON up.profileid = p.id',
-				'labels' => [
-					'profile' => 'p.name',
-					'name' => 'up.profile',
-				],
-				'value' => 'up.profileid',
 				'searchAlias' => 'id',
 			],
 		];
@@ -89,35 +80,113 @@ class OqlSelectReaderTest extends ItopDataTestCase
 		$aExpectedRes = [];
 		$oSearch = \DBSearch::FromOQL($sOql);
 		$oSet = new \DBObjectSet($oSearch);
-		while ($oUser = $oSet->Fetch()) {
-			$aFields = array_keys($aLabels);
-			$sFirst = $aFields[0];
-			$sSecond = $aFields[1];
-			$aExpectedRes[$sFirst][$sSecond] = $oUser->Get($searchAlias);
-		}
-
 		$aMetrics = $oOqlCountReader->GetMetrics();
-		$this->assertEquals(count($aExpectedRes), count($aMetrics));
+		$this->assertEquals($oSet->Count(), count($aMetrics));
+
+		while ($oUser = $oSet->Fetch()) {
+			$value = $oUser->Get($searchAlias);
+			$aExpectedLabels = [];
+			foreach ($aLabels as $sMonitoringLabel => $siTopField) {
+				$aExpectedLabels[$sMonitoringLabel] = $oUser->Get($siTopField);
+			}
+			$aExpectedRes[$this->GetMetricKey($value, $aExpectedLabels)] = $aExpectedLabels;
+		}
 
 		/* @var \Combodo\iTop\Monitoring\Model\MonitoringMetric $oMetric */
 		foreach ($aMetrics as $oMetric) {
 			$this->assertEquals('foo', $oMetric->GetName());
 			$this->assertEquals('user metric', $oMetric->GetDescription());
 
-			$aExpecteLabelKeys = array_keys($aLabels);
-			$sCurrentFirst = $aExpecteLabelKeys[0];
-			$sCurrentLast = $aExpecteLabelKeys[1];
-			sort($aExpecteLabelKeys);
+			var_dump($oMetric->GetValue());
+			var_dump($oMetric->GetLabels());
+			$sMetricKey = $this->GetMetricKey($oMetric->GetValue(), $oMetric->GetLabels());
+			$aExpectedLabels = $aExpectedRes[$sMetricKey] ?? null;
+			$this->assertNotNull($aExpectedLabels, "should find metric with itop value ($sMetricKey) among ".var_export(array_keys($aExpectedRes), true));
 
-			$aMetricLabels = $oMetric->GetLabels();
-			var_dump($aMetricLabels);
-			$aLabelKeys = array_keys($aMetricLabels);
-			sort($aLabelKeys);
-			$this->assertEquals($aExpecteLabelKeys, $aLabelKeys);
-			var_dump($sCurrentFirst);
-			var_dump($sCurrentLast);
-			var_dump($aExpectedRes);
-			$this->assertEquals($aExpectedRes[$sCurrentFirst][$sCurrentLast], $oMetric->GetValue());
+			$this->assertEquals($aExpectedLabels, $oMetric->GetLabels(), "labels associated to object with ID ({$oMetric->GetValue()}) should match");
 		}
+	}
+
+	public function GetMetricsWithJointsProvider()
+	{
+		return [
+			'jointure using fields on both sides with FROM syntax/ up.profileid' => [
+				'oql' => 'SELECT up, p FROM URP_UserProfile AS up JOIN URP_Profiles AS p ON up.profileid = p.id',
+				'labels' => [
+					'profile' => 'p.name',
+					'name' => 'up.profile',
+				],
+				'value' => 'up.profileid',
+				'searchAlias' => 'up.id',
+			],
+			'jointure using fields on both sides with FROM syntax /p.id' => [
+				'oql' => 'SELECT up, p FROM URP_UserProfile AS up JOIN URP_Profiles AS p ON up.profileid = p.id',
+				'labels' => [
+					'profile' => 'p.name',
+					'name' => 'up.profile',
+				],
+				'value' => 'p.id',
+				'searchAlias' => 'p.id',
+			],
+		];
+	}
+
+	/**
+	 * @group cbd-monitoring-ci
+	 * @dataProvider GetMetricsWithJointsProvider
+	 */
+	public function testGetMetricsWithJoints($sOql, $aLabels, $sValue)
+	{
+		$aMetric = [
+			'oql_select' => [
+				'select' => $sOql,
+				'labels' =>  $aLabels,
+				'value' => $sValue,
+			],
+			'description' => 'user metric',
+		];
+		$oOqlCountReader = new OqlSelectReader('foo', $aMetric);
+
+		$aExpectedRes = [];
+		$oSearch = \DBSearch::FromOQL($sOql);
+		$oSet = new \DBObjectSet($oSearch);
+		$aMetrics = $oOqlCountReader->GetMetrics();
+		$this->assertEquals($oSet->Count(), count($aMetrics));
+
+		while ($aFetchAssoc = $oSet->FetchAssoc()) {
+			$value = $this->GetFromFetchAssoc($sValue, $aFetchAssoc);
+			$aExpectedLabels = [];
+			foreach ($aLabels as $sMonitoringLabel => $siTopField) {
+				$aExpectedLabels[$sMonitoringLabel] = $this->GetFromFetchAssoc($siTopField, $aFetchAssoc);
+			}
+			$aExpectedRes[$this->GetMetricKey($value, $aExpectedLabels)] = $aExpectedLabels;
+		}
+		var_dump(array_keys($aExpectedRes));
+
+		/* @var \Combodo\iTop\Monitoring\Model\MonitoringMetric $oMetric */
+		foreach ($aMetrics as $oMetric) {
+			$this->assertEquals('foo', $oMetric->GetName());
+			$this->assertEquals('user metric', $oMetric->GetDescription());
+
+			$sMetricKey = $this->GetMetricKey($oMetric->GetValue(), $oMetric->GetLabels());
+			$aExpectedLabels = $aExpectedRes[$sMetricKey] ?? null;
+			$this->assertNotNull($aExpectedLabels, "should find metric with itop value ($sMetricKey) among ".var_export(array_keys($aExpectedRes), true));
+
+			$this->assertEquals($aExpectedLabels, $oMetric->GetLabels(), "labels associated to object with ID ({$oMetric->GetValue()}) should match");
+		}
+	}
+
+	private function GetFromFetchAssoc($sItopField, array $aGetFromFetchAssoc): string
+	{
+		$aSplit = explode('.', $sItopField);
+		$sObjKey = $aSplit[0];
+		$sItopAttr = $aSplit[1];
+		$oObj = $aGetFromFetchAssoc[$sObjKey];
+		return $oObj->Get($sItopAttr);
+	}
+
+	private function GetMetricKey($value, array $aLabels): string
+	{
+		return "{$value}_".implode("_", $aLabels);
 	}
 }
