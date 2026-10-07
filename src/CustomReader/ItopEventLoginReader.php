@@ -19,6 +19,7 @@ namespace Combodo\iTop\Monitoring\CustomReader;
 use Combodo\iTop\Monitoring\MetricReader\CustomReaderInterface;
 use Combodo\iTop\Monitoring\Model\Constants;
 use Combodo\iTop\Monitoring\Model\MonitoringMetric;
+use UserRights;
 
 class ItopEventLoginReader implements CustomReaderInterface
 {
@@ -79,9 +80,9 @@ OQL;
 			$sProfiles = null;
 			$oUser = $aObjects['u'];
 
-			$oProfileSet = $oUser->Get('profile_list');
-			while ($oProfile = $oProfileSet->Fetch()) {
-				$sProfile = str_replace(" ", "_", strtolower($oProfile->Get('profile')));
+			$aProfiles = UserRights::ListProfiles($oUser);
+			foreach ($aProfiles as $sProfile) {
+				$sProfile = str_replace(" ", "_", strtolower($sProfile));
 				$sProfiles = (is_null($sProfiles)) ? $sProfile : "$sProfiles+$sProfile";
 			}
 
