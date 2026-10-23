@@ -44,13 +44,14 @@ class CombodoMonitoringTest extends ItopDataTestCase
 	public function testMonitoringPage()
 	{
 		$sRessourcesDir = __DIR__.'/ressources';
+		$sOql = 'SELECT URP_UserProfile WHERE URP_UserProfile.userid=1 AND URP_UserProfile.profile="Administrator"';
 		$aMetricConf = [
 			'collection1' => [
 				'itop_user_select' => [
 					'description' => 'Name of profile (oql_select)',
 					'static_labels' => ['toto' => 'titi'],
 					'oql_select' => [
-						'select' => 'SELECT URP_UserProfile WHERE URP_UserProfile.userid=1',
+						'select' => $sOql,
 						'labels' => ['profile' => 'profile'],
 						'value' => 'userid',
 					],
@@ -58,14 +59,14 @@ class CombodoMonitoringTest extends ItopDataTestCase
 				'itop_user_count' => [
 					'description' => 'Nb of users (oql_count)',
 					'oql_count' => [
-						'select' => 'SELECT URP_UserProfile WHERE URP_UserProfile.userid=1',
+						'select' => $sOql,
 					],
 					'static_labels' => ['toto' => 'titi'],
 				],
 				'itop_user_groupby_count' => [
 					'description' => 'Nb of users (oql_groupby)',
 					'oql_groupby' => [
-						'select' => 'SELECT URP_UserProfile JOIN URP_Profiles ON URP_UserProfile.profileid =URP_Profiles.id WHERE URP_Profiles.id=1',
+						'select' => $sOql,
 						'groupby' => ['profile' => 'URP_UserProfile.profile'],
 					],
 				],

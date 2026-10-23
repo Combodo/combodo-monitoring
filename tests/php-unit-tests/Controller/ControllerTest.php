@@ -66,7 +66,8 @@ class ControllerTest extends ItopDataTestCase
 		$this->assertEquals($iExpectedMetricCount, count($aMetrics), var_export($aMetrics, true));
 		if ($iExpectedMetricCount != 0) {
 			$oExpectedMetric = new MonitoringMetric($sExpectedName, $sExpectedDesc, $iExpectedValue, $aExpectedLabels);
-
+			var_dump($oExpectedMetric);
+			var_dump($aMetrics);
 			$this->assertEquals(1, count($aMetrics), var_export($aMetrics, true));
 			$this->assertEquals(
 				$oExpectedMetric,
@@ -180,11 +181,15 @@ class ControllerTest extends ItopDataTestCase
 	 **/
 	public function testReadMetrics_OqlGroupByWithDynamicLabels()
 	{
+		$sOQL = <<<OQL
+SELECT URP_UserProfile JOIN User ON URP_UserProfile.userid=User.id WHERE User.id=1 AND URP_UserProfile.profile="Administrator"
+OQL;
+
 		$aConf = [
 				'itop_user_count' => [
 					'description' => 'Nb of URP_UserProfile par type',
 					'oql_groupby' => [
-						'select' => 'SELECT URP_UserProfile JOIN URP_Profiles ON URP_UserProfile.profileid =URP_Profiles.id WHERE URP_Profiles.id=1',
+						'select' => $sOQL,
 						'groupby' => ['profile' => 'URP_UserProfile.profile'],
 					],
 				],

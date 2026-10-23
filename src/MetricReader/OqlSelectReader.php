@@ -48,41 +48,28 @@ class OqlSelectReader implements MetricReaderInterface
 		$oSet = $this->GetObjectSet();
 		$aMetrics = [];
 		while ($aObjects = $oSet->FetchAssoc()) {
-			$bExposeCurrentMetric = true;
 			if (sizeof($aObjects) == 0) {
 				continue;
 			}
 
-			//used only for simple OQL that retunr one  single object.
+			//used only for simple OQL that return one  single object.
 			//it is used for fields without any alias
 			$oDefaultObject = $aObjects[$this->sDefaultAlias];
 
 			$aCurrentLabels = [];
 			foreach ($aColumns as $sLabel => $sColumn) {
 				$sValue = $this->GetColumnValueFromObjects($sColumn, $oDefaultObject, $aObjects);
-				if ($sValue == null) {
-					//missing label: do not keep metric
-					$bExposeCurrentMetric = false;
-					break;
-				}
-				$aCurrentLabels[$sLabel] = $sValue;
-			}
-
-			if (false == $bExposeCurrentMetric) {
-				//missing label
-				continue;
+				$aCurrentLabels[$sLabel] = $sValue ?? "";
 			}
 
 			$sMetricValue = $this->GetColumnValueFromObjects($sColumnValue, $oDefaultObject, $aObjects);
-			if ($sMetricValue != null) {
-				$aCurrentLabels = array_merge($aStaticLabels, $aCurrentLabels);
-				$aMetrics[] = new MonitoringMetric(
-					$this->sMetricName,
-					$sDescription,
-					$sMetricValue,
-					$aCurrentLabels
-				);
-			}
+			$aCurrentLabels = array_merge($aStaticLabels, $aCurrentLabels);
+			$aMetrics[] = new MonitoringMetric(
+				$this->sMetricName,
+				$sDescription,
+				$sMetricValue,
+				$aCurrentLabels
+			);
 		}
 
 		return $aMetrics;

@@ -75,8 +75,8 @@ class OqlSelectReaderTest extends ItopDataTestCase
 			],
 			'description' => 'user metric',
 		];
-		$oOqlCountReader = new OqlSelectReader('foo', $aMetric);
 
+		$oOqlCountReader = new OqlSelectReader('foo', $aMetric);
 		$aExpectedRes = [];
 		$oSearch = \DBSearch::FromOQL($sOql);
 		$oSet = new \DBObjectSet($oSearch);
