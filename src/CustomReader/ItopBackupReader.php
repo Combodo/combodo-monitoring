@@ -88,7 +88,7 @@ class ItopBackupReader implements CustomReaderInterface
 	 *
 	 * @return array
 	 */
-	public function ListFiles(string $sDir)
+	public function ListFiles(?string $sDir)
 	{
 		$sBackupDir = (null == $sDir) ? APPROOT.'data/backups/' : $sDir;
 		if (!is_dir($sBackupDir)) {
