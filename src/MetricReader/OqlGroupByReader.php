@@ -81,12 +81,13 @@ class OqlGroupByReader implements MetricReaderInterface
 			$sValue = $aRes['_itop_count_'];
 
 			$aLabels = $aStaticLabels;
+
 			foreach (array_keys($aGroupBy) as $sLabelName) {
-				$aLabels[$sLabelName] = $aRes[$sLabelName];
+				$sFieldValue = $aRes[$sLabelName];
+				$aLabels[$sLabelName] = $sFieldValue ?? 'NULL';
 			}
 
 			$aMonitoringMetrics[] = new MonitoringMetric($this->sMetricName, $sDescription, $sValue, $aLabels);
-
 			unset($aRes);
 		}
 		\CMDBSource::FreeResult($resQuery);

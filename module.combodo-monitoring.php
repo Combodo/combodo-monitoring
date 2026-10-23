@@ -41,22 +41,17 @@ SetupWebPage::AddModule(
 		// Components
 		//
 		'datamodel' => [
-			//'model.combodo-monitoring.php',
 			'vendor/autoload.php',
 		],
 		'webservice' => [],
 		'data.struct' => [],
 		'data.sample' => [],
 
-		// Documentation
-		//
 		'doc.manual_setup' => '', // hyperlink to manual setup documentation, if any
 		'doc.more_information' => '', // hyperlink to more information, if any
-
-		// Default settings
-		//
-		'settings' => [
-			// see the './datamodel.combodo-monitoring.xml' for the default settings!
+		'settings' => [],
+		'delegated_authentication_endpoints' => [
+			"index.php",
 		],
 	]
 );
