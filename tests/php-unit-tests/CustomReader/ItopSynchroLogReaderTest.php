@@ -42,7 +42,7 @@ OQL;
 			'running'                     => [
 				'aFieldValues'              => [
 					'stats_nb_replica_total' => '456',
-					'start_date'             => strtotime('-2 HOURS'),
+					'start_date'             => '-2 HOURS',
 					'status'                 => 'running',
 				],
 				'sExpectedStatus'           => 'running',
@@ -52,8 +52,8 @@ OQL;
 			'error'                       => [
 				'aFieldValues'              => [
 					'stats_nb_replica_total' => '456',
-					'start_date'             => strtotime('-2 HOURS'),
-					'end_date'               => strtotime('-1 HOURS'),
+					'start_date'             => '-2 HOURS',
+					'end_date'               => '-1 HOURS',
 					'status'                 => 'error',
 				],
 				'sExpectedStatus'           => 'error',
@@ -63,8 +63,8 @@ OQL;
 			'end date before start date?' => [
 				'aFieldValues'              => [
 					'stats_nb_replica_total' => '456',
-					'start_date'             => strtotime('-1 HOURS'),
-					'end_date'               => strtotime('-2 HOURS'),
+					'start_date'             => '-1 HOURS',
+					'end_date'               => '-2 HOURS',
 					'status'                 => 'error',
 				],
 				'sExpectedStatus'           => 'error',
@@ -74,8 +74,8 @@ OQL;
 			'completed'                   => [
 				'aFieldValues'              => [
 					'stats_nb_replica_total' => '456',
-					'start_date'             => strtotime('-2 HOURS'),
-					'end_date'               => strtotime('-1 HOURS'),
+					'start_date'             => '-2 HOURS',
+					'end_date'               => '-1 HOURS',
 					'status'                 => 'completed',
 				],
 				'sExpectedStatus'           => 'completed',
@@ -90,9 +90,14 @@ OQL;
 	 */
 	public function testGetMetricElapsedAndAge($aFieldValues, $sExpectedStatus, $iExpectedAgeInMinutes, $iExpectedElapsedInSeconds)
 	{
-		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-1 HOURS'));
-		$this->CreateSynchroObj("synchro1", $currentDate, $aFieldValues);
-
+		foreach (['start_date', 'end_date'] as $sField) {
+			if (array_key_exists($sField, $aFieldValues)) {
+				//replace operand like -1 HOUR by a timestamp
+				$aFieldValues[$sField] = strtotime($aFieldValues[$sField]);
+			}
+		}
+		$sSynchroName = "synchro_".uniqid();
+		$this->CreateSynchroObj($sSynchroName, $aFieldValues);
 		$oItopSynchroLogReader = new ItopSynchroLogReader('', [Constants::METRIC_LABEL => ['titi' => 'toto']]);
 		$aMetrics = $oItopSynchroLogReader->GetMetrics();
 		$this->assertEquals(4, sizeof($aMetrics));
@@ -100,7 +105,7 @@ OQL;
 		$aExpectedLabels = [
 			'titi'   => 'toto',
 			'status' => $sExpectedStatus,
-			'source' => "synchro1",
+			'source' => $sSynchroName,
 		];
 
 		$oErrorMetric = $aMetrics[0];
@@ -209,8 +214,9 @@ OQL;
 	 */
 	public function testGetMetricNbErrors($aFieldValues, $iExpectedValue)
 	{
-		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-1 HOURS'));
-		$this->CreateSynchroObj("synchro1", $currentDate, $aFieldValues);
+		$aFieldValues['start_date'] = date(\AttributeDateTime::GetSQLFormat(), strtotime('-1 HOURS'));
+		$sSynchroName = "synchro".uniqid();
+		$this->CreateSynchroObj($sSynchroName, $aFieldValues);
 
 		$oItopSynchroLogReader = new ItopSynchroLogReader('', [Constants::METRIC_LABEL => ['titi' => 'toto']]);
 		$aMetrics = $oItopSynchroLogReader->GetMetrics();
@@ -219,7 +225,7 @@ OQL;
 		$aExpectedLabels = [
 			'titi'   => 'toto',
 			'status' => 'running',
-			'source' => "synchro1",
+			'source' => $sSynchroName,
 		];
 
 		$oMonitoringMetric = $aMetrics[0];
@@ -248,20 +254,21 @@ OQL;
 	public function testListSynchroLogObjects_OneSynchroLogPerSource()
 	{
 		$aSyncroLogIds = [];
-		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-12 HOURS'));
-		$oSynchroLog = $this->CreateSynchroObj("synchro1", $currentDate);
-		$aSyncroLogIds[] = $oSynchroLog->GetKey();
+		$aFieldValues = ['start_date' => date(\AttributeDateTime::GetSQLFormat(), strtotime('-12 HOURS'))];
 
-		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-12 HOURS'));
-		$oSynchroLog = $this->CreateSynchroObj("synchro2", $currentDate);
-		$aSyncroLogIds[] = $oSynchroLog->GetKey();
+		$sUID = uniqid();
+		$aSynchroNames = ["synchro1_".$sUID, "synchro2_".$sUID];
+		foreach ($aSynchroNames as $sSynchroName) {
+			$oSynchroLog = $this->CreateSynchroObj($sSynchroName, $aFieldValues);
+			$aSyncroLogIds[] = $oSynchroLog->GetKey();
+		}
 
 		$oItopSynchroLogReader = new ItopSynchroLogReader('', []);
 		$aRes = $oItopSynchroLogReader->ListSynchroLogObjects();
 		$this->assertEquals(2, sizeof($aRes));
 		$aKeys = array_keys($aRes);
 		sort($aKeys);
-		$this->assertEquals(["synchro1", "synchro2"], $aKeys);
+		$this->assertEquals($aSynchroNames, $aKeys);
 
 		foreach ($aRes as $oSynchroLog) {
 			$this->assertContains($oSynchroLog->GetKey(), $aSyncroLogIds);
@@ -272,25 +279,25 @@ OQL;
 	{
 		$aExpectedSyncroLogIds = [];
 
-		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-12 HOURS'));
-		$oSynchroLog = $this->CreateSynchroObj("synchro1", $currentDate);
+		$sUID = uniqid();
+		for ($i = 1; $i <= 2; $i++) {
+			$aFieldValues = ['start_date' => date(\AttributeDateTime::GetSQLFormat(), strtotime('-12 HOURS'))];
+			$sSynchroName = "synchro{$i}_".$sUID;
+			$oSynchroLog = $this->CreateSynchroObj($sSynchroName, $aFieldValues);
 
-		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-6 HOURS'));
-		$oSynchroLog = $this->CreateSynchroObj(null, $currentDate, ['sync_source_id' => $oSynchroLog->Get('sync_source_id')]);
+			$aFieldValues = [
+				'start_date'     => date(\AttributeDateTime::GetSQLFormat(), strtotime('-6 HOURS')),
+				'sync_source_id' => $oSynchroLog->Get('sync_source_id'),
+			];
+			$oSynchroLog = $this->CreateSynchroObj(null, $aFieldValues);
 
-		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-1 HOURS'));
-		$oSynchroLog = $this->CreateSynchroObj(null, $currentDate, ['sync_source_id' => $oSynchroLog->Get('sync_source_id')]);
-		$aExpectedSyncroLogIds['synchro1'] = $oSynchroLog->GetKey();
-
-		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-12 HOURS'));
-		$oSynchroLog2 = $this->CreateSynchroObj("synchro2", $currentDate);
-
-		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-6 HOURS'));
-		$oSynchroLog2 = $this->CreateSynchroObj(null, $currentDate, ['sync_source_id' => $oSynchroLog2->Get('sync_source_id')]);
-
-		$currentDate = date(\AttributeDateTime::GetSQLFormat(), strtotime('-1 HOURS'));
-		$oSynchroLog2 = $this->CreateSynchroObj(null, $currentDate, ['sync_source_id' => $oSynchroLog2->Get('sync_source_id')]);
-		$aExpectedSyncroLogIds['synchro2'] = $oSynchroLog2->GetKey();
+			$aFieldValues = [
+				'start_date'     => date(\AttributeDateTime::GetSQLFormat(), strtotime('-1 HOURS')),
+				'sync_source_id' => $oSynchroLog->Get('sync_source_id'),
+			];
+			$oSynchroLog = $this->CreateSynchroObj(null, $aFieldValues);
+			$aExpectedSyncroLogIds[$sSynchroName] = $oSynchroLog->GetKey();
+		}
 
 		$oItopSynchroLogReader = new ItopSynchroLogReader('', []);
 		$aRes = $oItopSynchroLogReader->ListSynchroLogObjects();
@@ -333,8 +340,8 @@ OQL;
 	 */
 	public function testListSynchroLogObjects_SynchroTooOld($sCreatedSynchroLogsStartDateStrToTime, $sMinStartDateConfValue, $bIsEmpty)
 	{
-		$sStartDate = date(\AttributeDateTime::GetSQLFormat(), strtotime($sCreatedSynchroLogsStartDateStrToTime));
-		$this->CreateSynchroObj("synchro1", $sStartDate);
+		$aFieldValues = ['start_date' => date(\AttributeDateTime::GetSQLFormat(), strtotime($sCreatedSynchroLogsStartDateStrToTime))];
+		$this->CreateSynchroObj("synchro_".uniqid(), $aFieldValues);
 
 		$aMetricConf = [];
 		if ($sMinStartDateConfValue !== null) {
@@ -344,14 +351,13 @@ OQL;
 		$this->assertEquals($bIsEmpty, empty($oItopSynchroLogReader->ListSynchroLogObjects()));
 	}
 
-	private function CreateSynchroObj(?string $sSynchroName, $sStartDate, $aAttributeValues = [])
+	private function CreateSynchroObj(?string $sSynchroName, $aAttributeValues = [])
 	{
-		$aParams = ['start_date' => $sStartDate];
 		if (!is_null($sSynchroName)) {
 			$sSynchroSourceId = $this->createObject(\SynchroDataSource::class, ['name' => $sSynchroName]);
-			$aParams['sync_source_id'] = $sSynchroSourceId;
+			$aAttributeValues['sync_source_id'] = $sSynchroSourceId;
 		}
-		$oObj = $this->createObject(\SynchroLog::class, array_merge($aParams, $aAttributeValues));
+		$oObj = $this->createObject(\SynchroLog::class, $aAttributeValues);
 		echo "SynchroLog:".$oObj->GetKey()."\n";
 
 		return $oObj;
