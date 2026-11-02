@@ -13,6 +13,8 @@ use Combodo\iTop\Test\UnitTest\ItopDataTestCase;
  */
 class ItopSynchroLogReaderTest extends ItopDataTestCase
 {
+	public const USE_TRANSACTION = true;
+
 	protected function setUp(): void
 	{
 		parent::setUp();
@@ -354,7 +356,7 @@ OQL;
 	private function CreateSynchroObj(?string $sSynchroName, $aAttributeValues = [])
 	{
 		if (!is_null($sSynchroName)) {
-			$sSynchroSourceId = $this->createObject(\SynchroDataSource::class, ['name' => $sSynchroName]);
+			$sSynchroSourceId = $this->createObject(\SynchroDataSource::class, ['name' => $sSynchroName, 'scope_class' => 'UserLocal']);
 			$aAttributeValues['sync_source_id'] = $sSynchroSourceId;
 		}
 		$oObj = $this->createObject(\SynchroLog::class, $aAttributeValues);
